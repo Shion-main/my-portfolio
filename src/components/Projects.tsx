@@ -1,40 +1,21 @@
-
-import { ExternalLink, Github, ArrowRight } from 'lucide-react';
+import { Github, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Projects = () => {
   const projects = [
     {
-      title: 'E-Commerce Platform',
-      description: 'Full-stack e-commerce solution with React, Node.js, and Stripe integration. Features include user authentication, product management, and real-time inventory tracking.',
-      technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop',
-      liveUrl: '#',
-      githubUrl: '#',
+      title: 'Spacely – Nearby Rentals',
+      description: 'A full-stack platform that helps Mapúa Malayan Colleges Mindanao students discover budget-friendly rentals, post listings, and manage the process – with a powerful admin dashboard for moderation.',
+      technologies: ['Typescript', 'Next.js', 'PostgreSQL'],
+      image: '/Images/Projects/SPACELY.png',
+      githubUrl: 'https://github.com/Shion-main/spacely.git',
     },
     {
-      title: 'Task Management App',
-      description: 'Collaborative task management application with real-time updates, drag-and-drop functionality, and team collaboration features.',
-      technologies: ['Vue.js', 'Express.js', 'Socket.io', 'MongoDB'],
-      image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop',
-      liveUrl: '#',
-      githubUrl: '#',
-    },
-    {
-      title: 'Analytics Dashboard',
-      description: 'Modern analytics dashboard with interactive charts, real-time data visualization, and customizable reporting features.',
-      technologies: ['React', 'D3.js', 'Python', 'FastAPI'],
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
-      liveUrl: '#',
-      githubUrl: '#',
-    },
-    {
-      title: 'Social Media App',
-      description: 'Full-featured social media platform with real-time messaging, content sharing, and advanced privacy controls.',
-      technologies: ['React Native', 'Firebase', 'Node.js', 'GraphQL'],
-      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=400&fit=crop',
-      liveUrl: '#',
-      githubUrl: '#',
+      title: 'J&H Management System',
+      description: 'A comprehensive rental property management system designed for J&H Management staff to efficiently manage branches, tenants, billing, and financial operations.',
+      technologies: ['Typescript', 'Next.js', 'PostgreSQL', 'Nodemailer'],
+      image: '/Images/Projects/J-H-APARTMENT.png',
+      githubUrl: 'https://github.com/Shion-main/j-h-apartment.git',
     },
   ];
 
@@ -81,19 +62,12 @@ const Projects = () => {
                   ))}
                 </div>
                 
-                <div className="flex space-x-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="border-neon-blue/30 hover:bg-neon-blue/20 flex items-center space-x-2"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    <span>Live Demo</span>
-                  </Button>
+                <div className="flex justify-start">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     className="border-gray-500/30 hover:bg-gray-500/20 flex items-center space-x-2"
+                    onClick={() => window.open(project.githubUrl, '_blank')}
                   >
                     <Github className="h-4 w-4" />
                     <span>Code</span>
@@ -102,16 +76,6 @@ const Projects = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <Button 
-            variant="outline" 
-            className="border-neon-blue/30 hover:bg-neon-blue/20 px-8 py-3 text-lg group"
-          >
-            View All Projects
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
         </div>
       </div>
     </section>

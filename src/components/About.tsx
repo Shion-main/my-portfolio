@@ -1,12 +1,11 @@
-
-import { Code, Database, Globe, Smartphone, Zap, Users } from 'lucide-react';
+import { Code, Database, Globe, Palette, Zap, Users } from 'lucide-react';
 
 const About = () => {
   const skills = [
-    { icon: Code, name: 'Frontend Development', desc: 'React, Vue, TypeScript' },
-    { icon: Database, name: 'Backend Development', desc: 'Node.js, Python, PostgreSQL' },
+    { icon: Code, name: 'Frontend Development', desc: 'React, Vue, TypeScript, Next.js' },
+    { icon: Database, name: 'Backend Development', desc: 'Node.js, Next.js, PostgreSQL, MySQL' },
     { icon: Globe, name: 'Web Technologies', desc: 'REST APIs, GraphQL, WebSocket' },
-    { icon: Smartphone, name: 'Mobile Development', desc: 'React Native, Flutter' },
+    { icon: Palette, name: 'UI/UX Design', desc: 'Figma, Adobe XD, Prototyping' },
     { icon: Zap, name: 'Performance', desc: 'Optimization, Caching, CDN' },
     { icon: Users, name: 'Collaboration', desc: 'Agile, Git, Code Reviews' },
   ];
@@ -24,22 +23,40 @@ const About = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {skills.map((skill, index) => (
-            <div
-              key={skill.name}
-              className="glass-card p-6 hover:bg-white/10 transition-all duration-300 group animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-lg bg-gradient-to-r from-neon-blue/20 to-electric-blue/20 group-hover:from-neon-blue/30 group-hover:to-electric-blue/30 transition-all duration-300">
-                  <skill.icon className="h-6 w-6 text-neon-blue" />
+        {/* Marquee Skills Section */}
+        <div className="relative overflow-hidden mb-16">
+          <div className="flex animate-marquee">
+            {/* First set of skills */}
+            {skills.map((skill, index) => (
+              <div
+                key={`skill-1-${index}`}
+                className="glass-card p-6 hover:bg-white/10 transition-all duration-300 group flex-shrink-0 mx-4 min-w-[300px]"
+              >
+                <div className="flex items-center mb-4">
+                  <div className="p-3 rounded-lg bg-gradient-to-r from-neon-blue/20 to-electric-blue/20 group-hover:from-neon-blue/30 group-hover:to-electric-blue/30 transition-all duration-300">
+                    <skill.icon className="h-6 w-6 text-neon-blue" />
+                  </div>
+                  <h3 className="text-xl font-semibold ml-4">{skill.name}</h3>
                 </div>
-                <h3 className="text-xl font-semibold ml-4">{skill.name}</h3>
+                <p className="text-gray-400">{skill.desc}</p>
               </div>
-              <p className="text-gray-400">{skill.desc}</p>
-            </div>
-          ))}
+            ))}
+            {/* Duplicate set for seamless loop */}
+            {skills.map((skill, index) => (
+              <div
+                key={`skill-2-${index}`}
+                className="glass-card p-6 hover:bg-white/10 transition-all duration-300 group flex-shrink-0 mx-4 min-w-[300px]"
+              >
+                <div className="flex items-center mb-4">
+                  <div className="p-3 rounded-lg bg-gradient-to-r from-neon-blue/20 to-electric-blue/20 group-hover:from-neon-blue/30 group-hover:to-electric-blue/30 transition-all duration-300">
+                    <skill.icon className="h-6 w-6 text-neon-blue" />
+                  </div>
+                  <h3 className="text-xl font-semibold ml-4">{skill.name}</h3>
+                </div>
+                <p className="text-gray-400">{skill.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="mt-16 text-center">

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,9 +31,9 @@ const Contact = () => {
   };
 
   const contactInfo = [
-    { icon: Mail, label: 'Email', value: 'hello@portfolio.dev' },
-    { icon: Phone, label: 'Phone', value: '+1 (555) 123-4567' },
-    { icon: MapPin, label: 'Location', value: 'San Francisco, CA' },
+    { icon: Mail, label: 'Email', value: 'official.joshuasabuero@gmail.com' },
+    { icon: Phone, label: 'Phone', value: '+639626917893' },
+    { icon: MapPin, label: 'Location', value: 'Davao City, Philippines' },
   ];
 
   return (

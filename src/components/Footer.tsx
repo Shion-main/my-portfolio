@@ -1,13 +1,12 @@
 
-import { Code, Github, Linkedin, Mail, Twitter } from 'lucide-react';
+import { Code, Github, Linkedin, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Footer = () => {
   const socialLinks = [
-    { icon: Github, href: '#', label: 'GitHub' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn' },
-    { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Mail, href: 'mailto:hello@portfolio.dev', label: 'Email' },
+    { icon: Github, href: 'https://github.com/Shion-main', label: 'GitHub' },
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/joshua-robert-sabuero-6b3677373/', label: 'LinkedIn' },
+    { icon: Mail, href: 'mailto:official.joshuasabuero@gmail.com', label: 'Email' },
   ];
 
   return (
@@ -36,7 +35,7 @@ const Footer = () => {
           </div>
 
           <p className="text-gray-400 text-sm">
-            © 2024 Portfolio. Built with React & Tailwind CSS
+            © 2025 Portfolio.
           </p>
         </div>
       </div>

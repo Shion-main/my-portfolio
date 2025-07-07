@@ -1,4 +1,3 @@
-
 import { ArrowDown, Github, Linkedin, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -42,14 +41,20 @@ const Hero = () => {
             </Button>
             
             <div className="flex space-x-4">
-              <Button variant="outline" size="icon" className="rounded-full border-neon-blue/30 hover:bg-neon-blue/20">
-                <Github className="h-5 w-5" />
+              <Button asChild variant="outline" size="icon" className="rounded-full border-neon-blue/30 hover:bg-neon-blue/20">
+                <a href="https://github.com/Shion-main" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                  <Github className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-neon-blue/30 hover:bg-neon-blue/20">
-                <Linkedin className="h-5 w-5" />
+              <Button asChild variant="outline" size="icon" className="rounded-full border-neon-blue/30 hover:bg-neon-blue/20">
+                <a href="https://www.linkedin.com/in/joshua-robert-sabuero-6b3677373/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                  <Linkedin className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-neon-blue/30 hover:bg-neon-blue/20">
-                <Mail className="h-5 w-5" />
+              <Button asChild variant="outline" size="icon" className="rounded-full border-neon-blue/30 hover:bg-neon-blue/20">
+                <a href="mailto:official.joshuasabuero@gmail.com" aria-label="Email">
+                  <Mail className="h-5 w-5" />
+                </a>
               </Button>
             </div>
           </div>
