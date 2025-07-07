@@ -7,14 +7,14 @@ const Projects = () => {
       title: 'Spacely – Nearby Rentals',
       description: 'A full-stack platform that helps Mapúa Malayan Colleges Mindanao students discover budget-friendly rentals, post listings, and manage the process – with a powerful admin dashboard for moderation.',
       technologies: ['Typescript', 'Next.js', 'PostgreSQL'],
-      image: '/Images/Projects/SPACELY.png',
+      image: 'Images/Projects/SPACELY.png',
       githubUrl: 'https://github.com/Shion-main/spacely.git',
     },
     {
       title: 'J&H Management System',
       description: 'A comprehensive rental property management system designed for J&H Management staff to efficiently manage branches, tenants, billing, and financial operations.',
       technologies: ['Typescript', 'Next.js', 'PostgreSQL', 'Nodemailer'],
-      image: '/Images/Projects/J-H-APARTMENT.png',
+      image: 'Images/Projects/J-H-APARTMENT.png',
       githubUrl: 'https://github.com/Shion-main/j-h-apartment.git',
     },
   ];
@@ -40,7 +40,7 @@ const Projects = () => {
             >
               <div className="relative overflow-hidden">
                 <img
-                  src={project.image}
+                  src={import.meta.env.BASE_URL + project.image}
                   alt={project.title}
                   className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                 />

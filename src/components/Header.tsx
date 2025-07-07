@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Menu, X, Code, User, Briefcase, Mail } from 'lucide-react';
+import { Menu, X, Code, User, Briefcase, Award, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Header = () => {
@@ -18,6 +17,7 @@ const Header = () => {
   const navItems = [
     { name: 'About', href: '#about', icon: User },
     { name: 'Projects', href: '#projects', icon: Briefcase },
+    { name: 'Achievements', href: '#achievements', icon: Award },
     { name: 'Contact', href: '#contact', icon: Mail },
   ];
 
