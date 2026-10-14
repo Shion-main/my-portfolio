@@ -9,9 +9,9 @@ import {
   type CSSProperties,
 } from "react";
 import { flushSync } from "react-dom";
-import { ArrowLeft, ArrowUp, ArrowUpRight, Expand, X } from "lucide-react";
-import { asset, email } from "../content";
-import { Header } from "../components/SiteChrome";
+import { ArrowLeft, ArrowUpRight, Expand, X } from "lucide-react";
+import { asset } from "../content";
+import { Footer, Header } from "../components/SiteChrome";
 import { capture } from "../showcase";
 
 const media = (file: string) => asset(`media/korte-case/${file.replace(/\.png$/, ".webp")}`);
@@ -181,6 +181,7 @@ function ProductGallery() {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState<Selection | null>(null);
   const [previous, setPrevious] = useState<View | null>(null);
+  const gallery = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLDivElement>(null);
   const outgoing = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -226,6 +227,14 @@ function ProductGallery() {
     if (request !== sequence.current || !frame.current) return;
     setLoading(false);
     const { reduced, mobile } = motion();
+    const galleryTop = gallery.current?.getBoundingClientRect().top;
+    if (galleryTop !== undefined && galleryTop < -8) {
+      const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height ?? 80;
+      window.scrollTo({
+        top: window.scrollY + galleryTop - headerHeight - 12,
+        behavior: reduced ? "instant" : "smooth",
+      });
+    }
     const direction =
       next.tab === current.current.tab
         ? next.partner
@@ -284,7 +293,7 @@ function ProductGallery() {
   }
   const view = viewFor(displayed);
   return (
-    <div className="kc-gallery">
+    <div ref={gallery} className="kc-gallery">
       <div
         className="kc-tabs"
         role="tablist"
@@ -626,11 +635,7 @@ export default function KorteCaseStudy() {
             </div>
           </section>
         </main>
-        <footer className="kc-footer kc-wrap">
-          <a href={asset("")}>Joshua Sabuero © 2026</a>
-          <a href={`mailto:${email}`}>Email: {email}</a>
-          <a href="#top">Back to top <ArrowUp size={14} aria-hidden="true" /></a>
-        </footer>
+        <Footer showEmail />
         <dialog
           ref={dialog}
           className="kc-viewer"

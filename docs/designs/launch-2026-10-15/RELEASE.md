@@ -45,5 +45,6 @@ Typecheck, lint, motion checks, and production build passed. Browser verificatio
 - Clearly labeled the official email. Removed the oversized footer arrow and social links. Converted remaining text arrows and the contact ornament to SVG icons.
 - Traced the owner's supplied JS monogram into real SVG paths for the logo and favicon. Header color adapts to the dark portfolio and light Korte page.
 - Kept the original outlined Joshua footer lettering, added 24px of space above it, and added a brief blue/ivory sliced glitch. It pauses offscreen and respects system reduced motion.
+- Korte uses the same Joshua footer with its email link. Gallery tabs dock at the viewport top while the header is hidden, move below it when it returns, and scroll back to the screen's start when switching from farther down the gallery.
 
 Local verification covers 320×740, 390×844, 430×932 and 1159×668. Collage lanes reverse continuously, all service rows reach full opacity, header direction behavior works, touch particles return to their original pixels, and Korte's mobile screen/viewer animations remain active. System reduced-motion switches to readable static layouts. Mobile Contact starts at the viewport top when the footer reaches the bottom. Physical-device Safari performance remains untested; these are Chromium browser checks.

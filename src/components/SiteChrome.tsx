@@ -192,7 +192,7 @@ export function Contact() {
     </section>
   );
 }
-export function Footer() {
+export function Footer({ showEmail = false }: { showEmail?: boolean }) {
   const footer = useRef<HTMLElement>(null);
   useEffect(() => {
     const element = footer.current;
@@ -214,7 +214,7 @@ export function Footer() {
       <div className="footer-wordmark" aria-hidden="true"><span className="wordmark-lettering">Joshua<span className="wordmark-glitch wordmark-glitch--blue">Joshua</span><span className="wordmark-glitch wordmark-glitch--light">Joshua</span></span></div>
       <div className="footer-bottom">
       <a href={asset("")}>Joshua Sabuero © 2026</a>
-      <span>Designed with intention. Built with care.</span>
+      {showEmail ? <a href={`mailto:${email}`}>Email: {email}</a> : <span>Designed with intention. Built with care.</span>}
       </div>
     </footer>
   );
