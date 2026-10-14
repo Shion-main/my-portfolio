@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Joshua Sabuero · Open for commissions</title>
+    <style>
+      @font-face { font-family: "Story Syne"; src: url("./syne-800.woff2") format("woff2"); font-style: normal; font-weight: 800; font-display: block; }
+      @font-face { font-family: "Story DM"; src: url("./dm-sans-400.woff2") format("woff2"); font-style: normal; font-weight: 400; font-display: block; }
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; margin: 0; overflow: hidden; }
+      body { background: #111113; color: #f3f3ef; font-family: "Story DM", Arial, sans-serif; }
+      .story { position: relative; isolation: isolate; width: 1080px; height: 1920px; overflow: hidden; background: #111113; }
+      #field { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+      .quiet { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #111113a6 0%, #11111305 21%, #11111349 52%, #111113f2 78%, #111113 100%); }
+      .top { position: absolute; top: 205px; left: 82px; right: 82px; display: flex; align-items: center; justify-content: space-between; }
+      .identity { display: flex; gap: 20px; align-items: center; }
+      .identity img { width: 76px; height: 76px; object-fit: contain; filter: brightness(0) invert(1); }
+      .identity span { font-size: 25px; line-height: 1.1; }
+      .role { color: #bfc4ca; text-align: right; font-size: 22px; line-height: 1.35; }
+      .main { position: absolute; top: 590px; left: 77px; right: 73px; }
+      .status { display: flex; align-items: center; gap: 13px; color: #91c9ed; font-size: 23px; letter-spacing: .025em; }
+      .status::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 7px #91c9ed24; }
+      h1 { margin: 55px 0 0; font-family: "Story Syne", Arial, sans-serif; font-weight: 800; font-size: 95px; line-height: 1.14; letter-spacing: -.034em; text-transform: uppercase; }
+      h1 span { display: block; white-space: nowrap; }
+      h1 .long { font-size: 72px; line-height: 1.3; }
+      h1 .accent { display: inline; color: #91c9ed; }
+      .discipline { margin: 62px 0 0; padding-top: 25px; border-top: 1px solid #f3f3ef6a; font-size: 27px; line-height: 1.5; color: #d5d8dc; }
+      .bottom { position: absolute; left: 82px; right: 82px; bottom: 245px; }
+      .bottom::before { content: ""; display: block; width: 100%; height: 1px; margin-bottom: 35px; background: #f3f3ef65; }
+      .prompt { margin: 0 0 20px; font-size: 36px; color: #f3f3ef; }
+      .email { display: block; color: #91c9ed; font-size: 60px; line-height: 1.2; letter-spacing: -.025em; text-decoration: none; }
+      .site { display: flex; justify-content: space-between; align-items: center; margin-top: 108px; color: #b7bec5; font-size: 25px; }
+      .site svg { width: 27px; height: 27px; color: #91c9ed; stroke: currentColor; stroke-width: 1.8; fill: none; }
+    </style>
+  </head>
+  <body>
+    <main class="story" aria-label="Joshua Sabuero is open for commissions">
+      <canvas id="field" width="1080" height="1920" aria-hidden="true"></canvas>
+      <div class="quiet" aria-hidden="true"></div>
+      <div class="top">
+        <div class="identity"><img src="./shion-monogram.svg" alt="" /><span>Joshua<br />Sabuero</span></div>
+        <div class="role">Designer &amp;<br />developer</div>
+      </div>
+      <div class="main">
+        <div class="status">Available for new projects</div>
+        <h1><span>Open for</span><span class="long">commissions<span class="accent">.</span></span></h1>
+        <p class="discipline">Logo &amp; brand identity &nbsp;·&nbsp; Websites &amp; product design</p>
+      </div>
+      <div class="bottom">
+        <p class="prompt">Have a project in mind?</p>
+        <a class="email" href="mailto:create@by-shion.dev">create@by-shion.dev</a>
+        <div class="site"><span>by-shion.dev</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </main>
+    <script>
+      // The portfolio hero's square-dot field, kept static for a shareable story.
+      const canvas = document.getElementById("field");
+      const context = canvas.getContext("2d");
+      const width = canvas.width;
+      const height = canvas.height;
+      const spacing = Math.max(7, Math.sqrt(width * height / 9500));
+      for (let y = spacing / 2; y < height; y += spacing) {
+        for (let x = spacing / 2; x < width; x += spacing) {
+          const u = x / width;
+          const v = y / height;
+          const wave = Math.sin(u * 8 + v * 3 + Math.sin(v * 7) * 1.25) + Math.cos(v * 8 - u * 3) * .65;
+          const band = Math.pow(Math.max(0, 1 - Math.abs(wave) * .95), 2);
+          const quiet = .36 + .64 * Math.min(1, Math.abs(u - .46) * 2.8);
+          const alpha = (.025 + band * .4) * quiet;
+          const size = (.65 + band * 2.5) * spacing / 8;
+          context.globalAlpha = alpha;
+          context.fillStyle = Math.sin(u * 9 + v * 4) > -.15 ? "#85c5eb" : "#e0eaf0";
+          context.fillRect(x - size / 2, y - size / 2, size, size);
+        }
+      }
+      context.globalAlpha = 1;
+    </script>
+  </body>
+</html>
