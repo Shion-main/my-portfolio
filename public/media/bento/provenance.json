@@ -1,0 +1,234 @@
+{
+  "updated": "2026-10-15",
+  "method": "Complete native browser viewport captures using gstack browse. No screenshot content was recreated or edited.",
+  "layout": "Twenty unique screens: ten desktop and ten phone, five per alternating column. Images retain intrinsic proportions. The scroll window reveals each full screen during its pinned interval.",
+  "sources": {
+    "space": "https://space-arabica-2.vercel.app",
+    "korte": "Actual Korte working-tree app. Signed-in captures use a localhost-only fictional-data backend. Club screen uses the existing production-component fixture."
+  },
+  "data": "Fictional names, sessions, clubs, venues, counts and amounts illustrate the product interface; they are not adoption or revenue claims.",
+  "preparation": "Waited for fonts and visible images. Dismissed optional prompts through app controls. Hid only Next.js development launcher. Selected manual check-in through its control. No fake product UI or image cropping.",
+  "logo": "Korte/public/korte-logo-light.svg, copied unchanged; the previous brightness filter is removed.",
+  "screens": [
+    {
+      "id": "space-home",
+      "file": "media/bento/space-home.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/index.html",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-explore",
+      "file": "media/korte-case/explore-mobile.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/explore",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-live",
+      "file": "media/showcase/korte-live-cover.jpg",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "route": "/meet/quick (active courts)",
+      "captured": "2026-10-13 (clean original reused)"
+    },
+    {
+      "id": "space-menu",
+      "file": "media/bento/space-menu.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/menu.html",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "space-contact",
+      "file": "media/bento/space-contact.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/contact.html",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "space-story",
+      "file": "media/bento/space-story.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/story.html",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-club",
+      "file": "media/korte-case/connect-mobile.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "ClubDetailClient.tsx existing member fixture",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-partner",
+      "file": "media/korte-case/partner-desktop.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/partner",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-home",
+      "file": "media/showcase/korte-home-cover.jpg",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "route": "/",
+      "captured": "2026-10-13 (clean original reused)"
+    },
+    {
+      "id": "korte-organizers",
+      "file": "media/showcase/korte-organizers-cover.jpg",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "route": "/for-organizers",
+      "captured": "2026-10-13 (clean original reused)"
+    },
+    {
+      "id": "space-space",
+      "file": "media/bento/space-space.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/space.html",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-setup",
+      "file": "media/bento/korte-setup.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/meet/quick (signed-in setup)",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-checkin",
+      "file": "media/bento/korte-checkin.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/meet/b777b777-b777-4777-8777-b777b777b777/checkin",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "space-full-menu",
+      "file": "media/bento/space-full-menu.png",
+      "device": "desktop",
+      "viewport": [
+        1440,
+        900
+      ],
+      "route": "/full-menu.html",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-meet",
+      "file": "media/korte-case/discover-mobile.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/meet/sunday-social-doubles",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-book",
+      "file": "media/korte-case/book-mobile.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/venue/baseline-courts?tab=book",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-profile",
+      "file": "media/bento/korte-profile.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/profile/edit",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-organize",
+      "file": "media/bento/korte-organize.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/organizer",
+      "captured": "2026-10-15"
+    },
+    {
+      "id": "korte-score",
+      "file": "media/showcase/korte-scoring-mobile-cover.jpg",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/meet/quick (score entry)",
+      "captured": "2026-10-13 (clean original reused)"
+    },
+    {
+      "id": "korte-venue",
+      "file": "media/bento/korte-venue.png",
+      "device": "phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "route": "/venue/baseline-courts",
+      "captured": "2026-10-15"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+/* A brief project-color curtain bridges two independent, prerendered pages. */
+@view-transition { navigation: auto; }
+
+.project-transition { display: none; }
+:root[data-project-theme="korte"] { --project-curtain: #0b2337; --project-curtain-ink: #c1e568; }
+:root[data-project-theme="space-arabica"] { --project-curtain: #d8cbb8; --project-curtain-ink: #352c25; }
+:root[data-project-switching] .project-transition {
+  display: grid; place-items: center; position: fixed; inset: 0; z-index: 1000;
+  background: var(--project-curtain); color: var(--project-curtain-ink);
+  pointer-events: none; view-transition-name: project-curtain;
+}
+.project-transition-copy { width: min(100% - 48px, 1080px); }
+.project-transition-kicker { display: flex; justify-content: space-between; font: 11px/1.5 "DM Sans", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+#project-transition-label { display: block; margin: 22px 0 30px; font: 700 clamp(42px, 9vw, 130px)/.95 "Syne", sans-serif; letter-spacing: -.06em; }
+.project-transition-line { display: block; height: 1px; background: currentColor; opacity: .35; }
+
+:root[data-project-switching]::view-transition { pointer-events: none; }
+:root[data-project-switching]::view-transition-group(*) { animation-duration: 680ms; }
+:root[data-project-switching]::view-transition-image-pair(root) { isolation: isolate; }
+:root[data-project-switching]::view-transition-old(root) {
+  animation: project-page-out 680ms cubic-bezier(.4, 0, .2, 1) both;
+  mix-blend-mode: normal;
+}
+:root[data-project-switching]::view-transition-new(root) {
+  animation: project-page-in 680ms cubic-bezier(.2, 0, 0, 1) both;
+  mix-blend-mode: normal;
+}
+:root[data-project-switching]::view-transition-group(project-curtain) { z-index: 2; animation: none; }
+:root[data-project-switching]::view-transition-old(project-curtain) { display: none; }
+:root[data-project-switching]::view-transition-new(project-curtain) {
+  animation: project-curtain-pass 680ms cubic-bezier(.65, 0, .35, 1) both;
+  mix-blend-mode: normal;
+}
+@keyframes project-curtain-pass {
+  0% { clip-path: inset(100% 0 0); }
+  40%, 50% { clip-path: inset(0); }
+  100% { clip-path: inset(0 0 100%); }
+}
+@keyframes project-page-out {
+  0% { opacity: 1; transform: scale(1); }
+  40%, 100% { opacity: .65; transform: scale(.98); }
+}
+@keyframes project-page-in {
+  0%, 40% { opacity: 0; transform: translateY(20px); }
+  50% { opacity: 1; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+:root[data-project-arrival] #root { animation: project-arrival 340ms cubic-bezier(.2, 0, 0, 1) both; }
+@keyframes project-arrival { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 767px) {
+  :root[data-project-switching]::view-transition-group(*),
+  :root[data-project-switching]::view-transition-old(root),
+  :root[data-project-switching]::view-transition-new(root),
+  :root[data-project-switching]::view-transition-new(project-curtain) { animation-duration: 560ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .project-transition { display: none !important; }
+  :root[data-project-arrival] #root { animation: none; }
+}

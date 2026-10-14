@@ -1,30 +1,56 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Joshua Sabuero - Full Stack Developer</title>
-    <meta name="description" content="Joshua Sabuero - Professional full-stack developer specializing in modern web technologies, UI/UX design, and scalable applications." />
+    <title>Joshua Sabuero — Web Designer & Developer</title>
+    <meta
+      name="description"
+      content="I design and build websites and digital products. Explore Space Arabica and Korte through an interactive portfolio."
+    />
     <meta name="author" content="Joshua Sabuero" />
+    <link rel="canonical" href="https://by-shion.dev/" />
+    <meta property="og:url" content="https://by-shion.dev/" />
+    <meta property="og:site_name" content="Joshua Sabuero" />
 
-    <meta property="og:title" content="Joshua Sabuero - Full Stack Developer" />
-    <meta property="og:description" content="Professional full-stack developer specializing in modern web technologies, UI/UX design, and scalable applications." />
+    <meta
+      property="og:title"
+      content="Joshua Sabuero — Web Designer & Developer"
+    />
+    <meta
+      property="og:description"
+      content="From the first idea to the way it feels to use. Explore Space Arabica and Korte."
+    />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/favicon.svg" />
+    <meta
+      property="og:image"
+      content="https://by-shion.dev/media/social-cover.png"
+    />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/favicon.svg" />
+    <meta
+      name="twitter:image"
+      content="https://by-shion.dev/media/social-cover.png"
+    />
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta property="og:image:alt" content="Joshua Sabuero — independent designer and developer. Visual identity, digital design and development." />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="theme-color" content="#111113" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <script src="%BASE_URL%project-transitions.js"></script>
+    <link rel="expect" href="#project-transition-label" blocking="render" />
+    <script type="module" src="/src/main.tsx" blocking="render"></script>
   </head>
 
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="project-transition" hidden aria-hidden="true">
+      <div class="project-transition-copy">
+        <span class="project-transition-kicker">Selected work <span id="project-transition-number"></span></span>
+        <span id="project-transition-label"></span>
+        <span class="project-transition-line"></span>
+      </div>
+    </div>
   </body>
 </html>

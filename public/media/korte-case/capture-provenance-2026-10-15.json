@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-10-15",
+  "method": "gstack browse, complete browser viewports of real Korte components",
+  "data": "Realistic fictional records supplied by a localhost-only fixture backend. Names, venues, prices, capacities, booking counts and payment totals illustrate the interface, not product adoption or revenue.",
+  "screens": [
+    {"files":["explore-mobile.png"],"route":"/explore","state":"Signed-in player Alex Santos; Sunday Social Doubles at Baseline Pickleball Club; 18 of 24 players","viewport":"390x844"},
+    {"files":["discover-desktop.png","discover-mobile.png"],"route":"/meet/sunday-social-doubles","state":"Signed-in player; upcoming meet hosted by Isabella Cruz; PHP 250 participation; populated roster","viewports":["1440x900","390x844"]},
+    {"files":["book-desktop.png","book-mobile.png"],"route":"/venue/baseline-courts?tab=book","state":"Signed-in player; PHP 450 court rate; open and booked time slots","viewports":["1440x900","390x844"]},
+    {"files":["partner-desktop.png","partner-mobile.png"],"route":"/partner","state":"Signed-in venue partner; populated activity, booking previews, payment review and quick actions","viewports":["1440x900","390x844"]},
+    {"files":["connect-desktop.png","connect-mobile.png"],"component":"src/app/(main)/club/[id]/ClubDetailClient.tsx","fixture":"Korte/scripts/club-hub-ui-fixture.mjs?role=member","state":"Signed-in Southside Dinkers member; upcoming doubles and members-only club update","viewports":["1440x900","390x844"]}
+  ],
+  "source": "Korte working tree, actual Next.js app on localhost:3040 with production services disabled. Club uses its existing production-component fixture.",
+  "preparation": "Dismissed app prompts through controls. Removed only Next.js developer toolbar and the fixture's development-preview banner. No screenshot pixels edited, no product components re-created, no app labels replaced in the DOM.",
+  "coverArtwork": "Existing Korte marketing/organizer-adoption-poster/assets/court-background.png supplied as fictional session cover data.",
+  "organizerReuse": "The hero uses media/showcase/korte-live-cover.jpg, the clean 1440x1000 Tuesday Courtside browser capture with realistic fictional player names. It replaces reference-live-desktop.png, which contained the Next.js developer indicator. Score entry reuses media/showcase/korte-scoring-cover.jpg and korte-scoring-mobile-cover.jpg, full browser viewports with realistic fictional player names. These are not image crops.",
+  "localCaptureTools": [".gstack/start-korte-mock.mjs", ".gstack/start-korte-capture.mjs", ".gstack/capture-korte-realistic.mjs"],
+  "claimBoundary": "All-in-one describes product scope. No hosted availability, research findings, project dates, collaborators or measured outcomes are invented."
+}

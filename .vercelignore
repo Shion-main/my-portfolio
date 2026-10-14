@@ -1,0 +1,17 @@
+.git
+.agents
+.codex
+.gstack
+.impeccable
+.prerender
+dist
+node_modules
+docs
+favicon
+*.local
+*.log
+.env*
+*.tsbuildinfo
+*.md
+skills-lock.json
+scripts/prepare-*.py

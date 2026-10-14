@@ -1,0 +1,16 @@
+[
+  {
+    "family": "Exo",
+    "file": "exo-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/exo/v25/4UaOrEtFpBISc36j.woff2",
+    "library": "@remotion/google-fonts@4.0.534",
+    "sha256": "18bbf39a4e6915f988af7263ab2d92858949dc317e2fcfd3e77908f7a36cbc2c"
+  },
+  {
+    "family": "Geist",
+    "file": "geist-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2",
+    "library": "@remotion/google-fonts@4.0.534",
+    "sha256": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1"
+  }
+]

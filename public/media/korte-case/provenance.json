@@ -1,0 +1,74 @@
+{
+  "package": "Korte/portfolio/korte-case-study-2026-10-12",
+  "workbook": "https://www.figma.com/design/T8AEXO02s4yAM1dd8Jvyy5",
+  "exported": "2026-10-15",
+  "wireframeLabel": "Reconstructed after implementation; illustrative values",
+  "captures": "Actual local app; synthetic players",
+  "nodes": [
+    {
+      "name": "roster",
+      "nodeId": "6:28",
+      "file": "wire-roster.png"
+    },
+    {
+      "name": "checkin",
+      "nodeId": "6:76",
+      "file": "wire-checkin.png"
+    },
+    {
+      "name": "courts",
+      "nodeId": "6:101",
+      "file": "wire-courts.png"
+    },
+    {
+      "name": "score",
+      "nodeId": "6:124",
+      "file": "wire-score.png"
+    },
+    {
+      "name": "constrained",
+      "nodeId": "7:8",
+      "file": "wire-constrained.png"
+    },
+    {
+      "name": "sitting",
+      "nodeId": "7:29",
+      "file": "wire-sitting.png"
+    },
+    {
+      "name": "restore",
+      "nodeId": "7:48",
+      "file": "wire-restore.png"
+    },
+    {
+      "name": "incomplete",
+      "nodeId": "7:69",
+      "file": "wire-incomplete.png"
+    },
+    {
+      "name": "discovery",
+      "nodeId": "5:8",
+      "file": "wire-discovery.png"
+    },
+    {
+      "name": "clubs",
+      "nodeId": "11:8",
+      "file": "wire-clubs.png"
+    },
+    {
+      "name": "venues",
+      "nodeId": "11:71",
+      "file": "wire-venues.png"
+    },
+    {
+      "name": "partner",
+      "nodeId": "16:32",
+      "file": "wire-partner.png"
+    },
+    {
+      "name": "matchmaking",
+      "nodeId": "6:51",
+      "file": "wire-matchmaking.png"
+    }
+  ]
+}
