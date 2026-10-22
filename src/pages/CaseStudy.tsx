@@ -1,6 +1,6 @@
 import { asset, projects, type ProjectSlug } from "../content";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { Contact, Footer, Header, TextLink } from "../components/SiteChrome";
+import { Contact, Footer, Header } from "../components/SiteChrome";
 import ProjectShowcase from "../components/ProjectShowcase";
 import ScreenGallery from "../components/ScreenGallery";
 import { capture } from "../showcase";
@@ -32,9 +32,9 @@ export default function CaseStudy({ slug }: { slug: ProjectSlug }) {
           <div className="case-disciplines">
             <span>{p.disciplines}</span>
             {p.website && (
-              <TextLink href={p.website} external>
-                Visit the website
-              </TextLink>
+              <a className="case-demo-button" href={asset(p.website)}>
+                View demo <ArrowUpRight size={17} aria-hidden="true" />
+              </a>
             )}
           </div>
         </section>

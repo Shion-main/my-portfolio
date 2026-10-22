@@ -21,6 +21,27 @@ for (const [file, name] of [
     await stat(path);
   }
 }
+
+const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
+assert.ok(spaceCaseHtml.includes("View demo"));
+assert.ok(!spaceCaseHtml.includes("vercel.app"));
+
+for (const page of [
+  "index.html",
+  "menu.html",
+  "full-menu.html",
+  "space.html",
+  "story.html",
+  "contact.html",
+]) {
+  const demoHtml = await readFile(`dist/work/space-arabica/demo/${page}`, "utf8");
+  assert.ok(demoHtml.includes("Work in progress"));
+  assert.ok(demoHtml.includes('class="wip-banner"'));
+  for (const match of demoHtml.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
+    assert.ok(match[0].includes("disabled") && match[0].includes("readonly"));
+  }
+}
+
 console.log(
-  "Static checks passed: three complete pages, official email, no legacy project copy, all local referenced assets exist.",
+  "Static checks passed: three complete pages, Space Arabica demo attached with WIP banner and disabled inputs, official email, all local referenced assets exist.",
 );

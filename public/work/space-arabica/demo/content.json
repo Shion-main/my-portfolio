@@ -1,0 +1,32 @@
+{
+  "business": {
+    "name": "Space Arabica",
+    "tagline": "Great Coffee, Great Ideas",
+    "address": "Door 1, Focal Point Bldg., Ecowest Drv., Ecoland, Davao City, Philippines, 8000",
+    "phone_display": "0970 085 0510",
+    "phone_href": "+639700850510",
+    "email": "spacearabica@gmail.com",
+    "facebook": "https://www.facebook.com/profile.php?id=100086514666448",
+    "instagram": "https://www.instagram.com/space.arabica",
+    "tiktok": "https://tiktok.com/@spacearabica",
+    "maps": "https://www.google.com/maps/search/?api=1&query=Space+Arabica+Focal+Point+Ecowest+Davao+City",
+    "opening_hours": {
+      "monday_saturday": "10:30 AM–5:00 AM (next day)",
+      "sunday": "12:00 PM–1:00 AM (next day)"
+    }
+  },
+  "menu_source": "Owner-supplied printed menu photos, transcribed 2026-10-10. Full entries in menu-data.json; confirm before publication.",
+  "room": {
+    "capacity": 12,
+    "rates": "₱2,500 for 2 hours, fully consumable on food and drinks",
+    "availability": null,
+    "amenities_from_wordpress": ["Interactive digital whiteboard", "Wi-Fi", "Power outlets"],
+    "source": "Owner-supplied printed mini conference room flyer, 2026-10-10; confirm offer before publication"
+  },
+  "sources": {
+    "address_contact_social": "Facebook About page, inspected 2026-10-09",
+    "opening_hours": "Owner supplied in chat, 2026-10-10",
+    "story_room_amenities": "WordPress Our Story page, exported 2026-10-09",
+    "photos": "WordPress media library, 83 originals downloaded 2026-10-09"
+  }
+}

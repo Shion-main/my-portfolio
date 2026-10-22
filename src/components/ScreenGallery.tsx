@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
-import { type ProjectSlug } from "../content";
+import { asset, projects, type ProjectSlug } from "../content";
 import { capture, preview, projectScreens, type Screen } from "../showcase";
 
 function ScreenLink({ screen }: { screen: Screen }) {
@@ -14,10 +14,16 @@ function ScreenLink({ screen }: { screen: Screen }) {
 
 export default function ScreenGallery({ slug }: { slug: ProjectSlug }) {
   const screens = projectScreens[slug];
+  const demo = projects[slug].website;
   return (
     <section className="screen-gallery" aria-labelledby="screen-gallery-title">
       <div className="screen-gallery-heading"><p className="eyebrow">Explore the interface</p><h2 id="screen-gallery-title">Every screen has a part to play.</h2>
-        <p>{slug === "space-arabica" ? "Six connected pages, from discovering a drink to planning a visit. Open any page to see its complete layout." : "The community website and the guest-session flow, from setup and attendance to courts, scoring, and standings. Open a screen for a closer look."}</p>
+        <p>{slug === "space-arabica" ? "Six connected pages, from discovering a drink to planning a visit. Open any page to see its complete layout, or launch the full interactive demo." : "The community website and the guest-session flow, from setup and attendance to courts, scoring, and standings. Open a screen for a closer look."}</p>
+        {demo && (
+          <a className="case-demo-button screen-gallery-demo" href={asset(demo)}>
+            View demo <ArrowUpRight size={17} aria-hidden="true" />
+          </a>
+        )}
       </div>
       <div className="screen-grid">{screens.filter(screen => !screen.mobile).map(screen => <ScreenLink screen={screen} key={screen.id} />)}</div>
       <h3 className="screen-mobile-heading">Made for a smaller screen, too.</h3>

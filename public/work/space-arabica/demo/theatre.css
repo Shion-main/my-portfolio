@@ -1,0 +1,198 @@
+/* An orbiting product scene: real cutouts, architectural shapes, photographic depth. */
+.product-theatre { padding: 14px 14px 0; background: var(--ink); }
+.page-index main { margin-top: calc(-1 * var(--header-height)); }
+.theatre-scene { position: relative; isolation: isolate; overflow: hidden; height: clamp(580px, 76svh, 800px); min-height: 580px; background: var(--roast); touch-action: pan-y pinch-zoom; outline-offset: -8px; }
+.theatre-scene::before { position: absolute; z-index: -2; inset: 0; content: ''; background: url('assets/coffee-counter.webp') center 46% / cover no-repeat; opacity: .3; filter: grayscale(.25) sepia(.4); pointer-events: none; }
+.page-index .theatre-scene { height: clamp(calc(580px + var(--header-height)), calc(76svh + var(--header-height)), calc(800px + var(--header-height))); min-height: calc(580px + var(--header-height)); }
+.theatre-frame { position: absolute; z-index: 8; inset: 10px; border: 1px solid #f2f2f228; border-radius: 7px; pointer-events: none; }
+.theatre-arch { position: absolute; z-index: -1; top: -5%; bottom: -4%; left: 17%; width: 66%; border: 1px solid #f2f2f226; border-radius: 50% 50% 0 0 / 62% 62% 0 0; background: #141414d9; transform-origin: center bottom; box-shadow: 0 0 0 16px #0d0d0d0a; }
+.theatre-disc { position: absolute; z-index: 0; left: 50%; bottom: -300px; width: 800px; height: 390px; border-radius: 50%; background: var(--ink); transform: translateX(-50%); border-top: 1px solid #f2f2f240; }
+.theatre-meta { position: absolute; z-index: 9; left: 36px; right: 36px; top: 29px; display: flex; justify-content: space-between; gap: 20px; color: var(--cream-soft); font-size: 10px; font-weight: 700; letter-spacing: .1em; line-height: 1.4; }
+.page-index .theatre-meta { top: calc(29px + var(--header-height)); }
+.theatre-titles { position: absolute; z-index: 1; display: grid; left: 50%; top: 9%; width: 94%; max-width: 1280px; margin: 0; transform: translateX(-50%); text-align: center; letter-spacing: -.055em; line-height: .9; }
+.page-index .theatre-titles { top: calc(9% + var(--header-height) * .91); }
+.theatre-title { grid-area: 1 / 1; visibility: hidden; pointer-events: none; font-size: clamp(75px, calc(125vw / var(--title-width)), 155px); }
+.theatre-title.is-active, .theatre-title.is-exiting { visibility: visible; }
+.theatre-title > span { display: block; overflow: hidden; padding-block: .055em; }
+.theatre-title > span > span { display: block; }
+.theatre-title > span:last-child { color: var(--accent); }
+.theatre-cups { position: absolute; z-index: 4; inset: 0; transform: translateY(var(--scene-parallax, 0px)); }
+.theatre-cup { position: absolute; left: 50%; top: 58%; width: clamp(280px, 28vw, 395px); height: 67%; max-height: 540px; display: grid; place-items: center; opacity: 0; transform: translate(-50%, -50%); transform-origin: 50% 70%; cursor: pointer; }
+.page-index .theatre-cup { top: calc(58% + var(--header-height) * .42); height: calc(67% - var(--header-height) * .67); }
+.theatre-cup:first-child { opacity: 1; }
+.theatre-cup img { width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; filter: drop-shadow(14px 26px 13px #00000045); }
+.theatre-beans { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
+.page-index .theatre-beans { top: var(--header-height); }
+.theatre-bean { position: absolute; display: block; width: var(--bean-size); aspect-ratio: 1; transform: rotate(var(--bean-angle)) translateY(var(--bean-parallax, 0px)); filter: blur(var(--bean-blur, 0px)); }
+.theatre-bean img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(6px 10px 6px #00000035); }
+.theatre-bean--1 { --bean-size: 125px; --bean-angle: -35deg; top: 16%; left: 5%; }
+.theatre-bean--2 { --bean-size: 55px; --bean-angle: 40deg; --bean-blur: 1px; top: 34%; left: 28%; }
+.theatre-bean--3 { --bean-size: 180px; --bean-angle: 65deg; --bean-blur: 5px; top: 64%; left: -5%; }
+.theatre-bean--4 { --bean-size: 75px; --bean-angle: -70deg; top: 78%; left: 29%; }
+.theatre-bean--5 { --bean-size: 145px; --bean-angle: 120deg; top: 13%; right: 5%; }
+.theatre-bean--6 { --bean-size: 45px; --bean-angle: 170deg; --bean-blur: 2px; top: 39%; right: 30%; }
+.theatre-bean--7 { --bean-size: 210px; --bean-angle: -25deg; --bean-blur: 7px; top: 68%; right: -6%; }
+.theatre-bean--8 { --bean-size: 80px; --bean-angle: 95deg; top: 79%; right: 29%; }
+/* Each drink brings its own photographic ingredients into the same orbit. */
+.theatre-ingredients { position: absolute; inset: var(--header-height) 34px 24px; pointer-events: none; }
+.theatre-flavor { position: absolute; inset: 0; visibility: hidden; }
+.theatre-flavor.is-active, .theatre-flavor.is-exiting { visibility: visible; }
+.theatre-ingredient { position: absolute; z-index: 3; display: block; width: var(--ingredient-size); aspect-ratio: 1; transform: translateY(var(--ingredient-parallax, 0px)) rotate(var(--ingredient-angle)); filter: blur(var(--ingredient-blur, 0px)); }
+.theatre-ingredient--front { z-index: 6; }
+.theatre-ingredient-drift { display: block; width: 100%; height: 100%; }
+.is-ready .is-active .theatre-ingredient-drift, .is-ready .is-exiting .theatre-ingredient-drift { animation: var(--drift-path, ingredient-meander-a) var(--drift-duration, 17s) cubic-bezier(.45,0,.55,1) infinite, ingredient-turn var(--turn-duration, 29s) cubic-bezier(.45,0,.55,1) infinite; animation-delay: var(--drift-phase, -3s), var(--turn-phase, -11s); animation-play-state: paused; }
+.is-ready.is-in-view .is-active .theatre-ingredient-drift, .is-ready.is-in-view .is-exiting .theatre-ingredient-drift { animation-play-state: running; }
+.journey-paused .product-theatre.is-ready .theatre-flavor .theatre-ingredient-drift { animation-play-state: paused; }
+.theatre-ingredient img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(8px 15px 10px #00000040); }
+.theatre-ingredient--1 { left: 7%; top: 25%; --ingredient-size: clamp(90px, 12vw, 170px); --ingredient-angle: -28deg; }
+.theatre-ingredient--2 { right: 6%; top: 32%; --ingredient-size: clamp(100px, 14vw, 195px); --ingredient-angle: 35deg; --drift-path: ingredient-meander-b; --drift-duration: 23s; --turn-duration: 37s; --drift-x: -13px; --turn-angle: -13deg; }
+.theatre-ingredient--3 { left: 3%; bottom: 9%; --ingredient-size: clamp(110px, 14vw, 190px); --ingredient-angle: 65deg; --ingredient-blur: 4px; --drift-path: ingredient-meander-c; --drift-duration: 29s; --turn-duration: 43s; --drift-x: 16px; --drift-y: 12px; --turn-angle: 18deg; }
+.theatre-ingredient--4 { right: 35%; bottom: 22%; --ingredient-size: clamp(65px, 7vw, 100px); --ingredient-angle: -65deg; --ingredient-blur: .5px; --drift-path: ingredient-meander-b; --drift-duration: 19s; --turn-duration: 31s; --drift-x: 18px; --drift-y: -11px; --turn-angle: -16deg; }
+[data-ingredient='rose-petals-real'] .theatre-ingredient--1 { top: 20%; }
+[data-ingredient='chamomile-accent'] .theatre-ingredient--2 { --ingredient-angle: 75deg; }
+@media (max-width: 540px) {
+  .theatre-ingredient--1 { left: 0; top: 31%; --ingredient-size: 68px; }
+  .theatre-ingredient--2 { right: 0; top: 43%; --ingredient-size: 72px; }
+  .theatre-ingredient--3 { left: 8px; bottom: 13%; --ingredient-size: 82px; --ingredient-blur: 3px; }
+  .theatre-ingredient--4 { right: 20%; bottom: 21%; --ingredient-size: 62px; --drift-x: 12px; }
+  [data-ingredient='rose-petals-real'] .theatre-ingredient--1 { top: 29%; --ingredient-size: 74px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theatre-ingredient { --ingredient-parallax: 0px !important; }
+  .product-theatre .theatre-ingredient-drift { animation: none !important; }
+}
+.theatre-arrows { position: absolute; z-index: 10; top: 51%; left: 35px; right: 35px; display: flex; justify-content: space-between; pointer-events: none; }
+.page-index .theatre-arrows { top: calc(51% + var(--header-height) * .49); }
+.theatre-arrows button { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid #0d0d0d80; border-radius: 50%; background: var(--accent); color: var(--ink); pointer-events: auto; transition: transform 160ms var(--ease), background-color 160ms ease; }
+.theatre-arrows .arrow-icon { width: 23px; height: 23px; }
+.theatre-arrows button:hover { background: var(--cream); }
+.theatre-arrows button:active { transform: scale(.94); }
+.theatre-pagination { position: absolute; z-index: 10; left: 36px; right: 36px; bottom: 22px; display: flex; justify-content: space-between; align-items: center; gap: 20px; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--cream-soft); }
+.theatre-pagination > div { display: flex; gap: 2px; padding-inline: 8px; background: var(--ink); border-radius: 999px; }
+.theatre-pagination button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; background: transparent; }
+.theatre-pagination button span { display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); transition: transform 200ms var(--ease), background-color 200ms ease; }
+.theatre-pagination [aria-pressed='true'] span { background: var(--accent); transform: scale(1.6); }
+.theatre-scene:focus-visible { outline-color: var(--accent); }
+.theatre-arrows :focus-visible { outline-color: var(--ink); }
+.theatre-details { display: grid; padding-block: 35px 39px; }
+.theatre-detail { grid-area: 1 / 1; display: none; grid-template-columns: 1.05fr 1fr 1fr; align-items: center; gap: 50px; min-width: 0; }
+.theatre-detail.is-active { display: grid; }
+.product-theatre.is-ready .theatre-detail { display: grid; visibility: hidden; }
+.product-theatre.is-ready .theatre-detail.is-active { visibility: visible; }
+.theatre-detail .eyebrow { margin-bottom: 9px; font-size: 9px; letter-spacing: .09em; }
+.theatre-detail h2 { margin: 0; font-size: 32px; line-height: 1.05; text-transform: none; font-weight: 600; letter-spacing: -.035em; }
+.theatre-detail > p { max-width: 38ch; margin: 0; color: var(--muted); font-size: 12px; }
+.theatre-price { display: flex; align-items: center; justify-content: end; gap: 25px; }
+.theatre-price > span { display: grid; color: var(--muted); font-size: 10px; white-space: nowrap; }
+.theatre-price strong { font-size: 28px; font-weight: 500; line-height: 1.3; color: var(--cream); }
+.theatre-price .button { padding-inline: 18px; gap: 16px; white-space: nowrap; font-size: 11px; }
+.theatre-scene.is-dragging { cursor: grabbing; }
+.product-theatre.is-instant * { transition: none !important; }
+.theatre-scene.is-dragging .theatre-cups { transform: translateX(var(--theatre-drag, 0px)) translateY(var(--scene-parallax, 0px)); }
+.no-js .theatre-cups { position: relative; inset: auto; display: flex; justify-content: center; height: 100%; }
+.no-js .theatre-cup { display: none; }
+.no-js .theatre-cup:first-child { display: grid; }
+.no-js .theatre-arrows, .no-js .theatre-pagination { display: none; }
+.no-js .theatre-details { display: block; }
+.no-js .theatre-detail { display: grid; padding-block: 20px; border-bottom: 1px solid var(--line); }
+
+/* Large shapes replace the previous illustrated ornament on the menu stages. */
+.theatre-caption { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding-block: 20px; min-height: 86px; }
+.theatre-notes { display: grid; min-width: 0; }
+.theatre-caption-actions { display: flex; align-items: center; gap: 24px; flex: none; }
+.theatre-note { grid-area: 1 / 1; visibility: hidden; }
+.theatre-note.is-active { visibility: visible; }
+.theatre-note p { margin: 0; color: var(--cream-soft); font-size: 14px; line-height: 1.6; }
+.theatre-menu-link { display: inline-flex; flex: none; align-items: center; gap: 24px; min-height: 44px; border-bottom: 1px solid var(--accent); font-size: 12px; }
+.theatre-menu-link .arrow-icon { color: var(--accent); transition: transform 200ms var(--ease); }
+.no-js .theatre-note:not(.is-active) { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .theatre-menu-link:hover .arrow-icon { transform: translate(3px, -3px); }
+}
+@media (max-width: 600px) {
+  .theatre-caption { flex-direction: column; align-items: flex-start; gap: 5px; padding-block: 17px 19px; }
+  .theatre-note p { font-size: 13px; }
+  .theatre-menu-link { min-height: 40px; gap: 20px; }
+  .theatre-caption-actions { width: 100%; justify-content: space-between; gap: 12px; }
+}
+
+.signature-showcase.is-ready { border-radius: 0; border: 1px solid var(--line); }
+.signature-showcase.is-ready .signature-showcase__glow { inset: 4% 18% -9%; background: var(--accent); border-radius: 50% 50% 0 0 / 55% 55% 0 0; opacity: .25; }
+.signature-showcase.is-ready .signature-showcase__ornaments { inset: 8% 10%; border: 1px solid #c18b3e90; border-radius: 50% 50% 4px 4px / 48% 48% 4px 4px; background: none; opacity: 1; transform: rotate(-7deg); }
+.signature-showcase.is-ready .signature-showcase__cup { transition: transform 950ms cubic-bezier(.22,.68,.2,1), opacity 500ms ease; }
+.page-intro::before { width: 310px; height: 310px; top: -100px; right: -80px; background: none; border: 50px solid var(--accent); border-radius: 50%; opacity: .13; }
+.story-statement::after { width: 400px; height: 400px; right: -120px; top: -80px; background: none; border: 80px solid var(--accent); border-radius: 50%; opacity: .25; }
+
+@media (min-width: 1600px) {
+  .theatre-arch { left: 22%; width: 56%; }
+}
+@media (max-width: 1100px) {
+  .theatre-detail { grid-template-columns: 1fr 1fr; gap: 22px 40px; }
+  .theatre-price { grid-column: 2; grid-row: 1 / 3; }
+  .theatre-detail > p { grid-column: 1; }
+  .theatre-meta { font-size: 9px; }
+}
+@media (max-width: 800px) {
+  .product-theatre { padding: 8px 8px 0; }
+  .theatre-scene { height: 620px; min-height: 0; }
+  .page-index .theatre-scene { height: calc(620px + var(--header-height)); min-height: 0; }
+  .theatre-arch { left: 10%; width: 80%; top: 0; }
+  .theatre-titles { top: 11%; }
+  .page-index .theatre-titles { top: calc(11% + var(--header-height) * .89); }
+  .theatre-title { font-size: calc(121vw / var(--title-width)); }
+  .theatre-cup { width: 300px; height: 65%; top: 59%; }
+  .page-index .theatre-cup { top: calc(59% + var(--header-height) * .41); height: calc(65% - var(--header-height) * .65); }
+  .theatre-meta { left: 25px; right: 25px; top: 24px; font-size: 8px; }
+  .theatre-meta > span:last-child { display: none; }
+  .theatre-arrows { left: 23px; right: 23px; top: 55%; }
+  .page-index .theatre-arrows { top: calc(55% + var(--header-height) * .45); }
+  .theatre-arrows button { width: 44px; height: 44px; }
+  .theatre-bean--1 { --bean-size: 80px; top: 19%; left: 0; }
+  .theatre-bean--5 { --bean-size: 100px; top: 13%; right: -1%; }
+  .theatre-bean--2, .theatre-bean--6 { display: none; }
+  .theatre-bean--3 { --bean-size: 135px; left: -8%; }
+  .theatre-bean--7 { --bean-size: 160px; right: -10%; }
+  .theatre-pagination { left: 25px; right: 25px; font-size: 9px; }
+  .theatre-pagination > span:last-child { display: none; }
+  .theatre-details { padding-block: 28px; }
+  .theatre-detail h2 { font-size: 28px; }
+  .theatre-price { flex-wrap: wrap; gap: 13px; }
+}
+@media (max-width: 540px) {
+  .theatre-scene { height: 540px; }
+  .page-index .theatre-scene { height: calc(540px + var(--header-height)); }
+  .theatre-frame { inset: 7px; }
+  .theatre-meta { top: 22px; left: 22px; font-size: 8px; }
+  .theatre-meta { display: none; }
+  .theatre-arch { left: 7%; width: 86%; top: 0; border-radius: 50% 50% 0 0 / 35% 35% 0 0; }
+  .theatre-titles { top: 13%; width: 96%; }
+  .page-index .theatre-titles { top: calc(13% + var(--header-height) * .87); }
+  .theatre-title { font-size: calc(125vw / var(--title-width)); line-height: .96; }
+  .theatre-cup { width: 66vw; max-width: 265px; height: 62%; top: 57%; }
+  .page-index .theatre-cup { top: calc(57% + var(--header-height) * .43); height: calc(62% - var(--header-height) * .62); }
+  .theatre-disc { width: 380px; height: 220px; bottom: -162px; }
+  .theatre-arrows { left: 18px; right: 18px; top: 58%; }
+  .page-index .theatre-arrows { top: calc(58% + var(--header-height) * .42); }
+  .theatre-arrows button { width: 40px; height: 40px; }
+  .theatre-arrows .arrow-icon { width: 18px; height: 18px; }
+  .theatre-pagination { left: 21px; right: 21px; bottom: 21px; gap: 6px; }
+  .theatre-pagination button { width: 28px; height: 32px; }
+  .theatre-pagination > div { padding-inline: 5px; }
+  .theatre-bean--1 { --bean-size: 60px; top: 18%; left: -4%; }
+  .theatre-bean--5 { --bean-size: 65px; top: 22%; right: -4%; }
+  .theatre-bean--3 { --bean-size: 130px; top: 70%; left: -20%; --bean-blur: 4px; }
+  .theatre-bean--7 { --bean-size: 140px; top: 68%; right: -20%; --bean-blur: 5px; }
+  .theatre-bean--4 { --bean-size: 45px; top: 82%; left: 18%; }
+  .theatre-bean--8 { --bean-size: 50px; top: 82%; right: 16%; }
+  .theatre-detail { grid-template-columns: 1fr; gap: 16px; }
+  .theatre-detail h2 { font-size: 29px; }
+  .theatre-detail > p { max-width: none; font-size: 12px; }
+  .theatre-price { grid-column: auto; grid-row: auto; justify-content: space-between; gap: 16px; }
+  .theatre-detail .eyebrow { font-size: 8px; }
+  .theatre-price .button { min-height: 46px; }
+  .page-intro::before { width: 200px; height: 200px; border-width: 35px; }
+  .story-statement::after { width: 300px; height: 300px; border-width: 60px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theatre-cups, .theatre-bean { --scene-parallax: 0px !important; --bean-parallax: 0px !important; }
+}

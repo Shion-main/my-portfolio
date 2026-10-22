@@ -1,0 +1,208 @@
+{
+  "source": "Owner-supplied photographs of the printed Space Arabica menu, 2026-10-10. Local preview; confirm prices and availability before publishing.",
+  "groups": [
+    {
+      "id": "coffee",
+      "title": "Coffee",
+      "summary": "Espresso, house creations, and blended coffee.",
+      "sections": [
+        {
+          "id": "espresso-hot",
+          "title": "Espresso · hot",
+          "items": [
+            {"name":"Americano","prices":{"12 oz":125,"16 oz":135},"image":"americano.webp"},
+            {"name":"Hazelnut Americano","prices":{"12 oz":135,"16 oz":145},"image":"hazelnut-americano.webp"},
+            {"name":"Lime Americano","prices":{"12 oz":135,"16 oz":145}},
+            {"name":"Orange Americano","prices":{"12 oz":135,"16 oz":145},"image":"orange-americano.webp"},
+            {"name":"Caffè Latte","prices":{"12 oz":145,"16 oz":155},"image":"caffe-latte.webp"},
+            {"name":"Caffè Mocha","prices":{"12 oz":155,"16 oz":165},"image":"caffe-mocha.webp"},
+            {"name":"Cappuccino","prices":{"12 oz":150,"16 oz":160},"image":"cappuccino.webp"},
+            {"name":"Caramel Macchiato","prices":{"12 oz":155,"16 oz":165},"image":"caramel-macchiato.webp"},
+            {"name":"Durian Latte","prices":{"12 oz":165,"16 oz":175},"image":"durian-latte.webp"},
+            {"name":"Hazelnut Latte","prices":{"12 oz":155,"16 oz":165},"image":"hazelnut-latte.webp"},
+            {"name":"Vanilla Latte","prices":{"12 oz":150,"16 oz":160},"image":"vanilla-latte.webp"},
+            {"name":"Spanish Latte","prices":{"12 oz":165,"16 oz":180},"image":"spanish-latte.webp"},
+            {"name":"Salted Toffee Cream Latte","prices":{"12 oz":170,"16 oz":180}},
+            {"name":"White Chocolate Mocha","prices":{"12 oz":155,"16 oz":165},"image":"white-chocolate-mocha.webp"},
+            {"name":"Oreo Latte","prices":{"16 oz":150},"image":"oreo-latte.webp"},
+            {"name":"Ube Latte","prices":{"16 oz":160}}
+          ]
+        },
+        {
+          "id": "espresso-iced",
+          "title": "Espresso · iced",
+          "items": [
+            {"name":"Caramel Macchiato","prices":{"16 oz":180}},
+            {"name":"Durian Latte","prices":{"16 oz":180}},
+            {"name":"Hazelnut Latte","prices":{"16 oz":170}},
+            {"name":"Vanilla Latte","prices":{"16 oz":170}},
+            {"name":"Spanish Latte","prices":{"16 oz":180}},
+            {"name":"Salted Toffee Cream Latte","prices":{"16 oz":180}},
+            {"name":"Mocha Durian Latte","prices":{"16 oz":180}},
+            {"name":"White Chocolate Mocha","prices":{"16 oz":180}},
+            {"name":"Coffee Jelly","prices":{"16 oz":190}}
+          ]
+        },
+        {
+          "id": "signature",
+          "title": "Signature drinks",
+          "items": [
+            {"name":"Timeless Americano","detail":"Iced","prices":{"16 oz":200},"slug":"timeless-americano","description":"Americano with brown sugar, pineapple syrup, gin, and edible gold lustre.","soundtrack":"Only Time","artist":"Enya"},
+            {"name":"Boadicea Mocha Latte","detail":"Iced","prices":{"16 oz":210},"slug":"boadicea-mocha-latte","description":"Chocolate, vanilla, milk, and espresso with watermelon and strawberry syrup.","soundtrack":"Boadicea","artist":"Enya"},
+            {"name":"Midnight Covenant","detail":"Mont Blanc inspired · hot or iced","prices":{"16 oz":220},"slug":"midnight-covenant","description":"Espresso with watermelon and strawberry syrup, citrus vanilla cream, and orange zest.","soundtrack":"The Mass","artist":"ERA"},
+            {"name":"African Dawn Americano","detail":"Passion fruit · iced","prices":{"16 oz":150},"slug":"african-dawn-americano","description":"Americano meets passion fruit in a bright, refreshing cup.","soundtrack":"Africa","artist":"Toto"},
+            {"name":"Desert Rose Latte","detail":"Hot or iced","prices":{"16 oz":200},"slug":"desert-rose-latte","description":"Espresso with rose and vanilla syrup, finished with dried rose petals.","soundtrack":"Desert Rose","artist":"Sting"},
+            {"name":"Dream Mint Latte","detail":"Iced","prices":{"16 oz":180},"slug":"dream-mint-latte","description":"A mint latte with a soundtrack for your next coffee break.","soundtrack":"Dreams","artist":"The Cranberries"},
+            {"name":"Zen Chamomile Americano","detail":"Hot","prices":{"16 oz":160},"slug":"zen-chamomile-americano","description":"Americano infused with chamomile tea. A quiet moment, one sip at a time."}
+          ]
+        },
+        {
+          "id": "coffee-frappes",
+          "title": "Blended coffee frappes",
+          "items": [
+            {"name":"Mocha Durian Frappe","prices":{"16 oz":170,"22 oz":180}},
+            {"name":"Java Chips Frappe","prices":{"16 oz":160,"22 oz":170}},
+            {"name":"Mocha Cookie Crumble","prices":{"16 oz":170,"22 oz":180}},
+            {"name":"Latte Frappe","prices":{"16 oz":150,"22 oz":160}},
+            {"name":"Mocha Frappe","prices":{"16 oz":160,"22 oz":170}},
+            {"name":"Ultra Caramel Frappe","prices":{"16 oz":170,"22 oz":180}},
+            {"name":"Spanish Frappe","prices":{"16 oz":170,"22 oz":180}},
+            {"name":"Banoffee Frappe","prices":{"16 oz":170,"22 oz":180}}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "other-drinks",
+      "title": "Other drinks",
+      "summary": "Tea, chocolate, fruit, soda, and cream frappes.",
+      "sections": [
+        {
+          "id": "non-coffee-hot",
+          "title": "Non-coffee · hot",
+          "items": [
+            {"name":"Black Tea Latte","prices":{"12 oz":165,"16 oz":175}},
+            {"name":"Green Tea Matcha Latte","prices":{"12 oz":170,"16 oz":180}},
+            {"name":"Strawberry Latte","prices":{"12 oz":150,"16 oz":160}},
+            {"name":"Matcha-Berry Latte","prices":{"16 oz":180}},
+            {"name":"Mexican Spiced Chocolate","prices":{"16 oz":180}},
+            {"name":"Hot-Choco Mallow","prices":{"16 oz":160}}
+          ]
+        },
+        {
+          "id": "non-coffee-iced",
+          "title": "Non-coffee · iced",
+          "items": [
+            {"name":"Black Tea Latte","prices":{"16 oz":175}},
+            {"name":"Green Tea Matcha Latte","prices":{"16 oz":190}},
+            {"name":"Strawberry Latte","prices":{"16 oz":170}},
+            {"name":"Matcha-Berry Latte","prices":{"16 oz":200}},
+            {"name":"Iced Chocolate","prices":{"16 oz":170}}
+          ]
+        },
+        {
+          "id": "herbal-tea",
+          "title": "Herbal hot tea",
+          "items": [
+            {"name":"Jasmine Tea","prices":{"One pot":135}},
+            {"name":"Rose Buds Tea","prices":{"One pot":135}},
+            {"name":"Sangria Mama","detail":"Hibiscus, orange, rosehips","prices":{},"note":"Price obscured in the supplied photo"},
+            {"name":"Lovely Dreams","detail":"Chamomile & lavender","prices":{"One pot":135}},
+            {"name":"Green Tea Loose Leaf","prices":{"One pot":135}}
+          ]
+        },
+        {
+          "id": "iced-tea",
+          "title": "Brewed black iced tea",
+          "items": [
+            {"name":"Lemon Iced Tea","prices":{"16 oz":150,"22 oz":165}},
+            {"name":"Mixed Berries Iced Tea","prices":{"16 oz":150,"22 oz":165}},
+            {"name":"Passion Fruit Iced Tea","prices":{"16 oz":150,"22 oz":165}},
+            {"name":"Strawberry Iced Tea","prices":{"16 oz":150,"22 oz":165}}
+          ]
+        },
+        {
+          "id": "fruit-soda",
+          "title": "Sparkling fruit soda",
+          "items": [
+            {"name":"Berry Bubbly","detail":"Mixed berries","prices":{"16 oz":140,"22 oz":150}},
+            {"name":"Midnight Blue","detail":"Blueberry","prices":{"16 oz":140,"22 oz":150}},
+            {"name":"Passion Pop","detail":"Passion fruit","prices":{"16 oz":140,"22 oz":150}},
+            {"name":"White Pearl","detail":"Lychee","prices":{"16 oz":140,"22 oz":150}}
+          ]
+        },
+        {
+          "id": "cream-frappes",
+          "title": "Blended cream frappes",
+          "items": [
+            {"name":"Blueberries n’ Cream Frappe","prices":{"16 oz":160,"22 oz":170}},
+            {"name":"Chocolate Frappe","prices":{"16 oz":160,"22 oz":170}},
+            {"name":"Green Tea Matcha Frappe","prices":{"16 oz":170,"22 oz":180}},
+            {"name":"Strawberries n’ Cream Frappe","prices":{"16 oz":160,"22 oz":170}},
+            {"name":"Cookies n’ Cream Frappe","prices":{"16 oz":160,"22 oz":170}},
+            {"name":"Chocolate Chips Frappe","prices":{"16 oz":165,"22 oz":175}}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "food",
+      "title": "Food",
+      "summary": "Meals, savory bites, and waffles for a longer stay.",
+      "sections": [
+        {
+          "id": "rice-bowls",
+          "title": "Rice bowls",
+          "items": [
+            {"name":"Beef Rendang","prices":{"One serving":180}},
+            {"name":"Chicken Mushroom","prices":{"One serving":165}},
+            {"name":"Pork Teriyaki w/ Egg","prices":{"One serving":175}},
+            {"name":"Spicy Chicken Pastil Con Gata","prices":{"One serving":180}},
+            {"name":"Thai Chicken Curry","prices":{"One serving":180}},
+            {"name":"Stir Fry Beef w/ Egg","prices":{"One serving":180}}
+          ]
+        },
+        {
+          "id": "pasta",
+          "title": "Pasta",
+          "items": [
+            {"name":"Chicken Cajun Pasta","prices":{"One serving":200}},
+            {"name":"Spanish Style Pasta","prices":{"One serving":200}},
+            {"name":"Tuna Pesto Pasta","prices":{"One serving":210}}
+          ]
+        },
+        {
+          "id": "pica-pica",
+          "title": "Pica-pica",
+          "items": [
+            {"name":"Cheesy Pork Nachos","prices":{"One serving":160}},
+            {"name":"Cheesy Beef Nachos","prices":{"One serving":180}},
+            {"name":"French Fries","detail":"Plain, cheese, BBQ, or sour cream","prices":{"One serving":140}}
+          ]
+        },
+        {
+          "id": "sandwiches",
+          "title": "Sandwiches",
+          "items": [
+            {"name":"Ham & Cheese Sandwich","prices":{"One serving":180}},
+            {"name":"Korean Street Toast","prices":{"One serving":170}},
+            {"name":"Cheesy Sausage Toast","prices":{"One serving":130}}
+          ]
+        },
+        {
+          "id": "waffles",
+          "title": "Waffle pancakes",
+          "items": [
+            {"name":"Banana Waffle Pancake","prices":{"One serving":170}},
+            {"name":"Belgian Waffle Pancake","prices":{"One serving":170}},
+            {"name":"Blueberry Waffle Pancake","prices":{"One serving":170}},
+            {"name":"Choco-Mallow Waffle Pancake","prices":{"One serving":170}},
+            {"name":"Cookies n’ Cream Waffle Pancake","prices":{"One serving":175}},
+            {"name":"Green Tea Matcha Waffle Pancake","prices":{"One serving":180}},
+            {"name":"Strawberry Waffle Pancake","prices":{"One serving":170}}
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+/* Space Arabica's retained charcoal, concrete, and amber palette. */
+:root {
+  --ink: #0d0d0d;
+  --ink-soft: #1a1a1a;
+  --concrete: #202020;
+  --concrete-raised: #2d2d2d;
+  --cream: #f2f2f2;
+  --cream-soft: #dcdcdc;
+  --muted: #b9b9b9;
+  --accent: #c18b3e;
+  --roast: #4a3325;
+  --accent-dark: #141414;
+  --line: #5a5a5a;
+  --display: 'Bahnschrift', 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif;
+  --body: 'Segoe UI', Arial, sans-serif;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}

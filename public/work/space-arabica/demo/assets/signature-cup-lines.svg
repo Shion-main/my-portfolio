@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" fill="none">
+  <!-- Quiet coffee motifs, drawn behind the transparent drink photographs. -->
+  <g stroke="#c18b3e" stroke-width="1.2" stroke-linecap="round" opacity=".3">
+    <path d="M47 95C35 79 63 69 51 51M61 85C53 73 74 63 66 48"/>
+    <g transform="translate(215 64) rotate(32)">
+      <ellipse rx="12" ry="19"/>
+      <path d="M0-15C-8-6 8 6 0 15"/>
+    </g>
+    <g transform="translate(39 241) rotate(-34)">
+      <ellipse rx="10" ry="16"/>
+      <path d="M0-12C-7-5 7 5 0 12"/>
+    </g>
+    <g transform="translate(228 220) rotate(62)">
+      <ellipse rx="7" ry="11"/>
+      <path d="M0-8C-4-3 4 3 0 8"/>
+    </g>
+  </g>
+  <g stroke="#d1c2aa" stroke-width="1" opacity=".13">
+    <path d="M22 191C3 140 37 108 62 116M187 122C234 116 251 157 238 184"/>
+    <path d="M57 264C88 281 151 282 190 262"/>
+    <path d="M18 170H34M230 103H244"/>
+  </g>
+</svg>

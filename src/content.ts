@@ -17,7 +17,7 @@ export const projects = {
     coverAlt:
       "Space Arabica website with signature drinks, amber typography, and café photography",
     mobileAlt: "Space Arabica signature drink experience on a phone",
-    website: "https://space-arabica-2.vercel.app",
+    website: "work/space-arabica/demo/",
     question: "How do you translate the feeling of a place into a website?",
     context:
       "A café has a personality before anyone opens its menu. For Space Arabica, I wanted the website to carry that same sense of place while helping visitors find the practical details: what to drink, where to visit, and how to get in touch.",

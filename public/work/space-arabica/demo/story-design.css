@@ -1,0 +1,136 @@
+/* A homegrown story, told through the café's real spaces and everyday rituals. */
+.page-story main { margin-top: calc(-1 * var(--header-height)); overflow-x: clip; }
+.page-story [data-motion-heading] .motion-line { display: block; overflow: clip; padding-block: .065em; margin-block: -.035em; color: var(--cream); }
+.page-story [data-motion-heading] .motion-line > span { display: block; color: inherit; transform-origin: left center; }
+.page-story [data-motion-heading] .accent-line { color: var(--accent); }
+.story-hero, .story-origin, .story-everyday { position: relative; isolation: isolate; overflow: clip; }
+.story-hero { background: #282019; padding: calc(var(--header-height) + 30px) 0 90px; }
+.story-hero::before { content: ''; position: absolute; inset: 0; background: url('assets/coffee-counter.webp') center / cover; opacity: .08; z-index: -1; }
+.story-hero::after { content: ''; position: absolute; inset: 14px; border: 1px solid #c18b3e66; pointer-events: none; }
+.story-top, .story-finale-top { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 45px; }
+.story-top .eyebrow, .story-finale-top .eyebrow { margin: 0; }
+.story-hero-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2%; }
+.story-hero-copy { position: relative; z-index: 6; }
+.story-hero h1 { font-size: clamp(75px, 8.6vw, 128px); line-height: .88; letter-spacing: -.055em; }
+.story-hero-copy > p { max-width: 34ch; font-size: 16px; line-height: 1.7; color: var(--cream-soft); margin-block: 30px; }
+.story-hero-copy .sa-text-link { font-size: 12px; min-height: 44px; }
+.story-hero-art { position: relative; min-height: 670px; }
+.story-hero .space-portrait { width: 83%; height: 585px; margin: 0 4% 0 auto; }
+.story-hero .space-portrait img { object-position: 40% center; }
+.story-hero .space-counter { left: 3%; top: 64%; width: 54%; padding: 10px; rotate: -8deg; }
+.story-hero .space-counter img { aspect-ratio: 1.6; }
+.story-hero .space-counter figcaption { font-size: 7px; }
+.story-hero .floating-coffee { width: 230px; top: 0; right: 3%; }
+.story-hero .chapter-ring { width: 90%; height: 87%; aspect-ratio: auto; left: 8%; top: 7%; z-index: -1; }
+.story-hero .chapter-ingredient--accent-1 { left: 10%; top: 23%; width: 90px; --ingredient-tilt: -35deg; }
+.story-hero .chapter-ingredient--accent-2 { right: 12%; bottom: 10%; width: 100px; --ingredient-blur: 1px; }
+.story-origin { padding: 70px 0 120px; background: #14110e; }
+.story-origin-top { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-bottom: 60px; }
+.story-origin-top > p { max-width: 18ch; }
+.story-year { font: 700 clamp(130px, 20vw, 285px)/.8 var(--display); letter-spacing: -.065em; color: var(--accent); display: block; }
+.story-year > span { display: block; font: 500 10px/1.6 var(--body); letter-spacing: .14em; color: var(--cream-soft); padding-top: 20px; text-align: right; }
+.story-origin-grid { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 9%; }
+.story-origin-art { position: relative; padding: 35px 15px; }
+.story-origin .ideas-photo { padding: 14px; }
+.story-origin .ideas-photo img { aspect-ratio: 1; object-fit: cover; object-position: 48% center; }
+.story-origin h2 { font-size: clamp(65px, 7.5vw, 110px); line-height: .9; margin-bottom: 30px; }
+.story-origin-copy { position: relative; z-index: 5; }
+.story-origin-copy > p { font-size: 15px; color: var(--cream-soft); max-width: 41ch; }
+.story-origin-copy > .story-founder { font-size: 22px; line-height: 1.6; padding-bottom: 25px; border-bottom: 1px solid #c18b3e55; }
+.story-founder strong { color: #edbf7b; font-weight: 500; }
+.story-origin .chapter-ingredient--accent-1 { width: 100px; top: 0; right: 10%; }
+.story-origin .chapter-ingredient--accent-2 { width: 90px; bottom: 9%; left: 10%; --ingredient-tilt: 40deg; }
+.story-everyday { padding: 110px 0 140px; background: #30251e; }
+.story-everyday-grid { display: grid; grid-template-columns: 1.12fr 1fr; align-items: center; gap: 10%; }
+.story-everyday-art { position: relative; padding: 25px 25px 90px; }
+.story-everyday .table-photo { padding: 14px; }
+.story-everyday .table-photo img { aspect-ratio: .86; }
+.story-everyday .table-photo figcaption { font-size: 8px; }
+.story-everyday .space-counter { width: 50%; left: 3%; top: 66%; padding: 9px; }
+.story-everyday .space-counter img { aspect-ratio: 1.5; }
+.story-everyday .space-counter figcaption { font-size: 7px; }
+.story-everyday-copy { position: relative; z-index: 6; }
+.story-everyday h2 { font-size: clamp(65px, 7.2vw, 105px); line-height: .9; }
+.story-everyday-copy > p:not(.eyebrow) { color: var(--cream-soft); font-size: 15px; max-width: 32ch; }
+.story-everyday-copy > p.story-perspective { font: 500 clamp(28px, 3vw, 42px)/1.2 var(--display); margin-block: 30px; }
+.story-everyday .button { margin-top: 15px; font-size: 12px; }
+.story-everyday .chapter-ingredient--accent-1 { right: 13%; top: 2%; width: 95px; }
+.story-everyday .chapter-ingredient--accent-2 { right: 10%; bottom: 17%; width: 95px; }
+.story-finale { min-height: 760px; }
+.story-finale .arrival-content h2 { font-size: clamp(65px, 10.5vw, 150px); }
+.story-finale .arrival-bottom > p { font-size: 20px; }
+.story-finale .chapter-ingredient--accent-1 { right: 10%; top: 18%; width: 110px; }
+.story-finale .chapter-ingredient--accent-2 { left: auto; right: 12%; bottom: 35%; width: 100px; }
+.page-story .footer-invitation { display: none; }
+.page-story .footer-wordmark { color: var(--accent); opacity: .6; }
+.page-story .site-footer { border-top: 1px solid #c18b3e55; }
+@media (max-width: 1000px) {
+  .story-hero h1 { font-size: 8.5vw; }
+  .story-hero-art { min-height: 560px; }
+  .story-hero .space-portrait { height: 490px; width: 85%; }
+  .story-hero .floating-coffee { width: 165px; right: 7%; }
+  .story-hero .space-counter { width: 59%; left: 4%; padding: 7px; }
+  .story-hero .space-counter figcaption { font-size: 6px; }
+  .story-origin-grid { gap: 6%; }
+  .story-origin h2 { font-size: 7.7vw; }
+  .story-origin-copy > .story-founder { font-size: 19px; }
+  .story-everyday-grid { gap: 6%; }
+  .story-everyday-art { padding-inline: 14px; }
+  .story-everyday h2 { font-size: 7.5vw; }
+}
+@media (max-width: 650px) {
+  .story-hero { padding-top: calc(var(--header-height) + 20px); padding-bottom: 45px; }
+  .story-hero::after { inset: 8px; }
+  .story-top { align-items: start; gap: 20px; margin-bottom: 30px; }
+  .story-top .eyebrow { font-size: 8px; max-width: 23ch; padding-top: 7px; }
+  .story-top .journey-motion-toggle { flex-shrink: 0; padding-inline: 12px; font-size: 9px; }
+  .story-hero-grid { grid-template-columns: 1fr; gap: 35px; }
+  .story-hero h1 { font-size: 18.5vw; }
+  .story-hero-copy > p { font-size: 14px; margin-block: 25px 20px; }
+  .story-hero-art { min-height: 480px; }
+  .story-hero .space-portrait { height: 405px; width: 80%; margin-right: 7%; }
+  .story-hero .space-counter { width: 51%; top: 68%; left: 9%; }
+  .story-hero .floating-coffee { width: 130px; top: 4%; right: 8%; }
+  .story-hero .chapter-ring { left: 8%; width: 84%; }
+  .story-hero .chapter-ingredient--accent-1 { width: 55px; left: 13%; top: 29%; }
+  .story-hero .chapter-ingredient--accent-2 { width: 60px; right: 11%; bottom: 13%; }
+  .story-origin { padding-block: 65px 75px; }
+  .story-origin-top { gap: 20px; margin-bottom: 40px; }
+  .story-origin-top > p { font-size: 8px; max-width: 19ch; min-width: 75px; flex-shrink: 0; }
+  .story-year { font-size: 28vw; }
+  .story-year > span { font-size: 7px; padding-top: 14px; letter-spacing: .08em; }
+  .story-origin-grid { display: flex; flex-direction: column-reverse; align-items: stretch; gap: 30px; }
+  .story-origin h2 { font-size: 18vw; }
+  .story-origin-copy > .story-founder { font-size: 20px; }
+  .story-origin-copy > p { font-size: 14px; }
+  .story-origin-art { padding: 22px 32px; }
+  .story-origin .ideas-photo { padding: 10px; }
+  .story-origin .chapter-ingredient--accent-1 { width: 60px; top: 0; right: 15%; }
+  .story-origin .chapter-ingredient--accent-2 { width: 55px; left: 14%; bottom: 10%; }
+  .story-everyday { padding-block: 65px 80px; }
+  .story-everyday-grid { display: flex; flex-direction: column-reverse; align-items: stretch; gap: 40px; }
+  .story-everyday h2 { font-size: 18vw; }
+  .story-everyday-copy > p:not(.eyebrow) { font-size: 14px; }
+  .story-everyday-copy > p.story-perspective { font-size: 32px; margin-block: 25px; }
+  .story-everyday-art { padding: 10px 30px 85px; }
+  .story-everyday .table-photo { padding: 10px; }
+  .story-everyday .table-photo img { aspect-ratio: 1; }
+  .story-everyday .space-counter { width: 48%; left: 10%; top: 63%; padding: 7px; }
+  .story-everyday .space-counter figcaption { font-size: 6px; }
+  .story-everyday .chapter-ingredient--accent-1 { width: 60px; right: 15%; top: 0; }
+  .story-everyday .chapter-ingredient--accent-2 { width: 60px; right: 12%; bottom: 22%; }
+  .story-finale { min-height: 700px; }
+  .story-finale-top { align-items: start; }
+  .story-finale-top .eyebrow { font-size: 9px; padding-top: 10px; }
+  .story-finale .arrival-content h2 { font-size: 14vw; }
+  .story-finale .arrival-bottom { align-items: stretch; }
+  .story-finale .arrival-bottom > p { font-size: 17px; }
+  .story-finale .button { padding-inline: 18px; font-size: 12px; }
+  .story-finale .chapter-ingredient--accent-1 { width: 65px; right: 14%; top: 28%; }
+  .story-finale .chapter-ingredient--accent-2 { width: 55px; right: 13%; bottom: 40%; }
+}
+@media (max-width: 360px) {
+  .story-hero-art { min-height: 430px; }
+  .story-hero .space-portrait { height: 350px; }
+  .story-hero .floating-coffee { width: 105px; }
+}

@@ -1,0 +1,13 @@
+/* Native same-origin document transitions preserve links, history and focus. */
+@view-transition { navigation: auto; }
+.site-header { view-transition-name: site-header; }
+::view-transition-old(root) { animation: page-away 220ms cubic-bezier(.4,0,1,1) both; }
+::view-transition-new(root) { animation: page-arrive 380ms cubic-bezier(.22,1,.36,1) both; }
+::view-transition-group(site-header) { animation-duration: 380ms; }
+::view-transition-old(site-header), ::view-transition-new(site-header) { animation-duration: 160ms; }
+@keyframes page-away { to { opacity: 0; } }
+@keyframes page-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

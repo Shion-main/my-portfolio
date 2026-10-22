@@ -787,6 +787,35 @@ button:focus-visible {
   font-size: 12px;
   color: #a7aeba;
 }
+.case-demo-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #101116;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform 180ms var(--ease-out), background-color 180ms ease;
+}
+.case-demo-button svg {
+  transition: transform 180ms var(--ease-out);
+}
+.case-demo-button:hover {
+  background: #e2be8b;
+}
+.case-demo-button:hover svg {
+  transform: translate(2px, -2px);
+}
+.case-demo-button:active {
+  transform: scale(0.97);
+}
+.screen-gallery-demo {
+  margin-top: 24px;
+}
 .case-cover {
   margin: 0 var(--gutter);
   padding: 32px;
