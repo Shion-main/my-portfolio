@@ -1,0 +1,55 @@
+/* Project chapters. Stacked full-screen sections by default; pinned and wiped once `.motion` is added. */
+.worlds { position: relative; z-index: 1; }
+.chapter { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: var(--ground); color: var(--ink); }
+.worlds.motion { height: 560vh; }
+.worlds.motion .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.worlds.motion .chapter { position: absolute; inset: 0; min-height: 0; visibility: hidden; }
+.chapter-anchor { position: absolute; left: 0; top: calc((100% - 100vh) * var(--k)); width: 1px; height: 1px; pointer-events: none; }
+
+.chapter .label { color: inherit; opacity: .72; }
+.chapter-info { position: absolute; left: var(--pad); top: calc(50% - 30px); translate: 0 -50%; width: min(360px, 28vw); z-index: 3; }
+.chapter-info h2 { margin-top: 14px; font: 800 clamp(30px, 3vw, 46px)/.95 var(--display); font-variation-settings: "wdth" 112; text-transform: uppercase; }
+.chapter-line { margin-top: 16px; font: 400 clamp(17px, 1.3vw, 21px)/1.4 var(--serif); }
+.facts { margin-top: 22px; font-size: 14px; }
+.facts div { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); }
+.facts dt { font: 600 11px/1.7 var(--sans); letter-spacing: .1em; text-transform: uppercase; opacity: .65; }
+.chapter-open { margin-top: 22px; display: inline-flex; gap: 10px; align-items: center; padding: 13px 20px; border-radius: 999px; background: var(--ink); color: var(--ground); font-weight: 600; font-size: 14px; text-decoration: none; transition: transform .3s var(--ease-in-out-entry); }
+.chapter-open:hover { transform: translateY(-2px); }
+
+.showcase { --sw: min(60vw, 1000px, calc((100svh - 250px) * 1.6)); position: absolute; right: var(--pad); top: calc(50% - 30px); width: var(--sw); aspect-ratio: 1.6; translate: 0 -50%; z-index: 2; }
+.showcase-desk { position: absolute; right: 0; top: 0; width: 90%; will-change: transform; }
+.showcase-phone { position: absolute; left: 0; bottom: -7%; height: 82%; aspect-ratio: .462; will-change: transform; }
+.showcase-phone .frame { height: 100%; }
+.showcase-caption { position: absolute; right: 0; bottom: calc(100% + 12px); white-space: nowrap; }
+
+.giant { position: absolute; left: 0; right: 0; bottom: -.07em; z-index: 1; text-align: center; white-space: nowrap; font-family: var(--display); font-size: 12vw; line-height: .8; text-transform: uppercase; color: var(--giant); font-variation-settings: "wdth" var(--wd, 100), "wght" var(--wt, 800); pointer-events: none; }
+.giant span { display: inline-block; }
+
+.chapter-index { position: absolute; left: 50%; top: 24px; z-index: 5; translate: -50% 0; display: flex; gap: 18px; opacity: 0; pointer-events: none; transition: opacity .3s; color: var(--head, var(--text)); }
+.chapter-index.on { opacity: 1; pointer-events: auto; }
+.chapter-index a { display: grid; gap: 7px; font: 600 11px var(--sans); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; opacity: .5; transition: opacity .3s; }
+.chapter-index a::after { content: ""; height: 2px; border-radius: 2px; background: currentColor; transform: scaleX(.35); transform-origin: left; transition: transform .4s var(--ease-in-out-entry); }
+.chapter-index a.on { opacity: 1; }
+.chapter-index a.on::after { transform: none; }
+.worlds:not(.motion) .chapter-index { display: none; }
+
+@media (max-width: 1100px) { .chapter-index { display: none; } }
+@media (max-height: 700px) and (min-width: 861px) {
+  .facts div:nth-child(n + 2) { display: none; }
+  .chapter-line { margin-top: 10px; font-size: 16px; }
+  .chapter-info h2 { font-size: 30px; }
+  .chapter-open { margin-top: 14px; padding: 11px 16px; }
+}
+@media (max-width: 860px) {
+  .worlds.motion { height: 520vh; }
+  .chapter-info { top: 76px; left: 20px; right: 20px; width: auto; translate: none; }
+  .facts div:nth-child(n + 3) { display: none; }
+  .chapter-line { margin-top: 10px; font-size: 16px; }
+  .facts { margin-top: 12px; }
+  .chapter-open { margin-top: 12px; padding: 11px 16px; }
+  .showcase { left: 20px; right: 20px; width: auto; top: auto; bottom: 21vh; bottom: 21svh; translate: none; }
+  .showcase-caption { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chapter-open { transition: none; }
+}

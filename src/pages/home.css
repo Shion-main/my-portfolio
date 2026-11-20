@@ -9,7 +9,7 @@
 .site-head nav a:hover { opacity: 1; }
 
 .hero { min-height: 86vh; min-height: 86svh; display: grid; align-content: end; gap: 52px; padding: 120px var(--pad) 64px; }
-.hero h1 { font: 350 clamp(46px, 7.2vw, 124px)/.98 var(--serif); font-variation-settings: "opsz" 72; letter-spacing: -.025em; max-width: 15ch; }
+.hero h1 { font: 350 clamp(46px, 7.2vw, 124px)/.98 var(--serif); font-variation-settings: "opsz" 72; letter-spacing: -.025em; }
 .hero h1 em { font-style: italic; font-weight: 400; }
 .hero h1 .ln { display: block; overflow: hidden; padding-bottom: .06em; }
 .hero h1 .ln > span { display: block; animation: hero-rise 1.1s var(--ease-in-out-entry) both; }

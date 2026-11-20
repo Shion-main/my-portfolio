@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScreenWall from "../components/ScreenWall";
 import ProjectList from "../components/ProjectList";
+import ProjectWorlds from "../components/ProjectWorlds";
 import { EMAIL } from "../work/asset";
-import type { ProjectSlug } from "../work/projects";
+import { projectBySlug, type ProjectSlug } from "../work/projects";
 import "./home.css";
 
 export default function Home() {
   const [point, setPoint] = useState<ProjectSlug | "all">("all");
+  const [chapter, setChapter] = useState<ProjectSlug | null>(null);
+  const [covered, setCovered] = useState(false);
+  // The header takes the text colour of whichever chapter is on screen.
+  useEffect(() => {
+    document.documentElement.style.setProperty("--head", chapter ? projectBySlug(chapter).tokens.text : "");
+  }, [chapter]);
   return (
     <div className="home">
       <a className="skip-link" href="#work">Skip to work</a>
@@ -14,7 +21,7 @@ export default function Home() {
         <a className="site-head__name" href="/">Joshua Sabuero</a>
         <nav aria-label="Main"><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
       </header>
-      <ScreenWall show={point} hidden={false} />
+      <ScreenWall show={covered ? "all" : point} hidden={covered} />
       <main className="home-main">
         <section className="hero" aria-labelledby="hero-title">
           <h1 id="hero-title">
@@ -28,6 +35,7 @@ export default function Home() {
           </div>
         </section>
         <ProjectList onPoint={setPoint} />
+        <ProjectWorlds onActive={(slug, isCovered) => { setChapter(slug); setCovered(isCovered); }} />
         <section id="contact" className="home-contact-placeholder">
           <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
         </section>

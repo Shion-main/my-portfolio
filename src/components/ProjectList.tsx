@@ -1,6 +1,7 @@
 import type { CSSProperties, MouseEvent } from "react";
 import { projects, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
+import { chapterScrollTop } from "./chapterScroll";
 
 type Point = ProjectSlug | "all";
 
@@ -9,7 +10,7 @@ function goToChapter(event: MouseEvent<HTMLAnchorElement>, slug: ProjectSlug) {
   event.preventDefault();
   history.replaceState(null, "", `#${id}`);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  window.scrollTo({ top: chapterScrollTop(slug), behavior: reduce ? "auto" : "smooth" });
 }
 
 /** The table of contents. Pointing at a row (mouse or keyboard, never touch) fills the wall with that project's screens. */

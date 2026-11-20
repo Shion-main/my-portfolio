@@ -103,8 +103,69 @@ check("list-touch", async () => {
   await wallReady(page);
   await page.tap('.row[data-slug="korte"]');
   await page.waitForFunction(() => location.hash === "#work-korte", null, { timeout: 3000 });
+  await page.waitForFunction(() => {
+    const h2 = document.getElementById("chapter-korte");
+    const r = h2?.getBoundingClientRect();
+    return r && r.top >= 0 && r.bottom <= innerHeight && h2.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
+  }, null, { timeout: 4000 });
   assert.equal(await page.$eval(".wall", el => el.dataset.show), "all", "touch must not leave the wall pointing at a project");
   assert.ok(await page.$eval('.row[data-slug="korte"] .thumb', el => el.getBoundingClientRect().width > 0), "phones show row thumbnails");
+  await context.close();
+});
+
+// ---- Project chapters ----
+const SIZES = [[1440, 900], [1159, 668], [390, 844], [320, 740]];
+const SLUGS = ["space-arabica", "korte", "fluxtrack", "atlas-treasury"];
+const chapterState = (page, slug) => page.evaluate(s => {
+  const h2 = document.getElementById(`chapter-${s}`);
+  const r = h2.getBoundingClientRect();
+  const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  const giant = document.querySelector(`[data-chapter="${s}"] .giant span`).getBoundingClientRect();
+  const desk = document.querySelector(`[data-chapter="${s}"] .showcase-desk`).getBoundingClientRect();
+  const head = document.querySelector(".site-head").getBoundingClientRect();
+  return { visible: r.top >= 0 && r.bottom <= innerHeight && h2.contains(hit), wallOff: !!document.querySelector(".wall.off"), overflow: document.documentElement.scrollWidth - innerWidth, giant: giant.width - innerWidth, deskTop: desk.top, headBottom: head.bottom };
+}, slug);
+
+check("chapters-midpoints", async () => {
+  for (const [width, height] of SIZES) {
+    const { page, context } = await open("/?checks", { width, height });
+    await page.evaluate(() => document.fonts.ready);
+    for (const slug of SLUGS) {
+      await page.evaluate(s => { location.hash = `work-${s}`; }, slug);
+      await page.waitForTimeout(500);
+      const st = await chapterState(page, slug);
+      const at = `${slug} at ${width}x${height}`;
+      assert.ok(st.visible, `${at}: heading not visible`);
+      assert.ok(st.wallOff, `${at}: wall still showing`);
+      assert.ok(st.overflow <= 0, `${at}: horizontal overflow ${st.overflow}px`);
+      assert.ok(st.giant <= 1, `${at}: giant name wider than the screen by ${st.giant}px`);
+      assert.ok(st.deskTop >= st.headBottom, `${at}: showcase runs under the header`);
+    }
+    await context.close();
+  }
+});
+
+check("deep-link", async () => {
+  const { page, context } = await open("/#work-korte");
+  await page.waitForFunction(() => {
+    const h2 = document.getElementById("chapter-korte");
+    const r = h2.getBoundingClientRect();
+    return r.top >= 0 && r.bottom <= innerHeight && h2.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)) && document.querySelector(".wall.off");
+  }, null, { timeout: 1000 });
+  await context.close();
+});
+
+check("no-js", async () => {
+  const { page, context } = await open("/", { javaScriptEnabled: false });
+  for (const slug of SLUGS) {
+    await page.locator(`#chapter-${slug}`).scrollIntoViewIfNeeded();
+    const ok = await page.evaluate(s => {
+      const h2 = document.getElementById(`chapter-${s}`);
+      const r = h2.getBoundingClientRect();
+      return getComputedStyle(h2).visibility === "visible" && r.top >= 0 && r.bottom <= innerHeight;
+    }, slug);
+    assert.ok(ok, `${slug} chapter not readable without JavaScript`);
+  }
   await context.close();
 });
 

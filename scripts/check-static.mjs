@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
 
+// Case-study routes linked from the home chapters before Task 9 builds them. Task 9 empties this list.
+const PENDING_ROUTES = ["/work/fluxtrack/", "/work/atlas-treasury/"];
+
 for (const [file, name] of [
   ["dist/index.html", "Joshua"],
   ["dist/work/korte/index.html", "Korte"],
@@ -17,6 +20,7 @@ for (const [file, name] of [
     ...html.matchAll(/(?:src|href)="(\/[^"#?]*)"/g),
   ].map((m) => m[1]);
   for (const src of sources) {
+    if (PENDING_ROUTES.includes(src)) continue;
     const path = "dist/" + src.replace(process.env.VITE_BASE_PATH || "/", "");
     await stat(path);
   }
@@ -28,6 +32,16 @@ for (const text of ["I design how an idea", "Space Arabica", "Korte", "FluxTrack
   assert.ok(homeHtml.includes(text), `home is missing: ${text}`);
 const withoutClientLocation = homeHtml.replaceAll("Café website, Davao City", "").replaceAll("Café website · Davao City", "");
 assert.ok(!withoutClientLocation.includes("Davao City"), "no personal location on the home page");
+
+// Home: four chapters, readable in the prerendered HTML before any script runs.
+const { projects } = await (await import("./tests/load-ts.mjs")).loadTs("src/work/projects.ts");
+const html = text => text.replaceAll("&", "&amp;");
+for (const p of projects) {
+  assert.ok(homeHtml.includes(`id="work-${p.slug}"`), `missing anchor for ${p.slug}`);
+  for (const text of [p.name, p.line, ...p.facts.map(f => f.detail)]) assert.ok(homeHtml.includes(html(text)), `${p.slug} chapter is missing: ${text}`);
+}
+const worldsHtml = homeHtml.slice(homeHtml.indexOf('class="worlds'));
+assert.ok(!/visibility:\s*hidden|clip-path/.test(worldsHtml.slice(0, worldsHtml.indexOf("</section>"))), "prerendered chapters must be visible without script");
 
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
 assert.ok(spaceCaseHtml.includes("View demo"));
