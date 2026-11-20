@@ -1,6 +1,6 @@
 # Product
 
-> Current scope (2026-10-13): a dark portfolio featuring a scroll-driven collage of Space Arabica and Korte, followed by focused project previews and case studies. It serves freelance clients and hiring teams equally. Joshua confirmed that he designed and built both himself. Public copy emphasizes design and development. See [the current design contract](docs/designs/scroll-collage-portfolio.md) and `src/content.ts`; older scope notes below are historical.
+> Current scope (2026-11-21): a dark, scroll-driven portfolio of four projects — Space Arabica, Korte, FluxTrack and Atlas Treasury — shown in one consistent chapter layout, each with a case study from one shared template. It serves freelance clients and hiring teams equally. Credits follow Joshua's confirmations: sole designer and developer of Space Arabica and Korte; designer and builder of FluxTrack within a three-person capstone team; UI/UX designer of Atlas Treasury's Treasury module. See `docs/superpowers/specs/2026-11-21-portfolio-redesign-design.md` and `src/work/projects.ts`; older notes below are historical.
 
 ## Register
 

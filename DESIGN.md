@@ -1,41 +1,38 @@
 # Portfolio design system
 
-> Current direction (2026-10-15): ink and paper with sky blue accents (#91c9ed; #286b9b on paper), Syne display type, a type-only hero, an opposing-scroll collage of real project interfaces, service rows revealed by scrolling, and stacked project showcases. Desktop boards scale to the available height so the stack works in the in-app browser. See [the recording-led design](docs/designs/motion-reference-2026-10-13/REDESIGN.md) and [the latest feedback fixes](docs/designs/feedback-2026-10-15/CHANGES.md). Earlier notes below remain historical context.
+Current (2026-11-21). The full approved design, including motion values and the case-study template, is `docs/superpowers/specs/2026-11-21-portfolio-redesign-design.md`. Exact values live in `src/styles/base.css` and the component stylesheets; this page is the summary.
 
 ## Direction
 
-Confident, crafted, community-minded. The portfolio is a brand surface for hiring teams and clients. It puts project evidence and Joshua's contribution ahead of decoration.
+Confident, crafted, community-minded. A dark stage where Joshua's own voice is quiet and each project arrives in its own colour. One moving idea per screen; motion follows scroll and stops when scrolling stops. Project evidence and Joshua's part come before decoration.
 
-## Color
+## Colour
 
-The interface uses a neutral light canvas, charcoal type, and a committed vermilion accent. Values live in `src/index.css` as OKLCH tokens:
+| Token | Value | Role |
+| --- | --- | --- |
+| `--page` | `#0d0f11` | Page background |
+| `--surface` | `#16191c` | Frames, wall tiles, viewer |
+| `--text` | `#e8eaeb` | Text |
+| `--muted` | `#8d959c` | Labels, supporting text |
+| `--rule` | `#262b30` | Rules and borders |
 
-| Token | Role |
-| --- | --- |
-| `--surface` | Main light background |
-| `--surface-strong` | White work and experience sections |
-| `--ink` / `--dark` | Primary text and dark Korte feature |
-| `--muted` | Supporting text |
-| `--line` | Quiet structural separators |
-| `--accent` | Key actions and contact section |
-| `--accent-dark` | Accessible accent text on light backgrounds |
-
-Avoid gradient text, neon glow, and decorative glass surfaces.
+Project chapters (ground / text / giant): Space Arabica `#1b130d` / `#f1e3cc` / `#c9934a` · Korte `#0c1626` / `#eef2ea` / `#9acb2d` · FluxTrack `#001c43` / `#ffffff` / `#ec1f28` · Atlas Treasury `#13161c` / `#e8edf6` / `#4f86f0`. FluxTrack and Atlas both come from MMCM, so they are split into saturated navy with red and neutral graphite with blue.
 
 ## Typography
 
-Archivo is the single type family, with Arial as a fallback. Large headings use weight 800 and a tight but readable letter spacing of no less than `-0.04em`. Body copy has a comfortable line height and a bounded measure.
+- **Newsreader** (variable, opsz and italic) — Joshua's voice: hero, chapter one-liners, about, case questions.
+- **Anybody** (variable, wdth 50–150) — project names and the giant words, which stretch from condensed to their fitted width as a chapter arrives.
+- **Instrument Sans** — UI, body and labels. Labels are 11 px, weight 600, 0.1em tracking, uppercase.
+- No functional text below 11 px anywhere (checked by `scripts/tests/css.test.mjs`).
 
 ## Layout and components
 
-- A 1320px maximum shell creates consistent page edges.
-- The hero pairs a direct introduction with a real Spacely interface image.
-- Korte receives the strongest project treatment, using its real logo and two marketing screenshots. A lime field and short product headline frame the app screens.
-- School projects have their own heading; Spacely and J&H use real local screenshots with repository links, and FluxTrack appears as the capstone project.
-- Experience and credentials use ruled lists for scanning.
-- Contact uses a working `mailto:` link instead of a simulated form.
-- The navigation becomes a labeled, keyboard-accessible menu on narrow screens.
+- **Screen wall** behind the hero and list: 11 columns of real screens rotated −14°, neighbours drifting in opposite directions; pointing at a project swaps every tile to that project after its image has decoded.
+- **Project list**: four rows (name, what it is, my part, status); others dim while one is pointed at.
+- **Chapters**: one template — label, name, one-liner, three facts and a button on the left; a browser frame with an overlapping phone on the right; a giant name along the bottom.
+- **Case study**: hero frame, overview with facts, four-tab screen gallery with a larger viewer, three decisions, reflection, next project.
+- **Frames**: browser (radius 12, 30 px title bar) and phone (radius 26, 6 px bezel), the same everywhere.
 
 ## Motion and accessibility
 
-The hero uses a short positional entrance, while hover and press feedback stay brief. Content remains visible without animation. Reduced-motion preference removes movement. Links and controls use visible focus outlines; text and supporting labels target WCAG AA contrast.
+Entrances use `cubic-bezier(.2,.7,.1,1)`, morphs `cubic-bezier(.76,0,.18,1)` at about 900 ms. Chapters wipe in as circles of their ground colour; home → case study morphs the frame into the hero; case → case wipes. `prefers-reduced-motion` removes drift, wipes, stretching and morphs. Without JavaScript the chapters are stacked, readable sections. Focus is always visible, the gallery is keyboard-operable, and text meets WCAG AA on every ground.

@@ -14,4 +14,4 @@ favicon
 *.tsbuildinfo
 *.md
 skills-lock.json
-scripts/prepare-*.py
+.superpowers

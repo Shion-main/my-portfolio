@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-// Stylesheets written for the redesign. Task 12 widens this to all of src/.
-const ROOTS = ["src/styles", "src/components", "src/pages"];
+const ROOTS = ["src"];
 
 function cssFiles(dir) {
   if (!existsSync(dir)) return [];

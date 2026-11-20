@@ -1,8 +1,10 @@
 # Asset provenance
 
-All project screens are optimized copies of existing captures. They are not generated interfaces. The source codebases and local evidence notes are the basis for the project descriptions. Sole design/development ownership was confirmed directly by Joshua on 2026-10-13.
+Current (2026-11-21): every project screen on the site lives in `public/media/work/<slug>/` with a `provenance.json` beside it recording its source (Figma file and node, or the local Space Arabica build and commit), capture date and a data note. They are produced by `scripts/build-work-media.mjs`, which also replaces the signed-in name in Atlas Treasury screens with “Demo Requester”. They are real interfaces, not generated ones. Credits were confirmed by Joshua on 2026-11-21: sole designer and developer of Space Arabica and Korte; designer and builder of FluxTrack within a three-person capstone team; UI/UX designer of Atlas Treasury's Treasury module. The FluxTrack names shown are demo data.
 
 The current personal logo, `public/media/shion-monogram.svg`, is a vector trace of Joshua's supplied `Minimal Black JS Monogram Logo.png` (15 October 2026). The PNG's alpha silhouette was traced into editable paths, preserving the JS letterforms; no raster image is embedded. The favicon uses those same paths on an ink background. Browser raster comparison measured 99.38% silhouette overlap at the source resolution.
+
+## Historical (October 2026 portfolio; these files were removed)
 
 | Portfolio asset | Source |
 | --- | --- |
