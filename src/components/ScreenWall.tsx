@@ -24,13 +24,12 @@ export default function ScreenWall({ show, hidden }: { show: Show; hidden: boole
   const current = override ?? show;
   const shown = useRef<Show>("all");
 
-  // Tiles load after the page has painted, so the hero text never waits for them.
+  // Tiles mount after the hero has painted, so its text never waits for them.
   useEffect(() => {
-    const start = () => setReady(true);
-    const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
-    if (document.readyState === "complete") idle(start);
-    else window.addEventListener("load", () => idle(start), { once: true });
+    // Two frames after hydration: the hero has painted, the wall follows.
+    let frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => setReady(true)); });
     if (import.meta.env.DEV || location.search.includes("checks")) (window as unknown as { __wall: unknown }).__wall = { show: (v: Show) => setOverride(v) };
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   // Swap tiles only after the incoming image has decoded, so no tile ever shows an empty layer.

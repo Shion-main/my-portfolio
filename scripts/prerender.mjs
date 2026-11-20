@@ -2,7 +2,9 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { render } from "../.prerender/entry-server.js";
 import { loadTs } from "./tests/load-ts.mjs";
 
-const template = await readFile("dist/index.html", "utf8");
+const transitionScript = (await readFile("public/project-transitions.js", "utf8")).replaceAll("</script", "<\\/script");
+// Inline the transition script: it must run before first paint, and a separate request would block rendering.
+const template = (await readFile("dist/index.html", "utf8")).replace(/<script src="[^"]*project-transitions\.js"><\/script>/, `<script>${transitionScript}</script>`);
 const origin = "https://by-shion.dev";
 const { projects } = await loadTs("src/work/projects.ts");
 const routes = [

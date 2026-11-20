@@ -7,6 +7,8 @@ import { chapterScrollTop } from "./chapterScroll";
 import "./worlds.css";
 
 const COUNT = projects.length;
+// The wall tile of the same screen: media/work/<slug>/<name>.webp → media/work/<slug>/wall/<name>.webp
+const small = (src: string) => src.replace(/\/([^/]+)$/, "/wall/$1");
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const slugFromHash = () => {
@@ -136,10 +138,10 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
             </div>
             <div className="showcase" aria-hidden="true">
               <div className="showcase-desk" data-depth="1">
-                <BrowserFrame title={p.desktop.title} src={asset(p.desktop.src)} alt="" morph={active === i} />
+                <BrowserFrame title={p.desktop.title} src={asset(p.desktop.src)} srcSet={`${asset(small(p.desktop.src))} 640w, ${asset(p.desktop.src)} 1440w`} sizes="(max-width: 860px) 90vw, 54vw" alt="" morph={active === i} />
               </div>
               <div className="showcase-phone" data-depth="1.6">
-                <PhoneFrame src={asset(p.phone.src)} alt="" />
+                <PhoneFrame src={asset(p.phone.src)} srcSet={`${asset(small(p.phone.src))} 300w, ${asset(p.phone.src)} 780w`} sizes="(max-width: 860px) 30vw, 14vw" alt="" />
               </div>
               <p className="showcase-caption label">{p.caption}</p>
             </div>

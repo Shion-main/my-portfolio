@@ -72,6 +72,16 @@ for (const [i, p] of projects.entries()) {
 const sitemap = await readFile("dist/sitemap.xml", "utf8");
 assert.equal((sitemap.match(/<loc>/g) || []).length, 5, "sitemap lists five routes");
 
+// First paint: prerendered pages paint before the bundle loads, and the transition script is inline.
+for (const file of CHROME_ROUTES) {
+  const page = await readFile(file, "utf8");
+  assert.ok(!/<script[^>]*type="module"[^>]*blocking="render"/.test(page), `${file}: the app bundle blocks rendering`);
+  assert.ok(!/<script[^>]*src="[^"]*project-transitions\.js"/.test(page), `${file}: the transition script is a separate render-blocking request`);
+  assert.ok(page.includes("pagereveal"), `${file}: the inline transition script is missing`);
+}
+// Chapter frames offer the small wall-sized image to small screens.
+for (const p of projects) assert.ok(homeHtml.includes(`media/work/${p.slug}/wall/${p.desktop.src.split("/").pop()} 640w`), `${p.slug}: chapter frame has no small image`);
+
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
 assert.ok(spaceCaseHtml.includes("View demo"));
 assert.ok(!spaceCaseHtml.includes("vercel.app"));
