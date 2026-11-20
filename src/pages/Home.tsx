@@ -5,6 +5,7 @@ import { Contact, Footer, Header } from "../components/SiteChrome";
 import WorkCollage from "../components/WorkCollage";
 import ProjectShowcase from "../components/ProjectShowcase";
 import ParticleField from "../components/ParticleField";
+import ScreenWall from "../components/ScreenWall";
 
 const services = [
   { title: "Logo & visual identity", text: "A distinctive mark and a consistent visual language. Logos, color, typography, and the details that make a brand recognizable.", tags: "Logo design · Identity systems · Brand guidelines" },
@@ -116,6 +117,7 @@ export default function Home() {
 
   return (
     <div className={`portfolio collage-home ${simple ? "simple-motion" : "full-motion"}`}>
+      <ScreenWall show="all" hidden={false} />
       <ParticleField simple={simple} />
       <Header home />
       <main ref={main}>

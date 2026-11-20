@@ -12,7 +12,8 @@
     "test": "node --test scripts/tests/",
     "lint": "eslint .",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "check:browser": "node scripts/check-browser.mjs"
   },
   "dependencies": {
     "@fontsource-variable/anybody": "^5.3.0",
@@ -36,6 +37,7 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "gh-pages": "^6.3.0",
     "globals": "^15.9.0",
+    "playwright": "^1.63.0",
     "sharp": "^0.35.5",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
