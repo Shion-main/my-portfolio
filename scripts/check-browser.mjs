@@ -229,6 +229,71 @@ check("case-layout", async () => {
   }
 });
 
+// ---- Transitions ----
+const RECORD = () => {
+  window.__kinds = [];
+  window.addEventListener("pagereveal", e => {
+    const vt = !!e.viewTransition;
+    // After every pagereveal listener has run (microtasks would run between listeners).
+    setTimeout(() => window.__kinds.push({ vt, kind: document.documentElement.dataset.transitionKind || null }), 0);
+  });
+};
+async function navigateBy(page, selector) {
+  await Promise.all([page.waitForNavigation({ waitUntil: "load" }), page.click(selector)]);
+  await page.waitForFunction(() => window.__kinds?.length > 0, null, { timeout: 3000 });
+  return page.evaluate(() => window.__kinds[0]);
+}
+
+check("morph-into-case", async () => {
+  const { page, context, errors } = await open("/#work-korte");
+  await context.addInitScript(RECORD);
+  await page.waitForTimeout(400);
+  const reveal = await navigateBy(page, '[data-chapter="korte"] .chapter-open');
+  assert.deepEqual(reveal, { vt: true, kind: "morph" });
+  assert.equal(await page.textContent("h1"), "Korte");
+  await page.waitForTimeout(1200);
+  assert.deepEqual(errors.filter(e => !/aborted|skipped/i.test(e)), []);
+  await context.close();
+});
+
+check("wipe-next-case", async () => {
+  const { page, context } = await open("/work/atlas-treasury/");
+  await context.addInitScript(RECORD);
+  const reveal = await navigateBy(page, ".case-next");
+  assert.equal(new URL(page.url()).pathname, "/work/space-arabica/");
+  assert.deepEqual(reveal, { vt: true, kind: "wipe" });
+  await context.close();
+});
+
+check("back-lands-on-chapter", async () => {
+  const { page, context } = await open("/#work-korte");
+  await page.waitForTimeout(400);
+  for (let round = 0; round < 2; round++) {
+    await Promise.all([page.waitForNavigation({ waitUntil: "load" }), page.click('[data-chapter="korte"] .chapter-open')]);
+    await page.waitForTimeout(1100);
+    await page.goBack({ waitUntil: "load" });
+    assert.equal(new URL(page.url()).hash, "#work-korte");
+    await page.waitForFunction(() => {
+      const h2 = document.getElementById("chapter-korte");
+      const r = h2.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= innerHeight && h2.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
+    }, null, { timeout: 2000 });
+    await page.waitForTimeout(1000);
+    assert.equal(await page.evaluate(() => !!document.querySelector("[data-transition-kind], [data-project-arrival]")), false, "a transition state stayed on the page");
+  }
+  await context.close();
+});
+
+check("transitions-reduced", async () => {
+  const { page, context } = await open("/#work-korte", { reducedMotion: "reduce" });
+  await context.addInitScript(RECORD);
+  await page.waitForTimeout(400);
+  const reveal = await navigateBy(page, '[data-chapter="korte"] .chapter-open');
+  assert.equal(reveal.kind, null, "reduced motion skips the transition");
+  assert.equal(await page.textContent("h1"), "Korte");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

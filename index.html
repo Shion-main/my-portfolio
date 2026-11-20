@@ -39,18 +39,10 @@
     <meta name="theme-color" content="#0d0f11" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <script src="%BASE_URL%project-transitions.js"></script>
-    <link rel="expect" href="#project-transition-label" blocking="render" />
     <script type="module" src="/src/main.tsx" blocking="render"></script>
   </head>
 
   <body>
     <div id="root"></div>
-    <div class="project-transition" hidden aria-hidden="true">
-      <div class="project-transition-copy">
-        <span class="project-transition-kicker">Selected work <span id="project-transition-number"></span></span>
-        <span id="project-transition-label"></span>
-        <span class="project-transition-line"></span>
-      </div>
-    </div>
   </body>
 </html>
