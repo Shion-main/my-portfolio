@@ -185,9 +185,9 @@ export const projects: readonly Project[] = [
       { term: "Size", detail: "100+ screens & states" },
       { term: "Scope", detail: "Flows, UI, design system" },
     ],
-    caption: "Request form · printable view",
+    caption: "Request · form, comments and journey",
     desktop: { ...atlas("step3-desktop", "Atlas reimbursement request at step 3, payment terms and schedule", "New request · step 3 of 5"), title: "Atlas — New request, step 3" },
-    phone: atlas("form-tall", "Atlas printable request form with requester details and line items", "Request form · printable view"),
+    phone: atlas("form-tall", "Atlas request window stacked three ways: the filled form, its comments and its approval journey", "Form, comments and journey"),
     question: "How do you make a payment request easy to file and easy to follow?",
     intro: "Atlas Treasury is the request and payment module for MMCM’s Accounting and Treasury Office. As its UI/UX designer, I designed how requesters file reimbursements, vendor payments and cash advances, and how they track each one to a decision.",
     caseFacts: [
@@ -197,7 +197,7 @@ export const projects: readonly Project[] = [
       { term: "Delivered", detail: "Request flows, component library, prototype" },
     ],
     tabs: [
-      { title: "File a request", desktop: atlas("step1-desktop", "Reimbursement step 1, requester information", "Step 1 · requester information"), phone: atlas("form-tall", "Printable request form", "The printable form") },
+      { title: "File a request", desktop: atlas("step1-desktop", "Reimbursement step 1, requester information", "Step 1 · requester information"), phone: atlas("form-tall", "The submitted request as a form, comments and journey", "The submitted request, three ways") },
       { title: "Payment terms", desktop: atlas("step3-desktop", "Reimbursement step 3, payment terms and schedule", "Step 3 · payment terms"), phone: atlas("step3-tall", "Close-up of the payment terms step", "Payment terms, close up") },
       { title: "Track it", desktop: atlas("journey-desktop", "Request journey tab showing each approval step", "The journey view"), phone: atlas("journey-tall", "Close-up of the request journey", "Who has it, and what’s next") },
       { title: "My requests", desktop: atlas("list-desktop", "My requests list with status for each request", "Every request in one list"), phone: atlas("list-tall", "Close-up of the requests list and navigation", "Requests, close up") },
