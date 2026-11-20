@@ -169,6 +169,26 @@ check("no-js", async () => {
   await context.close();
 });
 
+// ---- Header ----
+check("header-contrast", async () => {
+  const { page, context } = await open("/?checks");
+  const ratio = await page.evaluate(() => {
+    const rgb = getComputedStyle(document.querySelector(".site-head__name")).color.match(/\d+/g).map(Number);
+    const lum = c => { const v = c / 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+    const L = ([r, g, b]) => .2126 * lum(r) + .7152 * lum(g) + .0722 * lum(b);
+    const a = L(rgb), b = L([13, 15, 17]);
+    return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+  });
+  assert.ok(ratio >= 4.5, `header contrast ${ratio.toFixed(2)}`);
+  const tokens = { "space-arabica": "rgb(241, 227, 204)", korte: "rgb(238, 242, 234)", fluxtrack: "rgb(255, 255, 255)", "atlas-treasury": "rgb(232, 237, 246)" };
+  for (const slug of SLUGS) {
+    await page.evaluate(s => { location.hash = `work-${s}`; }, slug);
+    await page.waitForTimeout(600);
+    assert.equal(await page.$eval(".site-head__name", el => getComputedStyle(el).color), tokens[slug], `header colour inside ${slug}`);
+  }
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

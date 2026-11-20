@@ -43,6 +43,20 @@ for (const p of projects) {
 const worldsHtml = homeHtml.slice(homeHtml.indexOf('class="worlds'));
 assert.ok(!/visibility:\s*hidden|clip-path/.test(worldsHtml.slice(0, worldsHtml.indexOf("</section>"))), "prerendered chapters must be visible without script");
 
+// Every route: the new contact block, no retired fonts, no personal location.
+// The Korte page joins this list in Task 9, when every case study uses the shared template.
+const CHROME_ROUTES = ["dist/index.html", "dist/work/space-arabica/index.html"];
+for (const file of CHROME_ROUTES) {
+  const page = await readFile(file, "utf8");
+  assert.ok(page.includes("Let’s make"), `${file} is missing the contact block`);
+  assert.ok(!/Syne|DM Sans/.test(page), `${file} still references a retired font`);
+  const rest = page.replaceAll("Café website, Davao City", "").replaceAll("Café website · Davao City", "").replace(/Space Arabica is a café in Ecoland, Davao City/g, "");
+  assert.ok(!rest.includes("Davao City"), `${file} shows a personal location`);
+}
+const notFound = await readFile("public/404.html", "utf8");
+assert.ok(notFound.includes("#0d0f11") && !/font-size:\s*(?:[0-9]|10)(?:\.\d+)?px/.test(notFound), "404 uses the dark base and no text under 11px");
+assert.ok(homeHtml.includes('id="about"') && homeHtml.includes("both sides"), "home has the About section");
+
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
 assert.ok(spaceCaseHtml.includes("View demo"));
 assert.ok(!spaceCaseHtml.includes("vercel.app"));
