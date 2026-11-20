@@ -1,26 +1,20 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { render } from "../.prerender/entry-server.js";
+import { loadTs } from "./tests/load-ts.mjs";
 
 const template = await readFile("dist/index.html", "utf8");
 const origin = "https://by-shion.dev";
+const { projects } = await loadTs("src/work/projects.ts");
 const routes = [
   [
     "/",
     "Joshua Sabuero — Web Designer & Developer",
-    "I design and build websites and digital products. Explore Space Arabica and Korte through an interactive portfolio.",
+    "I design and build websites and digital products. Explore Space Arabica, Korte, FluxTrack and Atlas Treasury.",
+    "#0d0f11",
   ],
-  [
-    "/work/space-arabica/",
-    "Space Arabica — Joshua Sabuero",
-    "Designing and building a café website with expressive motion, a distinct visual identity, and a clear menu experience.",
-  ],
-  [
-    "/work/korte/",
-    "Korte — Pickleball, all in one place | Joshua Sabuero",
-    "Designing and building an all-in-one pickleball app for the Philippines, connecting player discovery, clubs, court bookings and open-play management.",
-  ],
+  ...projects.map(p => [`/work/${p.slug}/`, `${p.name} — Joshua Sabuero`, p.line, p.tokens.ground]),
 ];
-for (const [path, title, description] of routes) {
+for (const [path, title, description, theme] of routes) {
   const body = render(path);
   let html = template
     .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
@@ -41,7 +35,7 @@ for (const [path, title, description] of routes) {
   html = html
     .replace(/(<link rel="canonical" href=")[^"]*("\s*\/?>)/, `$1${url}$2`)
     .replace(/(<meta property="og:url" content=")[^"]*("\s*\/?>)/, `$1${url}$2`);
-  if (path === "/work/korte/") html = html.replace('content="#111113"', 'content="#eef3f4"');
+  html = html.replace('<meta name="theme-color" content="#0d0f11" />', `<meta name="theme-color" content="${theme}" />`);
   const person = { "@type": "Person", "@id": `${origin}/#joshua`, name: "Joshua Sabuero", url: `${origin}/`, email: "create@by-shion.dev", jobTitle: "Designer and developer", sameAs: ["https://github.com/Shion-main", "https://www.linkedin.com/in/joshua-robert-sabuero-6b3677373/"] };
   const structured = {
     "@context": "https://schema.org",

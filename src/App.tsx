@@ -1,11 +1,10 @@
 import Home from "./pages/Home";
-import CaseStudy from "./pages/CaseStudy";
-import KorteCaseStudy from "./pages/KorteCaseStudy";
+import ProjectCase from "./pages/ProjectCase";
+import type { ProjectSlug } from "./work/projects";
 
 const App = ({ path = "/" }: { path?: string }) => {
-  if (/\/work\/space-arabica\/?$/.test(path))
-    return <CaseStudy slug="space-arabica" />;
-  if (/\/work\/korte\/?$/.test(path)) return <KorteCaseStudy />;
+  const match = path.match(/\/work\/(space-arabica|korte|fluxtrack|atlas-treasury)\/?$/);
+  if (match) return <ProjectCase slug={match[1] as ProjectSlug} />;
   return <Home />;
 };
 

@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
 
 // Case-study routes linked from the home chapters before Task 9 builds them. Task 9 empties this list.
-const PENDING_ROUTES = ["/work/fluxtrack/", "/work/atlas-treasury/"];
+const PENDING_ROUTES = [];
 
 for (const [file, name] of [
   ["dist/index.html", "Joshua"],
-  ["dist/work/korte/index.html", "Korte"],
   ["dist/work/space-arabica/index.html", "Space Arabica"],
+  ["dist/work/korte/index.html", "Korte"],
+  ["dist/work/fluxtrack/index.html", "FluxTrack"],
+  ["dist/work/atlas-treasury/index.html", "Atlas Treasury"],
 ]) {
   const html = await readFile(file, "utf8");
   assert.ok(html.includes(name));
@@ -45,7 +47,7 @@ assert.ok(!/visibility:\s*hidden|clip-path/.test(worldsHtml.slice(0, worldsHtml.
 
 // Every route: the new contact block, no retired fonts, no personal location.
 // The Korte page joins this list in Task 9, when every case study uses the shared template.
-const CHROME_ROUTES = ["dist/index.html", "dist/work/space-arabica/index.html"];
+const CHROME_ROUTES = ["dist/index.html", ...projects.map(p => `dist/work/${p.slug}/index.html`)];
 for (const file of CHROME_ROUTES) {
   const page = await readFile(file, "utf8");
   assert.ok(page.includes("Let’s make"), `${file} is missing the contact block`);
@@ -56,6 +58,19 @@ for (const file of CHROME_ROUTES) {
 const notFound = await readFile("public/404.html", "utf8");
 assert.ok(notFound.includes("#0d0f11") && !/font-size:\s*(?:[0-9]|10)(?:\.\d+)?px/.test(notFound), "404 uses the dark base and no text under 11px");
 assert.ok(homeHtml.includes('id="about"') && homeHtml.includes("both sides"), "home has the About section");
+
+// Case studies: one template, all four projects.
+for (const [i, p] of projects.entries()) {
+  const page = await readFile(`dist/work/${p.slug}/index.html`, "utf8");
+  const next = projects[(i + 1) % projects.length];
+  assert.ok(new RegExp(`<h1[^>]*>${p.name}</h1>`).test(page), `${p.slug}: h1`);
+  for (const text of [p.question, ...p.decisions.map(d => d.title), ...p.tabs.map(t => t.title)]) assert.ok(page.includes(html(text)), `${p.slug} case is missing: ${text}`);
+  assert.ok(page.includes(`href="/work/${next.slug}/"`), `${p.slug}: next project link`);
+  assert.ok(page.includes(`<link rel="canonical" href="https://by-shion.dev/work/${p.slug}/"`), `${p.slug}: canonical`);
+  assert.ok(page.includes(`${p.name} — Joshua Sabuero</title>`), `${p.slug}: title`);
+}
+const sitemap = await readFile("dist/sitemap.xml", "utf8");
+assert.equal((sitemap.match(/<loc>/g) || []).length, 5, "sitemap lists five routes");
 
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
 assert.ok(spaceCaseHtml.includes("View demo"));

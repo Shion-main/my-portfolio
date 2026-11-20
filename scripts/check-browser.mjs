@@ -189,6 +189,46 @@ check("header-contrast", async () => {
   await context.close();
 });
 
+// ---- Case studies ----
+check("tabs-keyboard", async () => {
+  const { page, context } = await open("/work/korte/");
+  await page.focus('[role="tab"][aria-selected="true"]');
+  await page.keyboard.press("ArrowRight");
+  const state = await page.evaluate(() => {
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    const selected = tabs.findIndex(t => t.getAttribute("aria-selected") === "true");
+    const panel = document.getElementById(tabs[selected].getAttribute("aria-controls"));
+    return { selected, focused: document.activeElement === tabs[selected], panelVisible: !panel.hidden && panel.getBoundingClientRect().height > 0 };
+  });
+  assert.deepEqual(state, { selected: 1, focused: true, panelVisible: true });
+  await page.keyboard.press("End");
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('[role="tab"]')].findIndex(t => t.getAttribute("aria-selected") === "true")), 3);
+  await context.close();
+});
+
+check("viewer-escape", async () => {
+  const { page, context } = await open("/work/fluxtrack/");
+  const opener = page.locator('[role="tabpanel"]:not([hidden]) .shot-open').first();
+  await opener.focus();
+  await page.keyboard.press("Enter");
+  await page.waitForSelector("dialog.viewer[open]", { timeout: 2000 });
+  assert.ok(await page.$eval("dialog.viewer img", img => img.alt.length > 10), "viewer image has alt text");
+  await page.keyboard.press("Escape");
+  await page.waitForSelector("dialog.viewer:not([open])", { state: "attached", timeout: 2000 });
+  assert.ok(await opener.evaluate(el => el === document.activeElement), "focus returns to the frame");
+  await context.close();
+});
+
+check("case-layout", async () => {
+  for (const slug of SLUGS) {
+    const { page, context, errors } = await open(`/work/${slug}/`, { width: 390, height: 844 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    assert.ok(overflow <= 0, `${slug}: horizontal overflow ${overflow}px`);
+    assert.deepEqual(errors, [], `${slug}: console errors`);
+    await context.close();
+  }
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
