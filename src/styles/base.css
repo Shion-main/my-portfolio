@@ -1,0 +1,46 @@
+/* Dark base shared by every page: tokens, type, labels, focus and device frames. */
+:root {
+  --page: #0d0f11;
+  --surface: #16191c;
+  --text: #e8eaeb;
+  --muted: #8d959c;
+  --rule: #262b30;
+  --serif: "Newsreader Variable", Georgia, serif;
+  --display: "Anybody Variable", system-ui, sans-serif;
+  --sans: "Instrument Sans Variable", system-ui, sans-serif;
+  --ease-in-out-entry: cubic-bezier(.2, .7, .1, 1);
+  --ease-morph: cubic-bezier(.76, 0, .18, 1);
+  --pad: clamp(20px, 4vw, 64px);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--page); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { margin: 0; background: var(--page); }
+h1, h2, h3, h4, p, dl, dd, figure, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 4px; }
+
+.skip-link { position: absolute; left: -999px; top: 16px; z-index: 100; padding: 10px 14px; border-radius: 6px; background: var(--text); color: var(--page); }
+.skip-link:focus { left: 16px; }
+
+.label { font: 600 11px/1.4 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* Device frames: the same browser and phone everywhere a screen is shown. */
+.frame { position: relative; overflow: hidden; background: var(--surface); box-shadow: 0 50px 90px -40px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .06); }
+.frame img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.frame--browser { display: flex; flex-direction: column; aspect-ratio: 1.6; border-radius: 12px; }
+.frame--browser img { flex: 1; min-height: 0; }
+.frame__bar { flex: none; height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 12px; background: #1c1f23; border-bottom: 1px solid #2a2e33; color: var(--muted); font: 500 11px/1 var(--sans); }
+.frame__bar i { width: 9px; height: 9px; border-radius: 50%; background: #3a3f45; }
+.frame__bar span { margin-left: 14px; padding: 4px 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; background: #121417; border: 1px solid #2a2e33; border-radius: 999px; }
+.frame--phone { aspect-ratio: .462; border: 6px solid #25292e; border-radius: 26px; }
+
+@media (max-width: 860px) {
+  .frame__bar { height: 22px; }
+  .frame__bar span { display: none; }
+  .frame--phone { border-width: 4px; border-radius: 16px; }
+}

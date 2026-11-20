@@ -1,11 +1,11 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import App from "./App.tsx";
-import "@fontsource/syne/latin-600.css";
-import "@fontsource/syne/latin-700.css";
-import "@fontsource/syne/latin-800.css";
-import "@fontsource/dm-sans/latin-400.css";
-import "@fontsource/dm-sans/latin-500.css";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
+import "@fontsource-variable/anybody/wdth.css";
+import "@fontsource-variable/instrument-sans/wdth.css";
+import "./styles/base.css";
 import "./portfolio.css";
 import "./collage.css";
 import "./korte-case.css";
