@@ -76,6 +76,38 @@ check("wall-reduced", async () => {
   await context.close();
 });
 
+// ---- Project list ----
+check("list-hover", async () => {
+  const { page, context } = await open("/?checks");
+  await wallReady(page);
+  await page.hover('.row[data-slug="korte"]');
+  await page.waitForSelector('.wall[data-show="korte"]', { timeout: 3000 });
+  await page.hover("h1");
+  await page.waitForSelector('.wall[data-show="all"]', { timeout: 3000 });
+  await context.close();
+});
+
+check("list-focus", async () => {
+  const { page, context } = await open("/?checks");
+  await wallReady(page);
+  await page.focus('.row[data-slug="space-arabica"]');
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute("data-slug")), "fluxtrack");
+  await page.waitForSelector('.wall[data-show="fluxtrack"]', { timeout: 3000 });
+  await context.close();
+});
+
+check("list-touch", async () => {
+  const { page, context } = await open("/?checks", { width: 390, height: 844, hasTouch: true, isMobile: true });
+  await wallReady(page);
+  await page.tap('.row[data-slug="korte"]');
+  await page.waitForFunction(() => location.hash === "#work-korte", null, { timeout: 3000 });
+  assert.equal(await page.$eval(".wall", el => el.dataset.show), "all", "touch must not leave the wall pointing at a project");
+  assert.ok(await page.$eval('.row[data-slug="korte"] .thumb', el => el.getBoundingClientRect().width > 0), "phones show row thumbnails");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
