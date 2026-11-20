@@ -20,7 +20,7 @@
 .full-menu-opening-art > .full-menu-cup--left { left: 3%; z-index: 1; --cup-rest: -18deg; }
 .full-menu-opening-art > .full-menu-cup--right { right: 3%; z-index: 2; --cup-rest: 19deg; }
 .full-menu-opening-art > .full-menu-cup--center { left: 29%; z-index: 3; --cup-rest: -7deg; }
-.menu-opening-cup img, .full-menu-opening-art > figure img { animation: menu-cup-sway 13s cubic-bezier(.45,0,.55,1) infinite alternate; animation-play-state: paused; }
+.menu-opening-cup img, .full-menu-opening-art > figure img { animation: menu-cup-sway 13s var(--ease-sine) infinite alternate; animation-play-state: paused; }
 .menu-opening-cup--back img, .full-menu-cup--right img { animation-duration: 17s !important; animation-delay: -8s; }
 .menu-opening-cup--third img, .full-menu-cup--left img { animation-duration: 19s !important; animation-delay: -4s; }
 .menu-opening-caption, .full-menu-opening-art > span:last-child { bottom: 0; font-size: 9px; }
@@ -53,7 +53,7 @@
 .signature-stage-name > span { display: block; }
 .signature-stage-name > span:last-child { color: var(--accent); }
 .signature-ingredient { position: absolute; width: 94px; pointer-events: none; z-index: 2; }
-.signature-ingredient > span { display: block; animation: ingredient-meander-b 23s cubic-bezier(.45,0,.55,1) infinite, ingredient-turn 37s cubic-bezier(.45,0,.55,1) infinite; animation-delay: calc(-7s + var(--flavor-phase)), -15s; animation-play-state: paused; }
+.signature-ingredient > span { display: block; animation: ingredient-meander-b 23s var(--ease-sine) infinite, ingredient-turn 37s var(--ease-sine) infinite; animation-delay: calc(-7s + var(--flavor-phase)), -15s; animation-play-state: paused; }
 .signature-ingredient img { width: 100%; height: auto; filter: drop-shadow(8px 12px 8px #0005); }
 .signature-ingredient--1 { top: 32%; left: 8%; rotate: -25deg; }
 .signature-ingredient--2 { top: 48%; right: 8%; width: 110px; rotate: 24deg; z-index: 4; }
@@ -112,7 +112,6 @@
 .page-full-menu .menu-wheel-section__intro h2 { font-size: clamp(70px, 9vw, 130px); }
 .menu-motion-ready .is-in-view :is(.menu-opening-cup img, .full-menu-opening-art > figure img),
 .menu-motion-ready .is-in-view .signature-flavor.is-active .signature-ingredient > span { animation-play-state: running; }
-.menu-motion-paused :is(.menu-opening-cup img, .full-menu-opening-art > figure img, .signature-ingredient > span) { animation-play-state: paused !important; }
 @keyframes menu-cup-sway { from { transform: translateY(-7px) rotate(-2deg); } to { transform: translateY(8px) rotate(2deg); } }
 @media (max-width: 1000px) {
   :is(.page-menu, .page-full-menu) .signature-showcase.is-ready { grid-template-columns: 1.3fr 1fr; }

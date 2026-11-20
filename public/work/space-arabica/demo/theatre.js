@@ -15,19 +15,17 @@
   const announcement = theatre.querySelector('[data-theatre-announcement]');
   const cupLayer = theatre.querySelector('.theatre-cups');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const paused = () => document.body.classList.contains('journey-paused');
   const animations = new Set();
   const ease = 'cubic-bezier(.55,0,.2,1)';
   let active = 0;
   let hasInteracted = false;
   let drag = null;
   let suppressClick = 0;
-  let scrollFrame = 0;
   let releaseFrame = 0;
   let lastWidth = scene.clientWidth;
 
   const animate = (element, frames, options) => {
-    if (motion.matches || paused() || !element.animate) return;
+    if (motion.matches || !element.animate) return;
     const animation = element.animate(frames, { fill: 'both', ...options });
     animations.add(animation);
     const release = () => animations.delete(animation);
@@ -67,7 +65,7 @@
     if (distance > cups.length / 2) distance -= cups.length;
     const direction = Math.sign(distance) || 1;
     const duration = opening ? 1250 : quick ? Math.max(440, 650 - Math.abs(distance) * 60) : 1050;
-    const shouldAnimate = !instant && !motion.matches && !paused();
+    const shouldAnimate = !instant && !motion.matches;
     theatre.dataset.transitionDuration = String(shouldAnimate ? duration : 0);
     theatre.dataset.active = String(active);
     scene.classList.remove('is-dragging');
@@ -142,7 +140,7 @@
         const animation = animate(img, [selected && (!wasVisible || opening) ? incoming : before[position], end], {
           duration: duration * (selected ? .85 : .4),
           delay: selected ? duration * .1 + position * (quick ? 12 : 30) : 0,
-          easing: selected ? 'cubic-bezier(.2,.65,.2,1)' : 'cubic-bezier(.4,0,1,1)',
+          easing: selected ? 'cubic-bezier(.2,.65,.2,1)' : window.SAMotion.ease.in,
         });
         if (!selected && position === images.length - 1) animation?.addEventListener('finish', () => group.classList.remove('is-exiting'));
       });
@@ -255,23 +253,22 @@
   scene.addEventListener('pointercancel', event => finishDrag(event, true));
   scene.addEventListener('lostpointercapture', event => { if (drag) finishDrag(event, true); });
 
-  const updateScroll = () => {
-    scrollFrame = 0;
-    const rect = scene.getBoundingClientRect();
-    if (motion.matches || paused() || rect.bottom < 0 || rect.top > window.innerHeight) return;
-    const travel = Math.max(0, Math.min(1, -rect.top / rect.height));
-    cupLayer.style.setProperty('--scene-parallax', `${travel * 45}px`);
-    beans.forEach((bean, index) => bean.style.setProperty('--bean-parallax', `${travel * (index === 2 || index === 6 ? -100 : 35)}px`));
-    theatre.style.setProperty('--ingredient-parallax', `${travel * -65}px`);
-  };
-  const requestScroll = () => { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScroll); };
-  window.addEventListener('scroll', requestScroll, { passive: true });
+  // Scroll depth runs in the shared frame loop (motion.js): read first, then write.
+  window.SAMotion.scene({
+    read: () => scene.getBoundingClientRect(),
+    write: ({ height }, rect) => {
+      if (motion.matches || rect.bottom < 0 || rect.top > height) return;
+      const travel = Math.max(0, Math.min(1, -rect.top / rect.height));
+      cupLayer.style.setProperty('--scene-parallax', `${travel * 45}px`);
+      beans.forEach((bean, index) => bean.style.setProperty('--bean-parallax', `${travel * (index === 2 || index === 6 ? -100 : 35)}px`));
+      theatre.style.setProperty('--ingredient-parallax', `${travel * -65}px`);
+    },
+  });
   window.addEventListener('resize', () => {
     if (scene.clientWidth !== lastWidth) {
       lastWidth = scene.clientWidth;
       update(active, { instant: true, announce: false });
     }
-    requestScroll();
   });
   const resetMotion = () => {
     animations.forEach(animation => animation.cancel());
@@ -282,22 +279,13 @@
     update(active, { instant: true, announce: false });
   };
   motion.addEventListener('change', resetMotion);
-  document.addEventListener('site-motion-change', resetMotion);
   // Ambient motion is independent of the finite cup/ingredient transitions.
-  const visible = new IntersectionObserver(entries => {
-    theatre.classList.toggle('is-in-view', entries[0].isIntersecting && !document.hidden);
-  });
-  visible.observe(scene);
-  document.addEventListener('visibilitychange', () => {
-    const rect = scene.getBoundingClientRect();
-    theatre.classList.toggle('is-in-view', !document.hidden && rect.bottom > 0 && rect.top < innerHeight);
-  });
+  window.SAMotion.inView(scene, { host: theatre });
   theatre.classList.add('is-ready');
   update(0, { instant: true, announce: false });
   productImagesReady.then(() => {
-    if (motion.matches || paused() || hasInteracted) return;
+    if (motion.matches || hasInteracted) return;
     update(0, { opening: true, announce: false });
     animate(theatre.querySelector('.theatre-arch'), [{ transform: 'scaleX(.85)' }, { transform: 'scaleX(1)' }], { duration: 1200, easing: ease });
   });
-  requestScroll();
 })();

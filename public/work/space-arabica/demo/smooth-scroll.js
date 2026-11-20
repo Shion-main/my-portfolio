@@ -21,7 +21,7 @@
     direction = 0;
     target = position = written = scrollY;
   };
-  const disabled = () => reduced.matches || !finePointer.matches || document.hidden || document.body.matches('.journey-paused, .menu-motion-paused, .menu-open');
+  const disabled = () => reduced.matches || !finePointer.matches || document.hidden || document.body.classList.contains('menu-open');
   const tick = now => {
     if (disabled()) { stop(); return; }
     const dt = Math.min(48, Math.max(1, now - previousTime));
@@ -73,7 +73,6 @@
   addEventListener('hashchange', stop);
   addEventListener('pagehide', stop);
   document.addEventListener('visibilitychange', stop);
-  document.addEventListener('site-motion-change', stop);
   reduced.addEventListener('change', stop);
   finePointer.addEventListener('change', stop);
 })();

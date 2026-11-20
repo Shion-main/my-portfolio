@@ -1,0 +1,87 @@
+/* Order & Book — "Stamps". Words stamp onto the page, tickets tear in, and the loyalty card
+   fills one stamp at a time as you scroll. */
+.page-order main { margin-top: calc(-1 * var(--header-height)); overflow-x: clip; }
+.page-order h2 > span { display: inline-block; }
+.page-order h2 .accent { color: var(--accent); }
+.ob-head { margin-bottom: clamp(30px, 4vw, 50px); }
+.ob-head h2 { margin: 0; font-size: clamp(46px, 6vw, 92px); line-height: .9; }
+
+/* Hero */
+.ob-hero { padding: calc(var(--header-height) + 50px) 0 clamp(70px, 8vw, 110px); background: linear-gradient(160deg, #2c2119 0%, #15110e 55%, var(--ink) 100%); }
+.ob-hero__grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(30px, 5vw, 80px); align-items: end; }
+.ob-hero__title { display: grid; margin-bottom: 28px; font-size: clamp(64px, 9vw, 140px); line-height: .86; }
+.ob-hero__title > span { display: block; width: fit-content; }
+.ob-hero__title .accent { color: var(--accent); }
+.ob-hero__grid > div > p:last-child { max-width: 40ch; color: var(--cream-soft); font-size: 17px; }
+@media (prefers-reduced-motion: no-preference) {
+  .ob-hero__title > span { animation: ob-stamp 620ms var(--ease-spring) both; animation-delay: calc(180ms + var(--i) * 230ms); }
+}
+@keyframes ob-stamp { 0% { opacity: 0; transform: scale(1.35) rotate(-4deg); } 60% { opacity: 1; } 100% { transform: none; } }
+.ob-jump { display: grid; border-top: 1px solid #ffffff26; }
+.ob-jump a { display: grid; grid-template-columns: 44px 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 14px; padding: 18px 0; border-bottom: 1px solid #ffffff26; font: 600 clamp(20px, 2vw, 28px)/1.1 var(--display); transition: padding-left 260ms var(--ease), color 200ms ease; }
+.ob-jump a > span { grid-row: 1 / 3; color: var(--accent); font: 600 11px var(--body); letter-spacing: .12em; }
+.ob-jump small { grid-column: 2; color: var(--muted); font: 400 12px var(--body); }
+.ob-jump .arrow-icon { grid-column: 3; grid-row: 1 / 3; color: var(--accent); }
+.ob-jump a:hover { padding-left: 8px; color: var(--accent); }
+
+/* Order channels: ticket stubs */
+.ob-order { padding: clamp(80px, 9vw, 130px) 0; background: var(--ink); }
+.ob-channels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.ob-channel { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 54px 28px 28px; border-radius: 16px; background: var(--concrete); }
+.ob-channel::before, .ob-channel::after { content: ''; position: absolute; top: 34px; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); }
+.ob-channel::before { left: -9px; }
+.ob-channel::after { right: -9px; }
+.ob-ticket { position: absolute; top: 0; left: 28px; right: 28px; padding: 12px 0; border-bottom: 1px dashed #ffffff33; color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: .18em; }
+.ob-channel .line-icon { width: 46px; height: 46px; margin: 18px 0 10px; color: var(--accent); }
+.ob-channel h3 { margin-bottom: 10px; }
+.ob-channel p { color: var(--cream-soft); font-size: 14px; }
+.ob-channel .button-row { margin-top: auto; padding-top: 8px; }
+.js-drawn-pending .ob-channel { opacity: 0; transform: translateY(40px) rotate(-1.5deg); }
+.is-drawn .ob-channel { opacity: 1; transform: none; transition: opacity 500ms ease, transform 700ms var(--ease); }
+.is-drawn .ob-channel:nth-child(2) { transition-delay: 110ms; }
+.is-drawn .ob-channel:nth-child(3) { transition-delay: 220ms; }
+.ob-note { margin: 26px 0 0; color: var(--muted); font-size: 13px; }
+.ob-note a, .ob-small a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Book */
+.ob-book { padding: clamp(80px, 9vw, 130px) 0; background: #17120f; }
+.ob-book__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 96px); align-items: start; }
+.ob-free { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; color: var(--cream-soft); }
+.ob-free strong { padding: 8px 14px; border: 2px solid var(--accent); border-radius: 6px; color: var(--accent); font: 700 22px/1 var(--display); letter-spacing: .06em; rotate: -6deg; }
+.ob-steps { margin: 0 0 24px; padding: 0; list-style: none; counter-reset: step; }
+.ob-steps li { position: relative; padding: 14px 0 14px 50px; border-bottom: 1px solid #ffffff14; color: var(--cream-soft); counter-increment: step; }
+.ob-steps li::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 13px; color: var(--accent); font: 700 20px/1 var(--display); }
+.ob-steps strong { color: var(--cream); }
+.ob-small { color: var(--muted); font-size: 13px; }
+.seat-form select { display: block; width: 100%; margin-top: 8px; padding: 13px 12px; border: 1px solid #555555; border-radius: 5px; background: var(--ink-soft); color: var(--cream); font: inherit; font-size: 14px; }
+
+/* Loyalty: a sticky card; scroll progress presses the stamps in order. */
+.ob-loyalty { position: relative; height: 230vh; background: var(--roast); }
+.ob-loyalty__stage { position: sticky; top: 0; display: grid; align-items: center; min-height: 100vh; min-height: 100svh; padding: calc(var(--header-height) + 20px) 0 40px; }
+.ob-loyalty__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 96px); align-items: center; }
+.ob-loyalty .ob-steps li { border-color: #ffffff1f; }
+.loyalty-card { position: relative; padding: 26px; border-radius: 18px; background: linear-gradient(135deg, #f3ece0, #e2d6c3); color: #2b2018; box-shadow: 0 30px 60px #00000059; rotate: -3deg; }
+.loyalty-card__top { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.loyalty-card__top span { font: 700 16px var(--display); letter-spacing: .03em; }
+.loyalty-card__top b { color: var(--accent); }
+.loyalty-card__top em { margin-left: auto; font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: .16em; }
+.loyalty-card__stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.stamp { position: relative; display: grid; place-items: center; aspect-ratio: 1; border: 2px dashed #2b201859; border-radius: 50%; font: 700 15px var(--display); color: #2b201880; }
+.stamp:last-child { border-style: solid; border-color: #9a6b2c; color: #9a6b2c; font-size: 11px; letter-spacing: .06em; }
+.stamp::after { content: ''; position: absolute; inset: 8%; border-radius: 50%; background: url('assets/space-arabica-logo.svg') center / 62% no-repeat, #9a3d2e; opacity: 0; transform: scale(1.8) rotate(-25deg); transition: opacity 160ms ease, transform 320ms var(--ease-spring); }
+.stamp:last-child::after { background-color: var(--accent); }
+.stamp.is-stamped::after { opacity: .92; transform: scale(1) rotate(calc(var(--i) * 17deg - 30deg)); }
+.loyalty-card__foot { margin: 20px 0 0; font-size: 11px; font-weight: 600; letter-spacing: .08em; }
+.no-js .ob-loyalty, .reduce-scrub .ob-loyalty { height: auto; }
+.no-js .ob-loyalty__stage, .reduce-scrub .ob-loyalty__stage { position: static; min-height: 0; padding-block: 100px; }
+
+@media (max-width: 900px) {
+  .ob-channels { grid-template-columns: 1fr; }
+}
+@media (max-width: 800px) {
+  .ob-hero__grid, .ob-book__grid, .ob-loyalty__grid { grid-template-columns: 1fr; }
+  .ob-loyalty { height: auto; }
+  .ob-loyalty__stage { position: static; min-height: 0; padding-block: 90px; }
+  .loyalty-card { rotate: 0deg; }
+  .loyalty-card__stamps { gap: 8px; }
+}

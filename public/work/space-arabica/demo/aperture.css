@@ -1,0 +1,79 @@
+/* The Aperture (planning/MOTION-SYSTEM-PLAN.md §2, phase 3).
+   One framed window per page opening. Between pages it morphs: position, size,
+   corner shape (aperture.js animates the radius) and contents all change.
+
+   Home  arch → Menu lens → Full Menu index card → Spaces plan → Order ticket
+   → Story portrait arch → Visit clock face. */
+.aperture { view-transition-name: aperture; }
+
+::view-transition-group(aperture) {
+  overflow: clip;
+  animation-duration: var(--t-morph);
+  animation-timing-function: var(--ease-in-out);
+}
+/* Both snapshots fill the morphing box, so differing aspect ratios crop rather than stretch. */
+::view-transition-old(aperture), ::view-transition-new(aperture) {
+  width: 100%; height: 100%; object-fit: cover;
+  animation-duration: var(--t-morph);
+  animation-timing-function: var(--ease-in-out);
+}
+
+/* Each page's headline is its own group, painted above the morphing window,
+   so the window never passes over the words. Names are per page, so headlines
+   cross-fade rather than morph into one another. */
+main h1 { view-transition-class: hero-title; }
+html[data-page='index'] main h1 { view-transition-name: title-index; }
+html[data-page='menu'] main h1 { view-transition-name: title-menu; }
+html[data-page='full-menu'] main h1 { view-transition-name: title-full-menu; }
+html[data-page='space'] main h1 { view-transition-name: title-space; }
+html[data-page='order'] main h1 { view-transition-name: title-order; }
+html[data-page='story'] main h1 { view-transition-name: title-story; }
+html[data-page='contact'] main h1 { view-transition-name: title-contact; }
+/* Stacking during a page change: window < cups < headline < header and Thread. */
+::view-transition-group(aperture) { z-index: 1; }
+::view-transition-group(*.signature-cup) { z-index: 2; }
+::view-transition-group(*.hero-title) { z-index: 3; }
+::view-transition-group(site-header) { z-index: 4; }
+/* The outgoing headline clears quickly so the two never read as one. */
+::view-transition-old(*.hero-title) { animation-duration: var(--t-short); animation-timing-function: var(--ease-in); }
+
+/* Menu: the arch closes into a lens around the cups. */
+.menu-opening-arch { border-radius: 50%; }
+
+/* Order & Book: a ticket — notched at both sides — holding the to-go coffee. */
+.ob-hero__side { display: grid; gap: clamp(18px, 2.4vw, 30px); }
+.ob-aperture {
+  position: relative; margin: 0; overflow: hidden; aspect-ratio: 16 / 7; border-radius: 10px;
+  -webkit-mask: radial-gradient(circle 13px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 13px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle 13px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 13px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+}
+.ob-aperture__img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+.ob-aperture::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, #15110e66, transparent 45%); }
+
+/* Our Story: a tall portrait arch, the room itself, standing behind the name. */
+.story-aperture {
+  position: absolute; left: 50%; top: 50%; z-index: 0; margin: 0; overflow: hidden;
+  width: min(34vw, 430px); height: min(66vh, 620px);
+  border-radius: 50% 50% 4px 4px / 30% 30% 4px 4px;
+  translate: -50% -47%;
+  opacity: calc(.6 - var(--p) * .3);
+  scale: calc(1 + var(--p) * .12);
+}
+.story-aperture__img { width: 100%; height: 100%; object-fit: cover; object-position: 58% 50%; filter: saturate(.75) brightness(.62); }
+.story-aperture::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, #1a1411 100%); }
+.name-split__words, .name-split .eyebrow, .nd, .name-split__tagline, .name-split__cue { z-index: 1; }
+.name-split__words { position: relative; }
+
+/* Visit: the clock face is a window onto the storefront. */
+.visit-aperture { position: absolute; inset: 7.5%; overflow: hidden; border-radius: 50%; }
+.visit-aperture__img { width: 100%; height: 100%; object-fit: cover; object-position: 46% 40%; opacity: .3; filter: saturate(.7) brightness(.7); }
+.visit-clock svg { position: relative; }
+
+@media (max-width: 800px) {
+  .story-aperture { width: min(64vw, 340px); height: min(54vh, 460px); }
+}
+
+/* A headline handed over by a next-chapter panel is already in place: no second entrance. */
+html.title-handoff main h1, html.title-handoff main h1 * { animation: none !important; }

@@ -76,22 +76,18 @@ const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8
 assert.ok(spaceCaseHtml.includes("View demo"));
 assert.ok(!spaceCaseHtml.includes("vercel.app"));
 
-for (const page of [
-  "index.html",
-  "menu.html",
-  "full-menu.html",
-  "space.html",
-  "story.html",
-  "contact.html",
-]) {
+// The hosted Space Arabica demo: the current seven pages, each marked as a work in progress, with nothing that sends.
+for (const page of ["index.html", "menu.html", "full-menu.html", "space.html", "order.html", "story.html", "contact.html"]) {
   const demoHtml = await readFile(`dist/work/space-arabica/demo/${page}`, "utf8");
-  assert.ok(demoHtml.includes("Work in progress"));
-  assert.ok(demoHtml.includes('class="wip-banner"'));
-  for (const match of demoHtml.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
-    assert.ok(match[0].includes("disabled") && match[0].includes("readonly"));
-  }
+  assert.ok(demoHtml.includes("Work in progress") && demoHtml.includes('class="wip-banner"'), `${page}: banner`);
+  for (const match of demoHtml.matchAll(/<(?:input|textarea|select)[^>]*>/g))
+    assert.ok(match[0].includes("disabled") && match[0].includes("readonly"), `${page}: live field ${match[0].slice(0, 60)}`);
+  for (const match of demoHtml.matchAll(/<button[^>]*type="submit"[^>]*>/g))
+    assert.ok(match[0].includes("disabled"), `${page}: live submit button`);
+  assert.ok(!/action="http/.test(demoHtml), `${page}: a form still submits somewhere`);
+  assert.ok(!/href="https:\/\/m\.me\//.test(demoHtml), `${page}: a Messenger link is still live`);
 }
 
 console.log(
-  "Static checks passed: three complete pages, Space Arabica demo attached with WIP banner and disabled inputs, official email, all local referenced assets exist.",
+  "Static checks passed: five prerendered routes, chapters and case studies complete, seven-page Space Arabica demo with the WIP banner and nothing that sends, official email, all local references resolve.",
 );

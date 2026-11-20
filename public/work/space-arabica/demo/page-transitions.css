@@ -1,12 +1,32 @@
-/* Native same-origin document transitions preserve links, history and focus. */
+/* Page changes (planning/MOTION-SYSTEM-PLAN.md §2–3, phase 4).
+   One grammar for every page, set by direction rather than by destination:
+   the nav order Home → Menu → Spaces → Order & Book → Our Story → Visit is the story.
+   - forward: the old page slides left and dims; the new page rises from below.
+   - back: the exact mirror.
+   The Aperture (aperture.css), the Thread (thread.css), headlines and signature cups
+   travel on top as their own groups. page-transitions.js sets the direction type. */
 @view-transition { navigation: auto; }
 .site-header { view-transition-name: site-header; }
-::view-transition-old(root) { animation: page-away 220ms cubic-bezier(.4,0,1,1) both; }
-::view-transition-new(root) { animation: page-arrive 380ms cubic-bezier(.22,1,.36,1) both; }
-::view-transition-group(site-header) { animation-duration: 380ms; }
-::view-transition-old(site-header), ::view-transition-new(site-header) { animation-duration: 160ms; }
-@keyframes page-away { to { opacity: 0; } }
-@keyframes page-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+::view-transition-old(root) { animation: page-leave-forward var(--t-short) var(--ease-in) both; }
+::view-transition-new(root) { animation: page-enter-forward var(--t-base) var(--ease-out) 60ms both; }
+html:active-view-transition-type(back)::view-transition-old(root) { animation-name: page-leave-back; }
+html:active-view-transition-type(back)::view-transition-new(root) { animation-name: page-enter-back; }
+/* Same rule keyed on the attribute page-transitions.js also sets, for engines without types. */
+html[data-nav-direction='back']::view-transition-old(root) { animation-name: page-leave-back; }
+html[data-nav-direction='back']::view-transition-new(root) { animation-name: page-enter-back; }
+
+::view-transition-group(site-header) { animation-duration: var(--t-base); }
+::view-transition-old(site-header), ::view-transition-new(site-header) { animation-duration: var(--t-micro); }
+
+/* Shared-element cup morph: Home's active cup becomes a Menu cup (page-transitions.js). */
+::view-transition-group(*.signature-cup) { animation-duration: var(--t-morph); animation-timing-function: var(--ease-out); }
+
+@keyframes page-leave-forward { to { opacity: 0; transform: translateX(-4vw); } }
+@keyframes page-leave-back { to { opacity: 0; transform: translateX(4vw); } }
+@keyframes page-enter-forward { from { opacity: 0; transform: translateY(48px); } }
+@keyframes page-enter-back { from { opacity: 0; transform: translateY(-48px); } }
+
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }

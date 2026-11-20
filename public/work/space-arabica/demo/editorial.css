@@ -7,7 +7,7 @@
   --coffee: #795038;
   --ink-on-light: #201b18;
   --ink-muted: #51483f;
-  --ease-editorial: cubic-bezier(.22, 1, .36, 1);
+  --ease-editorial: var(--ease-out);
 }
 
 body { background: var(--espresso); }

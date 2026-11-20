@@ -2,31 +2,81 @@
   "business": {
     "name": "Space Arabica",
     "tagline": "Great Coffee, Great Ideas",
-    "address": "Door 1, Focal Point Bldg., Ecowest Drv., Ecoland, Davao City, Philippines, 8000",
+    "address": "Door 1, Focal Point Bldg., Ecowest Drive, Ecoland, Davao City, Philippines 8000",
     "phone_display": "0970 085 0510",
     "phone_href": "+639700850510",
-    "email": "spacearabica@gmail.com",
-    "facebook": "https://www.facebook.com/profile.php?id=100086514666448",
+    "email": "spacearabica@spacearabica.com",
+    "facebook": "https://www.facebook.com/share/1KWfvqRnrT/?mibextid=wwXIfr",
+    "messenger": "https://m.me/100086514666448",
     "instagram": "https://www.instagram.com/space.arabica",
-    "tiktok": "https://tiktok.com/@spacearabica",
-    "maps": "https://www.google.com/maps/search/?api=1&query=Space+Arabica+Focal+Point+Ecowest+Davao+City",
+    "tiktok": "https://www.tiktok.com/@spacearabica",
+    "maps": "https://maps.app.goo.gl/sosPUc2M76ufP1LQ6",
+    "grab": "https://r.grab.com/o/VNNzqi6f",
     "opening_hours": {
       "monday_saturday": "10:30 AM–5:00 AM (next day)",
-      "sunday": "12:00 PM–1:00 AM (next day)"
+      "sunday": "2:30 PM–1:00 AM (next day)"
+    },
+    "schedule": {
+      "note": "Minutes after midnight, Asia/Manila. Close may exceed 1440 (next day). Index 0 = Sunday.",
+      "days": [[870, 1500], [630, 1740], [630, 1740], [630, 1740], [630, 1740], [630, 1740], [630, 1740]]
     }
   },
-  "menu_source": "Owner-supplied printed menu photos, transcribed 2026-10-10. Full entries in menu-data.json; confirm before publication.",
-  "room": {
-    "capacity": 12,
-    "rates": "₱2,500 for 2 hours, fully consumable on food and drinks",
-    "availability": null,
-    "amenities_from_wordpress": ["Interactive digital whiteboard", "Wi-Fi", "Power outlets"],
-    "source": "Owner-supplied printed mini conference room flyer, 2026-10-10; confirm offer before publication"
+  "founded": "November 2022",
+  "founder": {
+    "name": "Gilda Elaiza D. Cinco",
+    "role": "Founder and General Manager",
+    "education": "Bachelor of Arts in Mass Communication and Master of Business Administration, University of Mindanao",
+    "research": "2019 graduate research on customer preferences for a resort in Panabo City, using conjoint analysis",
+    "creative": ["Logo", "Tagline", "Menu", "Colour direction", "Built-in tables", "Customer experience"],
+    "operations": ["Internal systems", "Employee development", "Service standards", "Administration", "Daily operations", "Barista and kitchen training"],
+    "brand": ["Brand development", "Product concepts", "Signature drink design", "Creative storytelling", "Multimedia content", "Digital marketing"]
   },
+  "values": ["Quality", "Creativity", "Connection", "Growth"],
+  "timeline": [
+    {"year": "2019", "title": "A question about people", "copy": "Graduate research on what customers value — location, price, facilities, ambiance — later shapes the business plan."},
+    {"year": "2022", "title": "Finding the place", "copy": "Locations are compared and surveys run on pricing, facilities, ambiance, and experience. The concept takes shape with architects and builders."},
+    {"year": "Nov 2022", "title": "Doors open in Ecoland", "copy": "Space Arabica opens on Ecowest Drive: good coffee, shared tables, fast Wi-Fi, and a mini conference room."},
+    {"year": "Today", "title": "Still evolving", "copy": "Nine signature episodes and counting, two bookable spaces, and a team trained in-house."}
+  ],
+  "spaces": [
+    {
+      "id": "room",
+      "name": "Mini Conference Room",
+      "capacity": 12,
+      "rate": 2500,
+      "hours": 2,
+      "best_for": ["Meetings", "Training sessions", "Presentations", "Collaborations"]
+    },
+    {
+      "id": "floor",
+      "name": "Entire 2nd Floor",
+      "capacity": 20,
+      "rate": 5000,
+      "hours": 4,
+      "best_for": ["Larger meetings", "Workshops", "Training sessions", "Private gatherings"]
+    }
+  ],
+  "space_inclusions": ["Food and drinks, fully consumable during your session", "Free Wi-Fi", "Digital interactive whiteboard", "2 digital pens", "Dongle and HDMI cable"],
+  "space_extension": "₱500 per additional hour (non-consumable)",
+  "space_policies": [
+    "A 50% down payment confirms your reservation.",
+    "Confirmed reservations are non-refundable.",
+    "Consumables are for food and drinks during your reserved session only.",
+    "Unused consumables are non-refundable, cannot be converted to cash, and cannot be used after the session.",
+    "The full reservation fee applies whether or not the consumable amount is used."
+  ],
+  "loyalty": {
+    "app": "WinStamp – Loyalty Card",
+    "minimum_first_order": 500,
+    "stamps": 10,
+    "reward": "Any iced coffee, free"
+  },
+  "menu_source": "Owner-supplied printed menu photos, transcribed 2026-10-10; updated 2026-11-20 from spacearabica.com. Full entries in menu-data.json.",
   "sources": {
-    "address_contact_social": "Facebook About page, inspected 2026-10-09",
-    "opening_hours": "Owner supplied in chat, 2026-10-10",
-    "story_room_amenities": "WordPress Our Story page, exported 2026-10-09",
+    "address_contact_social": "spacearabica.com, checked 2026-11-20 (phone from Facebook About page, 2026-10-09)",
+    "opening_hours": "spacearabica.com, checked 2026-11-20",
+    "story_spaces_ordering_loyalty": "spacearabica.com /our-story, /exclusive-spaces, /order-here, /book-now, /loyalty-card, checked 2026-11-20",
+    "messenger": "m.me link built from the Facebook profile ID; confirm it opens the café's Messenger",
     "photos": "WordPress media library, 83 originals downloaded 2026-10-09"
   }
 }

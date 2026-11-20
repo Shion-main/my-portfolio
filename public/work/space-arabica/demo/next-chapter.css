@@ -1,0 +1,62 @@
+/* The next-chapter handoff (planning/MOTION-SYSTEM-PLAN.md §4, phase 4).
+   The last thing before the footer is the first frame of the next page: its headline
+   and its Aperture window. Scrolling in opens the window (--enter, 0 → 1, set by
+   scenes.js); clicking hands the window and headline to the next page (aperture.js).
+   Without JavaScript or with reduced motion, --enter stays at 1. */
+.next-chapter {
+  --enter: 1;
+  position: relative; overflow: clip;
+  padding: clamp(80px, 11vw, 150px) 0;
+  border-top: 1px solid #ffffff14;
+  background: radial-gradient(ellipse at 75% 55%, #3a2a1f 0%, #1a1411 50%, var(--ink) 85%);
+}
+.next-chapter__link { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: clamp(30px, 6vw, 100px); color: inherit; }
+.next-chapter__copy { display: grid; justify-items: start; gap: 18px; }
+.next-chapter .eyebrow { margin: 0; }
+.next-chapter__title { display: grid; font: 700 clamp(56px, 8vw, 128px)/.86 var(--display); letter-spacing: -.01em; }
+.nc-line { display: block; overflow: hidden; padding-bottom: .04em; }
+.nc-line > span {
+  display: block;
+  transform: translateY(calc((1 - clamp(0, var(--enter) * 1.5 - var(--i) * .18, 1)) * 105%));
+}
+.nc-line.accent { color: var(--accent); }
+.next-chapter__lead { max-width: 38ch; color: var(--cream-soft); font-size: 16px; opacity: clamp(0, var(--enter) * 2 - .8, 1); }
+.next-chapter__cta {
+  display: inline-flex; align-items: center; gap: 14px; margin-top: 8px; padding: 14px 22px;
+  border: 1px solid #c18b3e80; border-radius: 999px; font-size: 13px;
+  transition: background-color var(--t-micro) var(--ease-out), color var(--t-micro) var(--ease-out);
+}
+.next-chapter__cta .arrow-icon { color: var(--accent); transition: transform var(--t-short) var(--ease-out); }
+.next-chapter__link:hover .next-chapter__cta, .next-chapter__link:focus-visible .next-chapter__cta { background: var(--accent); color: var(--ink); }
+.next-chapter__link:hover .next-chapter__cta .arrow-icon, .next-chapter__link:focus-visible .next-chapter__cta .arrow-icon { color: var(--ink); transform: translate(3px, -3px); }
+
+/* The window: the next page's Aperture shape, opening as the panel scrolls in. */
+.next-chapter__window {
+  position: relative; display: block; justify-self: center; overflow: hidden;
+  width: min(100%, 460px); background: #17130f;
+  scale: calc(.62 + var(--enter) * .38);
+  opacity: calc(.35 + var(--enter) * .65);
+  transition: scale var(--t-short) var(--ease-out);
+}
+.next-chapter__link:hover .next-chapter__window { scale: calc(.64 + var(--enter) * .4); }
+.next-chapter__img { width: 100%; height: 100%; object-fit: cover; }
+.next-chapter__window[data-shape='arch'] { aspect-ratio: 3 / 4; border-radius: 50% 50% 0 0 / 40% 40% 0 0; }
+.next-chapter__window[data-shape='lens'] { aspect-ratio: 4 / 5; border-radius: 50%; border: 1px solid #c18b3e65; }
+.next-chapter__window[data-shape='lens'] .next-chapter__img { object-fit: contain; padding: 12% 14% 4%; }
+.next-chapter__window[data-shape='rect'] { aspect-ratio: 4 / 3; border-radius: 2px; outline: 1px solid #c18b3e55; outline-offset: 10px; }
+.next-chapter__window[data-shape='ticket'] {
+  aspect-ratio: 16 / 9; border-radius: 10px;
+  -webkit-mask: radial-gradient(circle 13px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 13px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle 13px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 13px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+}
+.next-chapter__window[data-shape='portrait'] { aspect-ratio: 3 / 4; width: min(80%, 380px); border-radius: 50% 50% 4px 4px / 30% 30% 4px 4px; }
+.next-chapter__window[data-shape='portrait'] .next-chapter__img { filter: saturate(.75) brightness(.7); }
+.next-chapter__window[data-shape='circle'] { aspect-ratio: 1; border-radius: 50%; border: 1px solid #ffffff1a; }
+.next-chapter__window[data-shape='circle'] .next-chapter__img { opacity: .55; filter: saturate(.7); }
+
+@media (max-width: 800px) {
+  .next-chapter__link { grid-template-columns: 1fr; }
+  .next-chapter__window { width: min(78%, 360px); }
+}

@@ -34,54 +34,24 @@ if (menuButton && menu) {
   });
 }
 
-document.querySelectorAll('form, [data-mailto-form]').forEach(form => {
-  form.querySelectorAll('input, textarea, select, button').forEach(control => {
-    control.disabled = true;
-    if ('readOnly' in control) control.readOnly = true;
-    control.tabIndex = -1;
-    control.setAttribute('aria-disabled', 'true');
-  });
+document.querySelectorAll('[data-mailto-form]').forEach(form => {
   form.addEventListener('submit', event => {
     event.preventDefault();
-    event.stopPropagation();
+    if (!form.reportValidity()) return;
+
+    const data = new FormData(form);
+    const subject = form.dataset.subject;
+    const recipient = form.dataset.recipient;
+    const lines = Array.from(data.entries(), ([label, value]) => `${label}: ${String(value).trim() || 'Not specified'}`);
+    const body = lines.join('\n');
+    const href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    form.querySelector('.form-status').textContent = `Review and send your message in your email app. If it does not open, email ${recipient} directly.`;
+    window.location.href = href;
   });
 });
 
-['beforeinput', 'input', 'keydown', 'keypress', 'paste', 'drop', 'focusin'].forEach(type => {
-  document.addEventListener(type, event => {
-    const target = event.target instanceof Element ? event.target.closest('input, textarea, select, [contenteditable]') : null;
-    if (!target) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if ('blur' in target && typeof target.blur === 'function') target.blur();
-  }, true);
-});
-
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const header = document.querySelector('.site-header');
-const progress = document.createElement('div');
-progress.className = 'scroll-progress';
-progress.setAttribute('aria-hidden', 'true');
-document.body.prepend(progress);
-
-let scrollFrame = false;
-const updateScrollState = () => {
-  header?.classList.toggle('is-scrolled', window.scrollY > 42);
-  const distance = document.documentElement.scrollHeight - window.innerHeight;
-  const amount = distance > 0 ? Math.min(1, window.scrollY / distance) : 0;
-  progress.style.transform = `scaleX(${amount})`;
-  scrollFrame = false;
-};
-const requestScrollState = () => {
-  if (!scrollFrame) {
-    scrollFrame = true;
-    requestAnimationFrame(updateScrollState);
-  }
-};
-window.addEventListener('scroll', requestScrollState, { passive: true });
-window.addEventListener('resize', requestScrollState);
-requestScrollState();
-
+const reducedMotion = window.SAMotion.reduced;
+const easeOut = window.SAMotion.ease.out;
 const photoWheel = document.querySelector('[data-menu-wheel]');
 if (photoWheel) {
   const slides = [...photoWheel.querySelectorAll('[data-wheel-slide]')];
@@ -190,17 +160,17 @@ document.querySelectorAll('[data-signature-showcase]').forEach(showcase => {
     const distance = Math.min((active - previous + cups.length) % cups.length, (previous - active + cups.length) % cups.length);
     showcase.style.setProperty('--signature-travel', distance > 1 ? '560ms' : '900ms');
     cancelAnimationFrame(releaseFrame);
-    showcase.classList.toggle('is-instant', instant || reducedMotion.matches || document.body.classList.contains('menu-motion-paused'));
+    showcase.classList.toggle('is-instant', instant || reducedMotion.matches);
     flavors.forEach((flavor, index) => {
       flavor.classList.toggle('is-active', index === active);
       flavor.querySelectorAll('.signature-ingredient, .signature-stage-name').forEach(el => el.getAnimations().forEach(a => a.cancel()));
     });
-    if (flavors[active] && previous !== active && !instant && !reducedMotion.matches && !document.body.classList.contains('menu-motion-paused')) {
+    if (flavors[active] && previous !== active && !instant && !reducedMotion.matches) {
       flavors[active].querySelectorAll('.signature-ingredient').forEach((piece, i) => piece.animate([
         { opacity: 0, transform: `translate(${i % 2 ? 45 : -45}px, 35px) rotate(${i % 2 ? 35 : -35}deg) scale(.8)` },
         { opacity: 1, transform: 'translate(0, 0) rotate(0) scale(1)' },
-      ], { duration: 800, delay: i * 45, fill: 'backwards', easing: 'cubic-bezier(.22,1,.36,1)' }));
-      flavors[active].querySelector('.signature-stage-name').animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 550, easing: 'cubic-bezier(.22,1,.36,1)' });
+      ], { duration: 800, delay: i * 45, fill: 'backwards', easing: easeOut }));
+      flavors[active].querySelector('.signature-stage-name').animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 550, easing: easeOut });
     }
     showcase.style.setProperty('--signature-tone', cups[active].dataset.tone);
     showcase.style.setProperty('--line-shift', `${(active % 3 - 1) * 14}px`);
@@ -224,9 +194,9 @@ document.querySelectorAll('[data-signature-showcase]').forEach(showcase => {
     count.textContent = `${String(active + 1).padStart(2, '0')} / ${String(cups.length).padStart(2, '0')}`;
     if (announce) {
       announcement.textContent = `${copies[active].dataset.name}, ${active + 1} of ${cups.length}`;
-      if (!instant && !reducedMotion.matches && !document.body.classList.contains('menu-motion-paused')) copies[active].animate(
+      if (!instant && !reducedMotion.matches) copies[active].animate(
         [{ opacity: .35 }, { opacity: 1 }],
-        { duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' }
+        { duration: 320, easing: easeOut }
       );
     }
     if (instant) releaseFrame = requestAnimationFrame(() => requestAnimationFrame(() => showcase.classList.remove('is-instant')));
@@ -281,46 +251,6 @@ document.querySelectorAll('[data-signature-showcase]').forEach(showcase => {
   gesture.addEventListener('pointerup', event => finishDrag(event));
   gesture.addEventListener('pointercancel', event => finishDrag(event, true));
   reducedMotion.addEventListener('change', () => update(active, { instant: true, announce: false }));
-  document.addEventListener('site-motion-change', () => {
-    if (document.body.classList.contains('menu-motion-paused')) {
-      showcase.getAnimations({ subtree: true }).filter(a => a.effect.getTiming().iterations !== Infinity).forEach(a => a.finish());
-    }
-  });
   update(0, { instant: true, announce: false });
   showcase.classList.add('is-ready');
-});
-
-// Large headings and photographs reveal once; content is visible by default.
-const entranceAnimations = new Set();
-const playEntrance = (element, kind, delay = 0) => {
-  if (kind === 'heading' && document.body.matches('.page-menu, .page-full-menu')) return;
-  if (reducedMotion.matches || document.body.matches('.menu-motion-paused, .journey-paused') || !element.animate) return;
-  const frames = kind === 'image'
-    ? [{ opacity: .8, clipPath: 'inset(0 0 12% 0)', transform: 'translateY(16px)' }, { opacity: 1, clipPath: 'inset(0)', transform: 'translateY(0)' }]
-    : [{ opacity: .65, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }];
-  const animation = element.animate(frames, {
-    duration: kind === 'image' ? 900 : 700, delay, easing: 'cubic-bezier(.22,1,.36,1)'
-  });
-  entranceAnimations.add(animation);
-  animation.onfinish = () => entranceAnimations.delete(animation);
-};
-
-let entranceObserver;
-if (!reducedMotion.matches && 'IntersectionObserver' in window) {
-  entranceObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      playEntrance(entry.target, entry.target.dataset.reveal);
-      entranceObserver.unobserve(entry.target);
-    });
-  }, { threshold: .12, rootMargin: '0px 0px -4% 0px' });
-  document.querySelectorAll('[data-reveal]').forEach(element => entranceObserver.observe(element));
-}
-
-reducedMotion.addEventListener('change', event => {
-  if (event.matches) {
-    entranceObserver?.disconnect();
-    entranceAnimations.forEach(animation => animation.cancel());
-    entranceAnimations.clear();
-  }
 });

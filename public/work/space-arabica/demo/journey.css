@@ -7,10 +7,6 @@ html { --header-height: 108px; scroll-padding-top: 120px; }
 .chapter-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .chapter-top > span:last-child { font-size: 9px; letter-spacing: .13em; color: var(--muted); }
 .chapter-top > span:nth-child(2) { margin-left: auto; font-size: 9px; letter-spacing: .13em; color: var(--muted); }
-.journey-motion-toggle { border: 1px solid #c18b3e70; background: transparent; color: var(--cream-soft); padding: 10px 16px; border-radius: 30px; font-size: 10px; min-height: 40px; }
-.no-js .journey-motion-toggle { display: none; }
-.journey-paused .chapter-bean img, .journey-paused .floating-coffee > div { animation: none; }
-.journey-paused.journey-ready [data-journey-reveal] { opacity: 1; transform: none; transition: none; }
 .space-composition { position: relative; min-height: 820px; padding-top: 65px; }
 .space-composition h2 { position: relative; z-index: 3; font-size: clamp(76px, 12.4vw, 184px); line-height: .83; pointer-events: none; }
 .space-composition h2 span { color: var(--accent); }
@@ -60,7 +56,7 @@ html { --header-height: 108px; scroll-padding-top: 120px; }
 .page-index .footer-invitation { display: none; }
 .page-index .site-footer { border-top: 1px solid #c18b3e50; }
 .page-index .footer-wordmark { color: #c18b3e; opacity: .6; }
-.journey-ready [data-journey-reveal] { opacity: 0; transform: translateY(44px); transition: opacity 700ms ease, transform 900ms cubic-bezier(.22,1,.36,1); }
+.journey-ready [data-journey-reveal] { opacity: 0; transform: translateY(44px); transition: opacity 700ms ease, transform 900ms var(--ease-out); }
 .journey-ready [data-journey-reveal].is-visible { opacity: 1; transform: translateY(0); }
 .journey-ready [data-journey-image] { backface-visibility: hidden; }
 
@@ -82,7 +78,7 @@ html { --header-height: 108px; scroll-padding-top: 120px; }
 .chapter-bean { position: absolute; display: block; width: var(--size); filter: blur(var(--blur, 0px)); }
 .chapter-bean img { width: 100%; height: auto; animation: bean-drift 9s ease-in-out infinite alternate; animation-delay: var(--delay, 0s); animation-play-state: paused; filter: drop-shadow(6px 10px 6px #0005); }
 .chapter-ingredient { position: absolute; z-index: 4; pointer-events: none; width: clamp(80px, 12vw, 170px); rotate: var(--ingredient-tilt, -18deg); filter: blur(var(--ingredient-blur, 0px)) drop-shadow(8px 12px 9px #0005); }
-.chapter-ingredient img { width: 100%; height: auto; animation: var(--drift-path, ingredient-meander-c) var(--drift-duration, 23s) cubic-bezier(.45,0,.55,1) infinite, ingredient-turn var(--turn-duration, 37s) cubic-bezier(.45,0,.55,1) infinite; animation-delay: var(--drift-phase, -5s), var(--turn-phase, -14s); animation-play-state: paused; }
+.chapter-ingredient img { width: 100%; height: auto; animation: var(--drift-path, ingredient-meander-c) var(--drift-duration, 23s) var(--ease-sine) infinite, ingredient-turn var(--turn-duration, 37s) var(--ease-sine) infinite; animation-delay: var(--drift-phase, -5s), var(--turn-phase, -14s); animation-play-state: paused; }
 .chapter-ingredient--accent-2 { --drift-path: ingredient-meander-a; --drift-x: -14px; --drift-y: 11px; --turn-angle: -14deg; }
 .space-chapter .chapter-ingredient--accent-1 { right: 3%; bottom: 4%; width: 140px; }
 .space-chapter .chapter-ingredient--accent-2 { left: 9%; top: 40%; width: 110px; --ingredient-tilt: 32deg; }
@@ -95,7 +91,6 @@ html { --header-height: 108px; scroll-padding-top: 120px; }
 .arrival-chapter .chapter-ingredient--accent-1 { right: 6%; top: 18%; width: 140px; --ingredient-tilt: 26deg; --ingredient-blur: 1.5px; }
 .arrival-chapter .chapter-ingredient--accent-2 { left: -3%; bottom: 4%; width: 140px; --ingredient-blur: 3px; }
 .is-in-view .chapter-ingredient img { animation-play-state: running; }
-.journey-paused .chapter-ingredient img { animation: none; }
 .chapter-bean--1 { --size: clamp(55px, 7vw, 115px); top: 8%; right: 7%; rotate: 28deg; }
 .chapter-bean--2 { --size: clamp(90px, 13vw, 195px); --blur: 5px; --delay: -3s; top: 67%; left: -4%; rotate: -38deg; }
 .chapter-bean--3 { --size: clamp(35px, 4vw, 65px); --delay: -5s; top: 88%; right: 36%; rotate: 85deg; }

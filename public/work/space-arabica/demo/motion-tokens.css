@@ -1,0 +1,22 @@
+/* Motion tokens: the only place durations and curves are defined.
+   motion.js reads the curves for Web Animations, so CSS and JS stay in step.
+   See planning/MOTION-SYSTEM-PLAN.md §3. */
+:root {
+  --ease-out: cubic-bezier(.22, 1, .36, 1);      /* arrivals, reveals: the house curve */
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);   /* morphs between states and pages */
+  --ease-in: cubic-bezier(.4, 0, 1, 1);          /* exits only */
+  --ease-sine: cubic-bezier(.45, 0, .55, 1);     /* ambient loops: float, drift, bob */
+  --ease-spring: cubic-bezier(.2, 1.35, .4, 1);  /* small pressed/stamped overshoot */
+  --ease: var(--ease-out);                       /* legacy alias used across page CSS */
+
+  --t-micro: 160ms;   /* hover, press, focus */
+  --t-short: 280ms;   /* exits, filter reflow */
+  --t-base: 480ms;    /* content reveals */
+  --t-morph: 720ms;   /* shared elements between pages */
+  --t-scene: 1050ms;  /* hero carousel orbit */
+  --stagger: 70ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-micro: 0ms; --t-short: 0ms; --t-base: 0ms; --t-morph: 0ms; --t-scene: 0ms; --stagger: 0ms; }
+}

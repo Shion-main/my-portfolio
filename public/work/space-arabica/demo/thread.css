@@ -1,0 +1,49 @@
+/* The Thread: the amber dash from SPACE—ARABICA (planning/MOTION-SYSTEM-PLAN.md §2).
+   It rests under the current nav link, travels between links on navigation,
+   unspools into each page's signature drawing, and settles in the footer wordmark. */
+
+/* ① Resting under the current page. view-transition-name lets it travel between pages. */
+.site-nav a[aria-current='page'] { position: relative; box-shadow: none; }
+.nav-thread {
+  position: absolute; left: 0; right: 0; bottom: 6px; height: 2px;
+  border-radius: 2px; background: var(--accent);
+  box-shadow: 0 0 10px #c18b3e66;
+  view-transition-name: thread;
+  transform-origin: left center;
+}
+.site-nav a:hover .nav-thread { transform: scaleX(1.08); transition: transform var(--t-micro) var(--ease-out); }
+
+/* Between pages the line slides from the old link to the new one, stretching as it goes. */
+::view-transition-group(thread) { animation-duration: var(--t-morph); animation-timing-function: var(--ease-in-out); z-index: 5; }
+::view-transition-old(thread), ::view-transition-new(thread) { animation: none; height: 100%; }
+::view-transition-old(thread) { opacity: 0; }
+
+/* ② Unspooling. A fixed overlay carries the line from the nav to the page's drawing… */
+.thread-overlay { position: fixed; inset: 0; z-index: 60; width: 100vw; height: 100vh; overflow: visible; pointer-events: none; }
+.thread-overlay path, .thread-trace path {
+  fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px #c18b3e80);
+}
+/* …and a trace inside the target draws its shape, scrolling with it. */
+.thread-trace { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
+.thread-trace--fade { transition: opacity 900ms var(--ease-out); }
+.thread-trace--fade.is-done { opacity: 0; }
+.thread-trace--persist.is-done path { stroke-opacity: .45; filter: none; transition: stroke-opacity 900ms var(--ease-out); }
+
+/* Waiting for the Thread to land (set only when the landing will actually animate). */
+.clock-arc.is-thread-waiting { stroke-dashoffset: var(--arc-length); }
+
+/* ③ Resting place: the dash in the footer wordmark. */
+.thread-rest {
+  display: inline-block; width: .5em; height: .085em; margin: 0 .04em; vertical-align: .32em;
+  border-radius: .05em; background: var(--accent); transform-origin: left center;
+}
+.thread-rest.js-drawn-pending { transform: scaleX(0); }
+.thread-rest.js-drawn-pending.is-drawn { transform: scaleX(1); transition: transform 1100ms var(--ease-in-out) 150ms; }
+
+@media (max-width: 800px) {
+  .nav-thread { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thread-overlay, .thread-trace { display: none; }
+}

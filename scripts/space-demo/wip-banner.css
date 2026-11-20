@@ -1,0 +1,113 @@
+/* Work-in-progress banner for the hosted Space Arabica demo. */
+/* Portfolio demo banner and read-only input lock */
+:root {
+  --wip-banner-height: 44px;
+}
+.wip-banner {
+  position: sticky;
+  top: 0;
+  z-index: 95;
+  min-height: var(--wip-banner-height);
+  background: #101116f5;
+  border-bottom: 1px solid #c18b3e66;
+  color: #f3f0e8;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+}
+.wip-banner__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.wip-banner__status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.wip-banner__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #c18b3e26;
+  border: 1px solid #c18b3e80;
+  color: #e6bc7e;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.wip-banner__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e6bc7e;
+  box-shadow: 0 0 8px #e6bc7e;
+}
+.wip-banner__note {
+  color: #c9c7c0;
+  font-size: 12px;
+}
+.wip-banner__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid #f2f2f238;
+  color: #f3f0e8;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+.wip-banner__back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #c18b3e14;
+}
+.wip-banner__back .arrow-icon {
+  width: 14px;
+  height: 14px;
+}
+.site-header {
+  top: var(--wip-banner-height);
+}
+.page-full-menu .menu-jump {
+  top: calc(var(--header-height) + var(--wip-banner-height));
+}
+.form-wip-badge {
+  display: inline-block;
+  margin: 0 0 22px;
+  padding: 7px 12px;
+  border-left: 2px solid var(--accent);
+  background: #c18b3e1a;
+  color: #e6bc7e;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+@media (max-width: 800px) {
+  .site-nav {
+    top: calc(var(--header-height) + var(--wip-banner-height));
+    max-height: calc(100dvh - var(--header-height) - var(--wip-banner-height));}
+}
+@media (max-width: 680px) {
+  :root {
+    --wip-banner-height: 40px;}
+  .wip-banner__note {
+    display: none;}
+  .wip-banner__inner {
+    gap: 10px;}
+  .wip-banner__back {
+    padding: 4px 10px;
+    font-size: 11px;}
+}

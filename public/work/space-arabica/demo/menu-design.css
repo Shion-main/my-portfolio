@@ -18,7 +18,7 @@
 .menu-opening-cup--front { right: 5%; bottom: 10%; width: 68%; height: 77%; rotate: 8deg; }
 .menu-opening-caption { position: absolute; bottom: 2%; left: 12%; right: 5%; font-size: 9px; letter-spacing: .12em; text-align: center; }
 .menu-accent { position: absolute; width: 95px; pointer-events: none; z-index: 4; rotate: var(--accent-angle, 0deg); }
-.menu-accent > span { display: block; animation: ingredient-meander-b 23s cubic-bezier(.45,0,.55,1) infinite, ingredient-turn 37s cubic-bezier(.45,0,.55,1) infinite; animation-delay: -7s, -15s; animation-play-state: paused; }
+.menu-accent > span { display: block; animation: ingredient-meander-b 23s var(--ease-sine) infinite, ingredient-turn 37s var(--ease-sine) infinite; animation-delay: -7s, -15s; animation-play-state: paused; }
 .menu-accent img { width: 100%; height: auto; filter: drop-shadow(4px 9px 6px #0005); }
 .menu-accent--petals { right: 8%; top: 8%; --accent-angle: 25deg; }
 .menu-accent--flower { left: 8%; bottom: 12%; width: 70px; --accent-angle: -25deg; }
@@ -69,8 +69,6 @@
 .page-menu .footer-invitation { display: none; }
 .page-menu .footer-wordmark { color: #c18b3e; opacity: .6; }
 .menu-motion-ready .is-in-view .menu-accent > span { animation-play-state: running; }
-.menu-motion-paused .menu-accent > span { animation: none; }
-.no-js [data-menu-motion] { display: none; }
 @media (hover: hover) and (pointer: fine) {
   .menu-directory a:hover { color: var(--accent); }
   .menu-editorial-photo:hover img { transform: scale(1.035); }
@@ -127,3 +125,25 @@
   .menu-accent > span { animation: none !important; }
   .menu-editorial-photo { --menu-photo-y: 0px !important; }
 }
+
+/* Menu — "Episodes". The stage takes each drink's colour; episode number and tagline lead the copy. */
+.signature-menu--episodes .signature-showcase.is-ready { position: relative; isolation: isolate; background-color: rgb(var(--signature-tone) / .16); transition: background-color 900ms var(--ease), border-color 900ms var(--ease); border-color: rgb(var(--signature-tone) / .45); }
+.signature-menu--episodes .signature-showcase.is-ready::before { content: ''; position: absolute; z-index: -1; inset: -20% 30% 10% -20%; background: radial-gradient(closest-side, rgb(var(--signature-tone) / .38), transparent); transition: opacity 600ms ease; pointer-events: none; }
+.signature-episode { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; color: rgb(var(--signature-tone)); font: 700 clamp(34px, 3.4vw, 52px)/1 var(--display); letter-spacing: -.02em; transition: color 900ms var(--ease); }
+.signature-episode span { color: var(--muted); font: 600 10px var(--body); letter-spacing: .18em; }
+.signature-tagline { margin: -6px 0 14px; color: var(--cream); font-size: 17px; font-style: italic; }
+.episode-next { display: grid; grid-template-columns: auto 1fr auto; gap: 28px; align-items: center; margin-top: 26px; padding: 22px 28px; border: 1px dashed #ffffff33; border-radius: 18px; }
+.episode-next__number { color: transparent; -webkit-text-stroke: 1px var(--accent); font: 700 clamp(56px, 6vw, 92px)/1 var(--display); }
+.episode-next .eyebrow { margin-bottom: 4px; }
+.episode-next__title { margin-bottom: 4px; font: 600 24px var(--display); }
+.episode-next p:last-child { margin: 0; color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) {
+  .episode-next__number { animation: episode-flicker 3.6s ease-in-out infinite; }
+}
+@keyframes episode-flicker { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@media (max-width: 700px) {
+  .episode-next { grid-template-columns: auto 1fr; }
+  .episode-next > a { grid-column: 1 / -1; }
+}
+.signature-menu--episodes .signature-showcase.is-ready .signature-showcase__info { background-color: rgb(var(--signature-tone) / .13); transition: background-color 900ms var(--ease); }
+.signature-menu--episodes .signature-showcase__count { color: rgb(var(--signature-tone)); transition: color 900ms var(--ease); }
