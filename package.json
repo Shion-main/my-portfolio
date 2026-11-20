@@ -9,7 +9,7 @@
     "build": "vite build && vite build --ssr src/entry-server.tsx --outDir .prerender && node scripts/prerender.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "test": "node scripts/check-story.mjs",
+    "test": "node --test scripts/tests/",
     "lint": "eslint .",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
