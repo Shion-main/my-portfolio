@@ -98,9 +98,9 @@ export const projects: readonly Project[] = [
       { term: "For", detail: "Players, organizers and venues" },
       { term: "In use", detail: "112 organizers ran 373 meets, Mar–Jun 2026" },
     ],
-    caption: "Organizer on a laptop · player on a phone",
+    caption: "Live courts on a laptop · the podium on a phone",
     desktop: { ...korte("live-desktop", "Korte live session on a laptop: courts in play with scores to enter, and Up next below", "Live courts on a laptop"), title: "Korte — Live courts" },
-    phone: korte("upnext-phone", "Korte player view showing You’re up next, tonight’s record and rankings", "Player · you’re up next"),
+    phone: korte("podium-phone", "Korte final results on a phone: the podium for the top three players, with their Korte Points", "Final results · the podium"),
     question: "How does one app serve the players, the organizers and the venues of a pickleball community?",
     intro: "Korte is an all-in-one app for the pickleball community in the Philippines. Players find open play, book courts and follow their standings on their phones; organizers create meets and run fair sessions from an iPad or laptop beside the court; venues list their courts, take bookings and put the live courts on a TV. I designed and built all of it, from v1 in March to Korte 3.0 in October.",
     caseFacts: [

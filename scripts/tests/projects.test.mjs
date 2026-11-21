@@ -39,6 +39,8 @@ test("credits are worded as Joshua confirmed", () => {
   assert.match(projectBySlug("korte").list.what, /all-in-one/i);
   assert.match(projectBySlug("korte").intro, /all-in-one app for the pickleball community/);
   assert.match(text(projectBySlug("korte")), /players, organizers and venues/i);
+  // The Korte chapter's phone shows the end-of-session podium (changed 2026-11-22).
+  assert.equal(projectBySlug("korte").phone.src, "media/work/korte/podium-phone.webp");
   assert.match(text(projectBySlug("korte")), /Next\.js, Supabase, Convex/);
   assert.match(text(projectBySlug("korte")), /112 organizers/);
   for (const p of projects) assert.doesNotMatch(text(p), /concept|Aisha|Dones/i, p.slug);
