@@ -350,6 +350,26 @@ check("back-after-scroll", async () => {
   await context.close();
 });
 
+check("deep-link-no-yank", async () => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  // Slow fonts hold back the load event, as they do on a slow phone connection.
+  await context.route("**/*.woff2", async r => { await new Promise(res => setTimeout(res, 4000)); await r.continue(); });
+  const page = await context.newPage();
+  await page.goto(BASE + "/#work-korte", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  assert.notEqual(await page.evaluate(() => document.readyState), "complete", "test setup: the page should still be loading");
+  assert.equal(await page.evaluate(() => document.querySelectorAll(".wall .tile").length), 0, "the covered wall mounted its tiles");
+  await page.mouse.move(700, 450);
+  await page.mouse.wheel(0, 1600);
+  await page.waitForTimeout(400);
+  const before = await page.evaluate(() => scrollY);
+  await page.waitForFunction(() => document.readyState === "complete", null, { timeout: 30000 });
+  await page.waitForTimeout(400);
+  const after = await page.evaluate(() => scrollY);
+  assert.ok(after >= before - 2, `the page pulled the reader back from ${before} to ${after} when it finished loading`);
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

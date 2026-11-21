@@ -108,17 +108,24 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       if (index !== onScreen) window.scrollTo({ top: chapterScrollTop(projects[index].slug), behavior: "auto" });
     };
     root.addEventListener("focusin", follow);
+    // Once the reader has scrolled, a late load event must not pull them back to the linked chapter.
+    let moved = false;
+    const mark = () => { moved = true; };
+    const settle = () => { if (!moved) goToHash(); };
+    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) window.addEventListener(type, mark, { passive: true, once: true });
     // Jump to a linked chapter before the first draw, which would otherwise rewrite the address.
     goToHash();
     fit();
     document.fonts?.ready.then(fit);
-    window.addEventListener("load", goToHash, { once: true });
+    window.addEventListener("load", settle, { once: true });
     window.addEventListener("scroll", queue, { passive: true });
     window.addEventListener("resize", fit);
     window.addEventListener("hashchange", goToHash);
     return () => {
       cancelAnimationFrame(frame);
       root.removeEventListener("focusin", follow);
+      window.removeEventListener("load", settle);
+      for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) window.removeEventListener(type, mark);
       window.removeEventListener("scroll", queue);
       window.removeEventListener("resize", fit);
       window.removeEventListener("hashchange", goToHash);

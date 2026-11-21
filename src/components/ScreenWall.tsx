@@ -26,11 +26,16 @@ export default function ScreenWall({ show, hidden }: { show: Show; hidden: boole
 
   // Tiles mount after the hero has painted, so its text never waits for them.
   useEffect(() => {
-    // Two frames after hydration: the hero has painted, the wall follows.
-    let frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => setReady(true)); });
     if (import.meta.env.DEV || location.search.includes("checks")) (window as unknown as { __wall: unknown }).__wall = { show: (v: Show) => setOverride(v) };
-    return () => cancelAnimationFrame(frame);
   }, []);
+
+  // Two frames after the hero has painted, and only once the wall is actually uncovered:
+  // a deep link straight into a chapter never fetches tiles nobody can see.
+  useEffect(() => {
+    if (ready || hidden) return;
+    let frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => setReady(true)); });
+    return () => cancelAnimationFrame(frame);
+  }, [ready, hidden]);
 
   // Swap tiles only after the incoming image has decoded, so no tile ever shows an empty layer.
   useEffect(() => {
