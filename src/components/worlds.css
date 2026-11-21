@@ -3,7 +3,7 @@
 .chapter { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: var(--ground); color: var(--ink); }
 .worlds.motion { height: 560vh; }
 .worlds.motion .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
-.worlds.motion .chapter { position: absolute; inset: 0; min-height: 0; visibility: hidden; }
+.worlds.motion .chapter { position: absolute; inset: 0; min-height: 0; clip-path: circle(0 at 62% 46%); }
 .chapter-anchor { position: absolute; left: 0; top: calc((100% - 100vh) * var(--k)); width: 1px; height: 1px; pointer-events: none; }
 
 .chapter .label { color: inherit; opacity: .72; }
@@ -26,6 +26,7 @@
 .giant span { display: inline-block; }
 
 .chapter-index { position: absolute; left: 50%; top: 24px; z-index: 5; translate: -50% 0; display: flex; gap: 18px; opacity: 0; pointer-events: none; transition: opacity .3s; color: var(--head, var(--text)); }
+.chapter-index:not(.on) { visibility: hidden; }
 .chapter-index.on { opacity: 1; pointer-events: auto; }
 .chapter-index a { display: grid; gap: 7px; font: 600 11px var(--sans); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; opacity: .5; transition: opacity .3s; }
 .chapter-index a::after { content: ""; height: 2px; border-radius: 2px; background: currentColor; transform: scaleX(.35); transform-origin: left; transition: transform .4s var(--ease-in-out-entry); }

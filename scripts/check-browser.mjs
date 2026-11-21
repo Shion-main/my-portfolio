@@ -294,6 +294,43 @@ check("transitions-reduced", async () => {
   await context.close();
 });
 
+// ---- Review fixes ----
+const focusedIsVisible = page => page.evaluate(() => {
+  const el = document.activeElement;
+  if (!el || el === document.body) return { ok: false, what: "nothing focused" };
+  const r = el.getBoundingClientRect();
+  const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  const seen = el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) && !!hit && (el === hit || el.contains(hit));
+  return { ok: seen, what: `${el.tagName}.${el.className} "${(el.textContent || "").trim().slice(0, 40)}"` };
+});
+
+check("chapters-accessible", async () => {
+  const { page, context } = await open("/?checks");
+  await page.waitForTimeout(300);
+  for (const p of ["Space Arabica", "Korte", "FluxTrack", "Atlas Treasury"]) {
+    assert.equal(await page.getByRole("heading", { level: 2, name: p, exact: true }).count(), 1, `${p} heading missing from the accessibility tree`);
+    assert.equal(await page.getByRole("link", { name: new RegExp(`Open case study.*${p}`) }).count(), 1, `${p} case-study link has no project in its name`);
+  }
+  await context.close();
+});
+
+check("chapter-focus-visible", async () => {
+  const { page, context } = await open("/?checks");
+  await page.focus('.row[data-slug="atlas-treasury"]');
+  await page.keyboard.press("Tab");
+  await page.waitForTimeout(400);
+  let st = await focusedIsVisible(page);
+  assert.ok(st.ok, `Tab from the list focused something you cannot see: ${st.what}`);
+  await page.evaluate(() => { location.hash = "work-atlas-treasury"; });
+  await page.waitForTimeout(500);
+  await page.focus('[data-chapter="atlas-treasury"] .chapter-open');
+  await page.keyboard.press("Shift+Tab");
+  await page.waitForTimeout(400);
+  st = await focusedIsVisible(page);
+  assert.ok(st.ok, `Shift+Tab from Atlas focused something you cannot see: ${st.what}`);
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

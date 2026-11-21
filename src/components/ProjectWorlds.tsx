@@ -35,6 +35,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     const chapters = [...root.querySelectorAll<HTMLElement>(".chapter")];
     let frame = 0;
     let last = "";
+    let onScreen = -1;
 
     const fit = () => {
       const mobile = innerWidth <= 860;
@@ -59,8 +60,8 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       chapters.forEach((chapter, i) => {
         const wipe = snap(chapterWipe(raw, i, COUNT), still);
         const radius = Math.hypot(innerWidth, innerHeight) * easeInOutCubic(wipe);
+        // Hidden by its clip alone, so screen readers and the keyboard can still reach it.
         chapter.style.clipPath = `circle(${radius.toFixed(1)}px at 62% 46%)`;
-        chapter.style.visibility = wipe > 0 ? "visible" : "hidden";
         if (wipe > 0.5) current = i;
         const local = chapterLocal(raw, i, COUNT);
         const axes = giantAxes(still ? 1 : local, projects[i].giantFit, i === 0);
@@ -71,7 +72,6 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
         const shown = still ? 1 : i === 0 ? range(raw, -0.02, 0.05) : range(local, 0.14, 0.3);
         info.style.opacity = String(shown);
         info.style.transform = `translateY(${((1 - shown) * 26).toFixed(1)}px)`;
-        info.inert = shown < 0.5;
         const enter = i === 0 ? range(raw, -0.05, 0.07) : range(local, 0.04, 0.32);
         chapter.querySelectorAll<HTMLElement>("[data-depth]").forEach(el => {
           const depth = Number(el.dataset.depth);
@@ -81,6 +81,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
         });
       });
       const inside = current >= 0 && raw > -0.03 && raw < 1.02;
+      onScreen = inside ? current : -1;
       // The wall fades out as soon as the first chapter's wipe is under way, and stays off below.
       const covered = raw > -0.04;
       const key = `${inside ? current : -1}|${covered}`;
@@ -96,6 +97,14 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       const slug = slugFromHash();
       if (slug) window.scrollTo({ top: chapterScrollTop(slug), behavior: "auto" });
     };
+    // Keyboard focus inside a chapter brings that chapter on screen, so the focus ring is never hidden under another.
+    const follow = (event: FocusEvent) => {
+      const chapter = (event.target as HTMLElement).closest<HTMLElement>("[data-chapter]");
+      if (!chapter) return;
+      const index = chapters.indexOf(chapter);
+      if (index !== onScreen) window.scrollTo({ top: chapterScrollTop(projects[index].slug), behavior: "auto" });
+    };
+    root.addEventListener("focusin", follow);
     fit();
     goToHash();
     document.fonts?.ready.then(fit);
@@ -105,6 +114,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     window.addEventListener("hashchange", goToHash);
     return () => {
       cancelAnimationFrame(frame);
+      root.removeEventListener("focusin", follow);
       window.removeEventListener("scroll", queue);
       window.removeEventListener("resize", fit);
       window.removeEventListener("hashchange", goToHash);
@@ -134,7 +144,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
               <dl className="facts">
                 {p.facts.map(f => <div key={f.term}><dt>{f.term}</dt><dd>{f.detail}</dd></div>)}
               </dl>
-              <a className="chapter-open" href={asset(`work/${p.slug}/`)}>Open case study <span aria-hidden="true">→</span></a>
+              <a className="chapter-open" href={asset(`work/${p.slug}/`)}>Open case study<span className="visually-hidden">: {p.name}</span> <span aria-hidden="true">→</span></a>
             </div>
             <div className="showcase" aria-hidden="true">
               <div className="showcase-desk" data-depth="1">
