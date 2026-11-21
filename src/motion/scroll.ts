@@ -48,14 +48,16 @@ export function momentAt(s: number, count: number): Moment {
 /** The chapter that counts as on screen: the incoming one once a move is halfway, -1 before the first arrives. */
 export const activeChapter = (m: Moment) => (m.t >= 0.5 ? m.to : m.from);
 
-/** Where to finish a move the reader stopped inside: forward past a quarter when heading forward, back short of three quarters when heading back. */
+/** Where the wall starts to dive as the list leaves; finishing backward out of the first arrival comes back here, with the list in view. */
+export const DIVE_FROM = -0.6;
+
+/** Where to finish a move the reader stopped inside: always the way they were heading, so a single arrow key or wheel notch advances. */
 export function settleTarget(s: number, dir: 1 | -1, count: number): number | null {
-  const spans: [number, number][] = [[0, ARRIVE]];
+  const spans: [number, number][] = [[DIVE_FROM, ARRIVE]];
   for (let i = 0; i < count - 1; i++) spans.push([restStart(i) + REST, restStart(i) + REST + MOVE]);
   for (const [a, b] of spans) {
     if (s <= a + 0.005 || s >= b - 0.005) continue;
-    const t = (s - a) / (b - a);
-    return (dir > 0 ? t > 0.25 : t > 0.75) ? b : a;
+    return dir > 0 ? b : a;
   }
   return null;
 }
@@ -72,7 +74,7 @@ export const arrivalT = (s: number) => lerp(0.48, 1, range(s, 0, ARRIVE));
 /** From here the first project is fully opaque over the wall. */
 export const COVER_AT = (ARRIVE * 0.16) / 0.52;
 /** The wall of screens rushes toward the camera as the first project arrives. */
-export const wallDive = (s: number) => easeIn3(range(s, -0.6, COVER_AT));
+export const wallDive = (s: number) => easeIn3(range(s, DIVE_FROM, COVER_AT));
 
 // ---- Push-through poses. t is the fraction of a move: 0 = outgoing at rest, 1 = incoming at rest ----
 /** Rises from a to a peak at m, falls back to 0 by b. */

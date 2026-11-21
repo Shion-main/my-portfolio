@@ -530,6 +530,8 @@ const nearScreens = (s, want, px) => Math.abs(s - want) * px <= 2;
 async function settleOpen(options) {
   const opened = await worldsOpen(options);
   await opened.page.evaluate(() => window.__worlds.settle(true));
+  // A reader has always given some input before scrolling; until then a chapter in the address wins.
+  await opened.page.keyboard.press("Shift");
   return opened;
 }
 
@@ -715,6 +717,128 @@ check("chapters-frame-budget", async () => {
   assert.ok(!/SwiftShader/.test(onGpu.renderer), "no real GPU available, so the frame budget cannot be judged here");
   assert.ok(onGpu.normal.p95 <= 17, `95% of frames should take at most 17 ms at full speed on the GPU; p95 was ${onGpu.normal.p95} ms`);
   assert.ok(onGpu.arrival.p95 <= 17, `the first arrival stutters on the GPU: p95 ${onGpu.arrival.p95} ms`);
+  // A visitor's very first arrival drops a few frames (measured 7–11); this ceiling keeps it from quietly getting worse.
+  assert.ok(onGpu.cold.over20 <= 12, `the cold first arrival dropped ${onGpu.cold.over20} frames (ceiling 12)`);
+});
+
+// ---- Review fixes for the push-through (2026-11-22) ----
+const visibleChapters = page => page.evaluate(() => [...document.querySelectorAll(".chapter")].filter(c => Number(getComputedStyle(c).opacity) > .99).map(c => c.dataset.chapter));
+
+check("settle-small-steps", async () => {
+  const { page, context } = await settleOpen();
+  // One wheel notch out of the end of Korte's rest, then a pause: it must advance, not snap back.
+  await goTo(page, 2.75); await caughtUp(page); await page.waitForTimeout(400);
+  await page.mouse.move(700, 450);
+  await page.mouse.wheel(0, 100);
+  await page.waitForTimeout(1500);
+  let end = await page.evaluate(position);
+  assert.ok(nearScreens(end, 3.8, 900), `one wheel notch forward from Korte ended at ${end.toFixed(3)} instead of FluxTrack (3.8)`);
+  // Tapping the down arrow walks out of FluxTrack's rest and on to Atlas.
+  await goTo(page, 4.075); await caughtUp(page); await page.waitForTimeout(400);
+  for (let i = 0; i < 10 && new URL(page.url()).hash !== "#work-atlas-treasury"; i++) { await page.keyboard.press("ArrowDown"); await page.waitForTimeout(600); }
+  await page.waitForTimeout(1200);
+  end = await page.evaluate(position);
+  assert.equal(new URL(page.url()).hash, "#work-atlas-treasury", `arrow keys could not leave FluxTrack (stuck at ${end.toFixed(3)})`);
+  assert.ok(atRest(end, 900), `arrow keys left the page mid-move at ${end.toFixed(3)}`);
+  await context.close();
+});
+
+check("reduced-no-drift", async () => {
+  const { page, context } = await worldsOpen({ reducedMotion: "reduce" });
+  const shots = [];
+  for (const s of [2.325, 2.525, 2.725]) {
+    await goTo(page, s); await caughtUp(page);
+    shots.push(await page.evaluate(() => {
+      const ch = document.querySelector('[data-chapter="korte"]');
+      return [getComputedStyle(ch.querySelector(".showcase-desk")).transform, getComputedStyle(ch.querySelector(".showcase-phone")).transform].join(" | ");
+    }));
+  }
+  assert.ok(shots.every(x => x === "none | none"), `reduced motion still moves the screens with scroll: ${shots.join(" / ")}`);
+  await context.close();
+});
+
+check("settle-reload-keeps-hash", async () => {
+  for (const [s, slug] of [[1.25 + .3, "space-arabica"], [1.25 + .7, "korte"]]) {
+    const { page, context } = await worldsOpen();
+    await goTo(page, s); await caughtUp(page);
+    assert.equal(new URL(page.url()).hash, `#work-${slug}`, "the address does not name the chapter being read");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForTimeout(1800);
+    const end = await page.evaluate(position);
+    assert.ok(atRest(end, 900), `a reload at ${s} stayed mid-move at ${end.toFixed(3)}`);
+    assert.equal(new URL(page.url()).hash, `#work-${slug}`, `a reload on ${slug} ended on ${new URL(page.url()).hash}`);
+    const shown = await visibleChapters(page);
+    assert.deepEqual(shown, [slug], `a reload on ${slug} shows ${shown.join(", ")}`);
+    await context.close();
+  }
+});
+
+check("settle-from-list", async () => {
+  const { page, context } = await settleOpen();
+  // PageDown from the end of the list lands on Space Arabica, not on the empty wall.
+  await goTo(page, -1); await page.waitForTimeout(500);
+  await page.keyboard.press("PageDown");
+  await page.waitForTimeout(2200);
+  let end = await page.evaluate(position);
+  assert.ok(nearScreens(end, .7, 900), `PageDown from the list ended at ${end.toFixed(3)} instead of Space Arabica (0.7)`);
+  assert.deepEqual(await visibleChapters(page), ["space-arabica"], "Space Arabica is not on screen");
+  // A few notches back up from Space Arabica return to the list, not the empty wall.
+  await goTo(page, .975); await caughtUp(page); await page.waitForTimeout(400);
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < 3; i++) { await page.mouse.wheel(0, -100); await page.waitForTimeout(60); }
+  await page.waitForTimeout(2200);
+  end = await page.evaluate(position);
+  const listBottom = await page.evaluate(() => document.querySelector(".rows").getBoundingClientRect().bottom);
+  assert.ok(nearScreens(end, -.6, 900), `scrolling back up from Space Arabica ended at ${end.toFixed(3)} instead of the list (-0.6)`);
+  assert.ok(listBottom > 100, "the list is not in view");
+  await context.close();
+});
+
+check("rotate-at-rest", async () => {
+  const { page, context } = await worldsOpen({ width: 390, height: 844, isMobile: true, hasTouch: true });
+  await page.evaluate(() => window.__worlds.settle(true));
+  await page.evaluate(() => { location.hash = "work-korte"; });
+  await caughtUp(page); await page.waitForTimeout(400);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.waitForTimeout(1500);
+  assert.equal(new URL(page.url()).hash, "#work-korte", `rotating on Korte moved to ${new URL(page.url()).hash}`);
+  const shown = await visibleChapters(page);
+  assert.deepEqual(shown, ["korte"], `rotating on Korte shows ${shown.join(", ")}`);
+  assert.ok(atRest(await page.evaluate(position), 390), "rotating left the page mid-move");
+  await context.close();
+});
+
+check("settle-pointer-held", async () => {
+  const { page, context } = await settleOpen();
+  await goTo(page, .975); await caughtUp(page);
+  await page.mouse.move(700, 450);
+  await page.mouse.down();
+  await goTo(page, 1.25 + .45);
+  const held = await page.evaluate(() => scrollY);
+  await page.waitForTimeout(700);
+  assert.equal(await page.evaluate(() => scrollY), held, "the page finished the move under a held mouse button");
+  await page.mouse.up();
+  await page.waitForTimeout(1500);
+  assert.ok(atRest(await page.evaluate(position), 900), "after the button was released the page stayed mid-move");
+  await context.close();
+});
+
+check("list-click-one-move", async () => {
+  const { page, context } = await worldsOpen();
+  await page.evaluate(() => window.scrollTo(0, document.getElementById("work").offsetTop));
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__seen = new Set();
+    const tick = () => { document.querySelectorAll(".chapter").forEach(c => { if (Number(getComputedStyle(c).opacity) > 0) window.__seen.add(c.dataset.chapter); }); window.__seenRaf = requestAnimationFrame(tick); };
+    tick();
+  });
+  await page.click('.row[data-slug="atlas-treasury"]');
+  await page.waitForTimeout(2500);
+  const seen = await page.evaluate(() => { cancelAnimationFrame(window.__seenRaf); return [...window.__seen].sort(); });
+  assert.deepEqual(seen, ["atlas-treasury", "fluxtrack"], `clicking Atlas in the list played ${seen.join(", ")}`);
+  assert.equal(new URL(page.url()).hash, "#work-atlas-treasury");
+  assert.deepEqual(await visibleChapters(page), ["atlas-treasury"], "Atlas is not on screen after the click");
+  await context.close();
 });
 
 let failed = 0;

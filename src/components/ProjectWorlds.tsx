@@ -32,8 +32,8 @@ function restPose(i: number, s: number): Pose {
   return {
     shown: false, z: 1, opacity: 1, sceneT: "", sceneO: "", blur: 0,
     infoO: 1, wordO: [1, 1, 1, 1], wordY: [0, 0, 0, 0],
-    deskT: `translateY(${(-drift * 26).toFixed(1)}px)`, deskO: 1,
-    phoneT: `translateY(${(-drift * 48).toFixed(1)}px)`, phoneO: 1,
+    deskT: drift ? `translateY(${(-drift * 26).toFixed(1)}px)` : "", deskO: 1,
+    phoneT: drift ? `translateY(${(-drift * 48).toFixed(1)}px)` : "", phoneO: 1,
     giantW: projects[i].giantFit, giantWt: 820, giantT: "", giantO: 1,
   };
 }
@@ -156,7 +156,8 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       target = -root.getBoundingClientRect().top / innerHeight;
       cur = Number.isNaN(cur) ? target : glide(cur, target, dt, still);
       const m = momentAt(cur, COUNT);
-      const poses = parts.map((_, i) => restPose(i, cur));
+      // Reduced motion: no parallax drift either, so every chapter is drawn at its rest centre.
+      const poses = parts.map((_, i) => restPose(i, still ? restCenter(i) : cur));
       const blurs = innerWidth > 860;
       let flash = 0;
       let lit = -1;
@@ -214,6 +215,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     // Finish a move the reader stopped inside, in the direction they were heading. Never under a finger.
     let finishTimer = 0;
     let touching = false;
+    let pressing = false;
     let lastY = scrollY;
     let dir: 1 | -1 = 1;
     // Our own eased scroll rather than behavior: "smooth", which keeps heading for its target over the reader's own input.
@@ -221,7 +223,9 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     const stopFinishing = () => { cancelAnimationFrame(finishing); finishing = 0; };
     const finish = () => {
       finishTimer = 0;
-      if (reduced() || touching || finishing || !opts.settle) return;
+      if (reduced() || touching || pressing || finishing || !opts.settle) return;
+      // Until the reader moves, a chapter in the address wins: a reload's restored scroll position must not pick the other chapter.
+      if (!moved && slugFromHash()) { goToHash(); return; }
       const top = root.getBoundingClientRect().top;
       const dest = settleTarget(-top / innerHeight, dir, COUNT);
       if (dest === null) return;
@@ -244,6 +248,8 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       waitToFinish();
     };
     const touchOn = () => { touching = true; stopFinishing(); };
+    const pressOn = () => { pressing = true; };
+    const pressOff = () => { if (!pressing) return; pressing = false; waitToFinish(); };
     const touchOff = () => { touching = false; waitToFinish(); };
 
     const fit = () => {
@@ -276,6 +282,17 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     const mark = () => { moved = true; };
     const settle = () => { if (!moved) goToHash(); };
     for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) window.addEventListener(type, mark, { passive: true, once: true });
+    // A rotation or width change keeps the reader where they were in the chapters (positions are in screens,
+    // the browser keeps pixels). Height-only changes are left alone: phone toolbars resize mid-scroll.
+    let lastWidth = innerWidth;
+    const resized = () => {
+      const keep = target;
+      const widthChanged = innerWidth !== lastWidth;
+      lastWidth = innerWidth;
+      fit();
+      if (widthChanged && keep >= 0 && keep <= movesEnd(COUNT)) window.scrollTo(0, root.getBoundingClientRect().top + scrollY + keep * innerHeight);
+      waitToFinish();
+    };
     // Jump to a linked chapter before the first draw, which would otherwise rewrite the address.
     goToHash();
     fit();
@@ -285,11 +302,13 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     window.addEventListener("load", settle, { once: true });
     window.addEventListener("scroll", scrolled, { passive: true });
     window.addEventListener("touchstart", touchOn, { passive: true });
-    // The reader's own input always wins over a finish in flight.
+    // The reader's own input always wins over a finish in flight, and nothing finishes under a held button.
     for (const type of ["wheel", "keydown", "pointerdown"]) window.addEventListener(type, stopFinishing, { passive: true });
+    window.addEventListener("pointerdown", pressOn, { passive: true });
+    for (const type of ["pointerup", "pointercancel", "blur"]) window.addEventListener(type, pressOff, { passive: true });
     window.addEventListener("touchend", touchOff, { passive: true });
     window.addEventListener("touchcancel", touchOff, { passive: true });
-    window.addEventListener("resize", fit);
+    window.addEventListener("resize", resized);
     window.addEventListener("hashchange", goToHash);
     return () => {
       cancelAnimationFrame(frame);
@@ -301,11 +320,13 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       document.documentElement.style.removeProperty("--dive-blur");
       stopFinishing();
       for (const type of ["wheel", "keydown", "pointerdown"]) window.removeEventListener(type, stopFinishing);
+      window.removeEventListener("pointerdown", pressOn);
+      for (const type of ["pointerup", "pointercancel", "blur"]) window.removeEventListener(type, pressOff);
       window.removeEventListener("scroll", scrolled);
       window.removeEventListener("touchstart", touchOn);
       window.removeEventListener("touchend", touchOff);
       window.removeEventListener("touchcancel", touchOff);
-      window.removeEventListener("resize", fit);
+      window.removeEventListener("resize", resized);
       window.removeEventListener("hashchange", goToHash);
     };
   }, [motion]);

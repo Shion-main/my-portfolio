@@ -4,7 +4,7 @@ import { loadTs } from "./load-ts.mjs";
 
 const { fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, range,
   trackScreens, restStart, restCenter, movesEnd, momentAt, activeChapter, settleTarget, glide, arrivalT, COVER_AT, wallDive,
-  pushOut, pushIn, landing, leaveWords, dolly, restDrift } = await loadTs("src/motion/scroll.ts");
+  pushOut, pushIn, landing, leaveWords, dolly, restDrift, DIVE_FROM } = await loadTs("src/motion/scroll.ts");
 
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} ≠ ${b}`);
 
@@ -24,15 +24,21 @@ test("chapter timeline", () => {
 });
 
 test("finishing a move", () => {
-  near(settleTarget(1.65, 1, 4), 2.25);   // forward, t .4
-  near(settleTarget(1.45, 1, 4), 1.25);   // forward, t .2
-  near(settleTarget(1.95, -1, 4), 1.25);  // back, t .7
-  near(settleTarget(2.05, -1, 4), 2.25);  // back, t .8
-  near(settleTarget(.3, 1, 4), .7);       // the arrival counts as a move
-  near(settleTarget(.1, -1, 4), 0);
+  // A finish always goes the way the reader was heading, so single steps (an arrow key, one wheel notch) advance.
+  near(settleTarget(1.65, 1, 4), 2.25);
+  near(settleTarget(1.27, 1, 4), 2.25);   // a small step forward out of a rest
+  near(settleTarget(1.95, -1, 4), 1.25);
+  near(settleTarget(2.23, -1, 4), 1.25);  // a small step back out of a rest
+  // The dive from the list (-0.6) to the first project's rest (.7) is one move: back ends with the list in view.
+  near(DIVE_FROM, -.6);
+  near(settleTarget(.3, 1, 4), .7);
+  near(settleTarget(-.3, 1, 4), .7);
+  near(settleTarget(.1, -1, 4), -.6);
+  near(settleTarget(-.3, -1, 4), -.6);
+  assert.equal(settleTarget(-.7, 1, 4), null);    // still reading the list
   assert.equal(settleTarget(1, 1, 4), null);      // resting
   assert.equal(settleTarget(1.252, 1, 4), null);  // within .005 of an end
-  assert.equal(settleTarget(-.2, 1, 4), null);
+  assert.equal(settleTarget(9, 1, 4), null);      // below the chapters
 });
 
 test("glide", () => {

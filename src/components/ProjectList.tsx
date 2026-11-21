@@ -1,7 +1,7 @@
 import type { CSSProperties, MouseEvent } from "react";
 import { projects, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
-import { chapterScrollTop } from "./chapterScroll";
+import { chapterApproachTop, chapterScrollTop } from "./chapterScroll";
 
 type Point = ProjectSlug | "all";
 
@@ -10,6 +10,9 @@ function goToChapter(event: MouseEvent<HTMLAnchorElement>, slug: ProjectSlug) {
   event.preventDefault();
   history.replaceState(null, "", `#${id}`);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Cut straight to the chapter before it, so a click plays exactly one push-through instead of every move on the way.
+  const approach = reduce ? null : chapterApproachTop(slug);
+  if (approach !== null) window.scrollTo({ top: approach, behavior: "auto" });
   window.scrollTo({ top: chapterScrollTop(slug), behavior: reduce ? "auto" : "smooth" });
 }
 
