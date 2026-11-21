@@ -60,10 +60,6 @@
 .case-reflection__text { margin-top: 18px; max-width: 30ch; font: 300 clamp(28px, 3vw, 48px)/1.15 var(--serif); }
 .case-evidence { margin-top: 28px; max-width: 70ch; font-size: 14px; opacity: .7; }
 
-.case-next { display: grid; gap: 12px; padding: 90px var(--pad); background: var(--next-ground); color: var(--next-ink); text-decoration: none; }
-.case-next strong { font: 800 clamp(48px, 9vw, 160px)/.84 var(--display); font-variation-settings: "wdth" 118; text-transform: uppercase; color: var(--next-giant); transition: font-variation-settings .6s var(--ease-in-out-entry); }
-.case-next:hover strong { font-variation-settings: "wdth" 140; }
-.case-next__line { max-width: 52ch; font: 400 18px/1.4 var(--serif); }
 
 @media (max-width: 860px) {
   .case-hero { padding-top: 80px; }
@@ -73,9 +69,7 @@
   .case-overview, .tab-panel { grid-template-columns: 1fr; }
   .tab-shot--phone { width: 60%; }
   .case-decisions li { grid-template-columns: 1fr; }
-  /* Sized to the screen so the longest name (ATLAS ACCOUNTANCY) never runs off a 320px phone. */
-  .case-next strong, .case-next:hover strong { font-size: 10.5vw; font-variation-settings: "wdth" 100; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .case-next strong, .tablist [role="tab"] { transition: none; }
+  .tablist [role="tab"] { transition: none; }
 }

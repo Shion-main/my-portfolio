@@ -82,6 +82,15 @@ for (const file of CHROME_ROUTES) {
 // Chapter frames offer the small wall-sized image to small screens.
 for (const p of projects) assert.ok(homeHtml.includes(`media/work/${p.slug}/wall/${p.desktop.src.split("/").pop()} 640w`), `${p.slug}: chapter frame has no small image`);
 
+// Every case study carries on into the next project: contact first, then the hand-off; no old next block, no footer.
+for (const p of projects) {
+  const nextP = projects[(projects.indexOf(p) + 1) % projects.length];
+  const page = await readFile(`dist/work/${p.slug}/index.html`, "utf8");
+  assert.ok(page.includes('class="handoff"') && page.includes(`href="/work/${nextP.slug}/"`) && page.includes(nextP.name), `${p.slug}: no hand-off to ${nextP.slug}`);
+  assert.ok(!page.includes("case-next") && !page.includes("site-foot"), `${p.slug}: the old next-project block or the footer is still there`);
+  assert.ok(page.indexOf('class="contact"') > 0 && page.indexOf('class="contact"') < page.indexOf('class="handoff"'), `${p.slug}: the contact block must come before the hand-off`);
+}
+
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
 // The full demo (Joshua's original direction) plays inside the case study; the live site (his second design, to the owner's brief) is one link away, in a new tab.
 assert.ok(!spaceCaseHtml.includes("owner’s version"), "Space Arabica: the live site is still called the owner's version");

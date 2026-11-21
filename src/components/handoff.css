@@ -1,0 +1,44 @@
+/* The end of every case study: the next project arrives, holds, and the camera dives into it.
+   Without the .motion class (no JavaScript, reduced motion) it is a plain full-screen "next project" section. */
+.handoff { position: relative; z-index: 1; color: var(--ink); background: var(--ground); }
+.handoff__stage { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; }
+.handoff__world { position: absolute; inset: 0; background: var(--ground); }
+.handoff__scene { position: absolute; inset: 0; }
+.handoff__flash { position: absolute; inset: 0; z-index: 20; opacity: 0; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(circle at 50% 50%, var(--giant) 0%, transparent 65%); }
+
+.handoff__info { position: absolute; left: var(--pad); top: calc(50% - 30px); translate: 0 -50%; width: min(380px, 30vw); z-index: 3; container-type: inline-size; }
+.handoff__info .label { color: inherit; opacity: .72; }
+.handoff__mask { margin-top: 14px; padding-bottom: 3px; overflow: hidden; }
+.handoff__info h2 { font: 800 min(clamp(30px, 3vw, 46px), 10.8cqi)/.95 var(--display); font-variation-settings: "wdth" 112; text-transform: uppercase; }
+.handoff__line { margin-top: 16px; font: 400 clamp(17px, 1.3vw, 21px)/1.4 var(--serif); }
+.handoff__continue { display: inline-flex; gap: 10px; align-items: center; margin-top: 22px; padding: 13px 20px; border-radius: 999px; background: var(--ink); color: var(--ground); font-weight: 600; font-size: 14px; text-decoration: none; transition: transform .3s var(--ease-in-out-entry); }
+.handoff__continue:hover { transform: translateY(-2px); }
+.handoff__hint { margin-top: 18px; }
+.handoff:not(.motion) .handoff__hint { display: none; }
+
+.handoff__desk { position: absolute; right: var(--pad); top: calc(50% - 30px); width: min(58vw, 1000px, calc((100svh - 250px) * 1.6)); translate: 0 -50%; z-index: 2; }
+.handoff__giant { position: absolute; left: 0; right: 0; bottom: -.07em; z-index: 1; text-align: center; white-space: nowrap; font-family: var(--display); font-size: 12vw; line-height: .8; text-transform: uppercase; color: var(--giant); font-variation-settings: "wdth" var(--wd, 100), "wght" var(--wt, 800); pointer-events: none; }
+.handoff__giant span { display: inline-block; }
+
+/* Pinned once hydrated: 300vh is the dive's end plus the pinned screen (handoffTrackScreens in scroll.ts).
+   The stage starts as dark as the contact block above it; the next project emerges from it. */
+.handoff.motion { height: 300vh; background: #070809; }
+.handoff.motion .handoff__stage { position: sticky; top: 0; }
+.handoff.motion .handoff__world { opacity: 0; }
+
+@media (max-width: 860px) {
+  .handoff__info { top: 76px; left: 20px; right: 20px; width: auto; translate: none; }
+  .handoff__line { margin-top: 10px; font-size: 16px; }
+  .handoff__continue { margin-top: 14px; padding: 11px 16px; }
+  .handoff__desk { left: 20px; right: 20px; width: auto; top: auto; bottom: 21vh; bottom: 21svh; translate: none; }
+}
+/* Landscape phones: text and laptop side by side, sized by the short height. */
+@media (max-width: 860px) and (max-height: 500px) {
+  .handoff__info { top: calc(50% + 22px); left: 20px; right: auto; width: 42vw; translate: 0 -50%; }
+  .handoff__info h2 { font-size: min(26px, 10.8cqi); }
+  .handoff__line { font-size: 15px; }
+  .handoff__desk { left: auto; right: 20px; top: calc(50% + 22px); bottom: auto; width: min(46vw, calc((100svh - 130px) * 1.6)); translate: 0 -50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .handoff__continue { transition: none; }
+}

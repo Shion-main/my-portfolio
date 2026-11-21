@@ -1,9 +1,10 @@
 import type { CSSProperties } from "react";
 import { nextProject, projectBySlug, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
-import { Contact, Footer, Header } from "../components/SiteChrome";
+import { Contact, Header } from "../components/SiteChrome";
 import { BrowserFrame } from "../components/DeviceFrames";
 import ScreenTabs from "../components/ScreenTabs";
+import CaseHandoff from "../components/CaseHandoff";
 import "./case.css";
 
 /** The one case-study template every project uses, in the project's own colours. */
@@ -85,14 +86,9 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
           <p className="case-evidence">{p.evidence}</p>
         </section>
 
-        <a className="case-next" href={asset(`work/${next.slug}/`)} style={{ "--next-ground": next.tokens.ground, "--next-ink": next.tokens.text, "--next-giant": next.tokens.giant } as CSSProperties}>
-          <span className="label">Next project</span>
-          <strong>{next.name}</strong>
-          <span className="case-next__line">{next.line}</span>
-        </a>
         <Contact />
+        <CaseHandoff next={next} />
       </main>
-      <Footer />
     </div>
   );
 }

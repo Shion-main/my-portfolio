@@ -909,6 +909,136 @@ check("space-arabica-demo-transitions", async () => {
   await context.close();
 });
 
+// ---- Case hand-off: case studies carry on into the next project (2026-11-22) ----
+const handoffGoTo = (page, s) => page.evaluate(s => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + s * innerHeight); }, s);
+const handoffCaught = async page => {
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.waitForFunction(() => window.__handoff.caught(), null, { timeout: 4000 });
+};
+const handoffPos = page => page.evaluate(() => -document.querySelector(".handoff").getBoundingClientRect().top / innerHeight);
+async function handoffOpen(path, options) {
+  const opened = await open(`${path}?checks`, options);
+  await opened.page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
+  return opened;
+}
+// From the hold, wheel like a reader until the next case opens.
+async function handoffWheelThrough(page, from = "space-arabica", to = "korte") {
+  await page.keyboard.press("Shift");
+  await handoffGoTo(page, .85); await handoffCaught(page); await page.waitForTimeout(300);
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < 40 && !page.url().includes(`/work/${to}/`); i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(60); }
+  await page.waitForURL(new RegExp(`/work/${to}/$`), { timeout: 5000 });
+  await page.waitForLoadState("load");
+}
+
+check("handoff-continues", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await handoffWheelThrough(page);
+  const top = await page.evaluate(() => document.querySelector(".case-hero__frame").getBoundingClientRect().top);
+  assert.ok(top < 200, `Korte opened but its hero is not at the top (${top}px)`);
+  await context.close();
+});
+
+check("handoff-overscroll-once", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.keyboard.press("Shift");
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, 1.9); await handoffCaught(page);
+  let navigations = 0;
+  page.on("framenavigated", f => { if (f === page.mainFrame()) navigations++; });
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < 3; i++) { await page.mouse.wheel(0, 400); await page.waitForTimeout(40); }
+  await page.waitForURL(/\/work\/korte\/$/, { timeout: 5000 });
+  await page.waitForTimeout(1500);
+  assert.equal(navigations, 1, `the hand-off opened ${navigations} pages`);
+  assert.match(page.url(), /\/work\/korte\/$/);
+  await context.close();
+});
+
+check("handoff-back-holds", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await handoffWheelThrough(page);
+  await page.goBack({ waitUntil: "load" });
+  assert.match(page.url(), /\/work\/space-arabica\//);
+  await page.waitForTimeout(2000);
+  assert.match(page.url(), /\/work\/space-arabica\//, "Back opened the next case again");
+  const st = await page.evaluate(() => {
+    const h = document.querySelector(".handoff");
+    const t = getComputedStyle(h.querySelector(".handoff__scene")).transform;
+    return { s: -h.getBoundingClientRect().top / innerHeight, scale: t === "none" ? 1 : new DOMMatrix(t).a, head: getComputedStyle(document.querySelector(".site-head")).color };
+  });
+  assert.ok(Math.abs(st.s - .85) <= .05, `Back landed at ${st.s.toFixed(3)}, not the hold`);
+  assert.ok(st.scale <= 1.05, `Back shows the dive (scale ${st.scale})`);
+  assert.equal(st.head, "rgb(238, 242, 234)", "the header colour does not follow Korte");
+  await context.close();
+});
+
+check("handoff-no-accidental-open", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForTimeout(1500);
+  assert.match(page.url(), /\/work\/space-arabica\//, "scrolling by script, with no reader input, opened the next case");
+  await page.reload({ waitUntil: "load" });
+  await page.waitForTimeout(2000);
+  assert.match(page.url(), /\/work\/space-arabica\//, "a reload at the end opened the next case");
+  await context.close();
+});
+
+check("handoff-finish-back", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.keyboard.press("Shift");
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, 1.5); await handoffCaught(page);
+  await page.evaluate(() => window.__handoff.settle(true));
+  await page.mouse.move(700, 450); await page.mouse.wheel(0, -100);
+  await page.waitForTimeout(1500);
+  const s = await handoffPos(page);
+  assert.ok(Math.abs(s - .85) <= .01, `stopping mid-dive heading back ended at ${s.toFixed(3)}, not the hold`);
+  assert.match(page.url(), /\/work\/space-arabica\//);
+  await context.close();
+});
+
+check("handoff-keyboard", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.focus(".contact-mail");
+  await page.keyboard.press("Tab");
+  await page.waitForTimeout(800);
+  const st = await page.evaluate(() => ({ focused: String(document.activeElement?.className), s: -document.querySelector(".handoff").getBoundingClientRect().top / innerHeight }));
+  assert.match(st.focused, /handoff__continue/, `Tab from the contact block focused "${st.focused}"`);
+  assert.ok(Math.abs(st.s - .85) <= .05, `focus left the hand-off at ${st.s.toFixed(3)}`);
+  assert.match(page.url(), /\/work\/space-arabica\//);
+  await Promise.all([page.waitForURL(/\/work\/korte\/$/), page.keyboard.press("Enter")]);
+  await context.close();
+});
+
+check("handoff-reduced", async () => {
+  const { page, context } = await open("/work/space-arabica/", { reducedMotion: "reduce" });
+  await page.keyboard.press("Shift");
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await page.mouse.move(700, 450); await page.mouse.wheel(0, 400);
+  await page.waitForTimeout(1500);
+  assert.match(page.url(), /\/work\/space-arabica\//, "reduced motion opened the next case by itself");
+  await Promise.all([page.waitForURL(/\/work\/korte\/$/), page.click(".handoff__continue")]);
+  await context.close();
+});
+
+check("handoff-phone", async () => {
+  for (const [w, h] of [[390, 844], [320, 740]]) {
+    for (const slug of SLUGS) {
+      const { page, context } = await open(`/work/${slug}/`, { width: w, height: h });
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      assert.ok(overflow <= 0, `${slug} at ${w}px: horizontal overflow ${overflow}px`);
+      await context.close();
+    }
+    const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h, isMobile: true, hasTouch: true });
+    await page.evaluate(() => window.__handoff.settle(false));
+    await handoffGoTo(page, 1.999); await handoffCaught(page);
+    const r = await page.evaluate(() => { const f = document.querySelector(".handoff__frame img").getBoundingClientRect(); return { l: f.left, t: f.top, r: f.right, b: f.bottom }; });
+    assert.ok(r.l <= 2 && r.t <= 2 && r.r >= w - 2 && r.b >= h - 2, `${w}px: the dive does not fill the screen (${JSON.stringify(r)})`);
+    await context.close();
+  }
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
