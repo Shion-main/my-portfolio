@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { projects, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
 import { BrowserFrame, PhoneFrame } from "./DeviceFrames";
-import { ARRIVE, COVER_AT, activeChapter, arrivalT, dolly, fitFontSize, glide, landing, leaveWords, momentAt, movesEnd, pushIn, pushOut, restCenter, restDrift } from "../motion/scroll";
+import { ARRIVE, COVER_AT, SETTLE_MS, activeChapter, clamp, easeInOut3, arrivalT, dolly, fitFontSize, glide, landing, leaveWords, momentAt, movesEnd, pushIn, pushOut, restCenter, restDrift, settleTarget } from "../motion/scroll";
 import { chapterScrollTop } from "./chapterScroll";
 import "./worlds.css";
 
@@ -197,6 +197,41 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
 
     const queue = () => { if (!frame) { last = 0; frame = requestAnimationFrame(draw); } };
 
+    // Finish a move the reader stopped inside, in the direction they were heading. Never under a finger.
+    let finishTimer = 0;
+    let touching = false;
+    let lastY = scrollY;
+    let dir: 1 | -1 = 1;
+    // Our own eased scroll rather than behavior: "smooth", which keeps heading for its target over the reader's own input.
+    let finishing = 0;
+    const stopFinishing = () => { cancelAnimationFrame(finishing); finishing = 0; };
+    const finish = () => {
+      finishTimer = 0;
+      if (reduced() || touching || finishing || !opts.settle) return;
+      const top = root.getBoundingClientRect().top;
+      const dest = settleTarget(-top / innerHeight, dir, COUNT);
+      if (dest === null) return;
+      const from = scrollY, to = top + scrollY + dest * innerHeight;
+      const duration = clamp(260 + Math.abs(to - from) * 0.5, 300, 700);
+      const start = performance.now();
+      const step = (now: number) => {
+        const k = clamp((now - start) / duration);
+        window.scrollTo(0, from + (to - from) * easeInOut3(k));
+        finishing = k < 1 ? requestAnimationFrame(step) : 0;
+      };
+      finishing = requestAnimationFrame(step);
+    };
+    const waitToFinish = () => { clearTimeout(finishTimer); finishTimer = window.setTimeout(finish, SETTLE_MS); };
+    const scrolled = () => {
+      const delta = scrollY - lastY;
+      if (delta) dir = delta > 0 ? 1 : -1;
+      lastY = scrollY;
+      queue();
+      waitToFinish();
+    };
+    const touchOn = () => { touching = true; stopFinishing(); };
+    const touchOff = () => { touching = false; waitToFinish(); };
+
     const fit = () => {
       const mobile = innerWidth <= 860;
       rects = [];
@@ -230,9 +265,16 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     // Jump to a linked chapter before the first draw, which would otherwise rewrite the address.
     goToHash();
     fit();
+    // A position the browser restored mid-move (a reload) finishes too.
+    waitToFinish();
     document.fonts?.ready.then(fit);
     window.addEventListener("load", settle, { once: true });
-    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("scroll", scrolled, { passive: true });
+    window.addEventListener("touchstart", touchOn, { passive: true });
+    // The reader's own input always wins over a finish in flight.
+    for (const type of ["wheel", "keydown", "pointerdown"]) window.addEventListener(type, stopFinishing, { passive: true });
+    window.addEventListener("touchend", touchOff, { passive: true });
+    window.addEventListener("touchcancel", touchOff, { passive: true });
     window.addEventListener("resize", fit);
     window.addEventListener("hashchange", goToHash);
     return () => {
@@ -240,7 +282,13 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       root.removeEventListener("focusin", follow);
       window.removeEventListener("load", settle);
       for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) window.removeEventListener(type, mark);
-      window.removeEventListener("scroll", queue);
+      clearTimeout(finishTimer);
+      stopFinishing();
+      for (const type of ["wheel", "keydown", "pointerdown"]) window.removeEventListener(type, stopFinishing);
+      window.removeEventListener("scroll", scrolled);
+      window.removeEventListener("touchstart", touchOn);
+      window.removeEventListener("touchend", touchOff);
+      window.removeEventListener("touchcancel", touchOff);
       window.removeEventListener("resize", fit);
       window.removeEventListener("hashchange", goToHash);
     };

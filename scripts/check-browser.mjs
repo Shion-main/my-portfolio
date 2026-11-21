@@ -522,6 +522,94 @@ check("hidden-words-no-click", async () => {
   await context.close();
 });
 
+// ---- Finish the move (2026-11-22) ----
+const position = () => (scrollY - (document.querySelector(".worlds").getBoundingClientRect().top + scrollY)) / innerHeight;
+const REST_SPANS = [[.7, 1.25], [2.25, 2.8], [3.8, 4.35], [5.35, 5.9]];
+const atRest = (s, px) => REST_SPANS.some(([a, b]) => s >= a - 2 / px && s <= b + 2 / px);
+const nearScreens = (s, want, px) => Math.abs(s - want) * px <= 2;
+async function settleOpen(options) {
+  const opened = await worldsOpen(options);
+  await opened.page.evaluate(() => window.__worlds.settle(true));
+  return opened;
+}
+
+check("settle-forward", async () => {
+  const { page, context } = await settleOpen();
+  await goTo(page, .975); await caughtUp(page);
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < 20 && await page.evaluate(position) < 1.25 + .3; i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(60); }
+  const stop = await page.evaluate(position);
+  assert.ok(stop > 1.25 + .25 && stop < 1.25 + .5, `the wheel stopped at ${stop}, outside the case this check is for`);
+  await page.waitForTimeout(1500);
+  const end = await page.evaluate(position);
+  assert.ok(nearScreens(end, 2.25, 900), `stopped at ${stop.toFixed(3)} heading forward, finished at ${end.toFixed(3)} instead of Korte's rest (2.25)`);
+  await context.close();
+});
+
+check("settle-back", async () => {
+  const { page, context } = await settleOpen();
+  await goTo(page, 2.25); await caughtUp(page); await page.waitForTimeout(300);
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < 20 && await page.evaluate(position) > 1.25 + .7; i++) { await page.mouse.wheel(0, -100); await page.waitForTimeout(60); }
+  const stop = await page.evaluate(position);
+  assert.ok(stop > 1.25 + .5 && stop < 1.25 + .75, `the wheel stopped at ${stop}, outside the case this check is for`);
+  await page.waitForTimeout(1500);
+  const end = await page.evaluate(position);
+  assert.ok(nearScreens(end, 1.25, 900), `stopped at ${stop.toFixed(3)} heading back, finished at ${end.toFixed(3)} instead of Space Arabica's rest (1.25)`);
+  await context.close();
+});
+
+check("settle-touch-held", async () => {
+  const { page, context } = await settleOpen({ hasTouch: true });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 700, y: 450 }] });
+  await goTo(page, 1.25 + .4);
+  const held = await page.evaluate(() => scrollY);
+  await page.waitForTimeout(600);
+  assert.equal(await page.evaluate(() => scrollY), held, "the page finished the move under a finger");
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await page.waitForTimeout(1500);
+  const end = await page.evaluate(position);
+  assert.ok(atRest(end, 900), `after the finger lifted the page stayed mid-move at ${end.toFixed(3)}`);
+  await context.close();
+});
+
+check("settle-pagedown", async () => {
+  const { page, context } = await settleOpen();
+  await goTo(page, .975); await caughtUp(page); await page.waitForTimeout(300);
+  await page.keyboard.press("PageDown");
+  await page.waitForTimeout(1800);
+  const end = await page.evaluate(position);
+  assert.ok(atRest(end, 900), `PageDown left the page mid-move at ${end.toFixed(3)}`);
+  assert.equal(new URL(page.url()).hash, "#work-korte", "PageDown from Space Arabica did not land on Korte");
+  await context.close();
+});
+
+check("settle-reload", async () => {
+  const { page, context } = await worldsOpen();
+  await goTo(page, 1.25 + .4); await caughtUp(page);
+  // Drop the chapter hash, so the restored scroll position (not a deep link) decides where the page is.
+  await page.evaluate(() => history.replaceState(null, "", "/?checks"));
+  await page.reload({ waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+  const end = await page.evaluate(position);
+  assert.ok(atRest(end, 900), `a reload mid-move stayed mid-move at ${end.toFixed(3)}`);
+  await context.close();
+});
+
+check("settle-input-wins", async () => {
+  const { page, context } = await settleOpen();
+  await goTo(page, .975); await caughtUp(page); await page.waitForTimeout(300);
+  await goTo(page, 1.25 + .4);
+  await page.waitForTimeout(170 + 100);
+  await page.mouse.move(700, 450);
+  await page.mouse.wheel(0, -300);
+  await page.waitForTimeout(1500);
+  const end = await page.evaluate(position);
+  assert.ok(nearScreens(end, 1.25, 900), `scrolling back during a finish ended at ${end.toFixed(3)} instead of back on Space Arabica (1.25)`);
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
