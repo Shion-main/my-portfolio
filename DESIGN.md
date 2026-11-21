@@ -16,7 +16,7 @@ Confident, crafted, community-minded. A dark stage where Joshua's own voice is q
 | `--muted` | `#8d959c` | Labels, supporting text |
 | `--rule` | `#262b30` | Rules and borders |
 
-Project chapters (ground / text / giant): Space Arabica `#1b130d` / `#f1e3cc` / `#c9934a` · Korte `#0c1626` / `#eef2ea` / `#9acb2d` · FluxTrack `#001c43` / `#ffffff` / `#ec1f28` · Atlas Treasury `#13161c` / `#e8edf6` / `#4f86f0`. FluxTrack and Atlas both come from MMCM, so they are split into saturated navy with red and neutral graphite with blue.
+Project chapters (ground / text / giant): Space Arabica `#1b130d` / `#f1e3cc` / `#c9934a` · Korte `#0c1626` / `#eef2ea` / `#9acb2d` · FluxTrack `#001c43` / `#ffffff` / `#ec1f28` · Atlas Accountancy `#13161c` / `#e8edf6` / `#4f86f0`. FluxTrack and Atlas both come from MMCM, so they are split into saturated navy with red and neutral graphite with blue.
 
 ## Typography
 

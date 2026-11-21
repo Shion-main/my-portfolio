@@ -7,7 +7,7 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const native = 'onpageswap' in window && 'onpagereveal' in window;
   const arrivalKey = 'portfolio-arrival';
-  const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-treasury'];
+  const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-accountancy'];
 
   // Returns { page: 'home' | 'case', slug } for same-origin portfolio URLs.
   const place = (value) => {

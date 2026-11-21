@@ -9,7 +9,7 @@ for (const [file, name] of [
   ["dist/work/space-arabica/index.html", "Space Arabica"],
   ["dist/work/korte/index.html", "Korte"],
   ["dist/work/fluxtrack/index.html", "FluxTrack"],
-  ["dist/work/atlas-treasury/index.html", "Atlas Treasury"],
+  ["dist/work/atlas-accountancy/index.html", "Atlas Accountancy"],
 ]) {
   const html = await readFile(file, "utf8");
   assert.ok(html.includes(name));
@@ -30,7 +30,7 @@ for (const [file, name] of [
 
 // Home: hero and project list, with Joshua's confirmed credits and no personal location.
 const homeHtml = await readFile("dist/index.html", "utf8");
-for (const text of ["I design how an idea", "Space Arabica", "Korte", "FluxTrack", "Atlas Treasury", "Design + build · team of 3", "UI/UX · Treasury module", "Independent designer &amp; developer"])
+for (const text of ["I design how an idea", "Space Arabica", "Korte", "FluxTrack", "Atlas Accountancy", "Design + build · team of 3", "UI/UX · Accountancy module", "Independent designer &amp; developer"])
   assert.ok(homeHtml.includes(text), `home is missing: ${text}`);
 const withoutClientLocation = homeHtml.replaceAll("Café website, Davao City", "").replaceAll("Café website · Davao City", "");
 assert.ok(!withoutClientLocation.includes("Davao City"), "no personal location on the home page");

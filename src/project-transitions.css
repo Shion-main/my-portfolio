@@ -11,7 +11,7 @@
 :root[data-morph-target="space-arabica"] .worlds:not(.motion) [data-chapter="space-arabica"] .showcase-desk .frame,
 :root[data-morph-target="korte"] .worlds:not(.motion) [data-chapter="korte"] .showcase-desk .frame,
 :root[data-morph-target="fluxtrack"] .worlds:not(.motion) [data-chapter="fluxtrack"] .showcase-desk .frame,
-:root[data-morph-target="atlas-treasury"] .worlds:not(.motion) [data-chapter="atlas-treasury"] .showcase-desk .frame { view-transition-name: project-frame; }
+:root[data-morph-target="atlas-accountancy"] .worlds:not(.motion) [data-chapter="atlas-accountancy"] .showcase-desk .frame { view-transition-name: project-frame; }
 
 /* Wipe: the next case study grows as a circle over the current one; heroes don't morph into each other. */
 :root[data-transition-kind="wipe"] .case-hero__frame { view-transition-name: none !important; }

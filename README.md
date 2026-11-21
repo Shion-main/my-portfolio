@@ -1,6 +1,6 @@
 # Joshua Sabuero — Portfolio
 
-A dark, scroll-driven portfolio published at https://by-shion.dev. A slanted wall of real screens sits behind the intro and project list; pointing at a project fills the wall with that project's screens. Four projects — Space Arabica, Korte, FluxTrack and Atlas Treasury — each take over the screen in the same chapter layout, and each has a case study built from one shared template. Opening a case study morphs the chapter's browser frame into the case-study hero.
+A dark, scroll-driven portfolio published at https://by-shion.dev. A slanted wall of real screens sits behind the intro and project list; pointing at a project fills the wall with that project's screens. Four projects — Space Arabica, Korte, FluxTrack and Atlas Accountancy — each take over the screen in the same chapter layout, and each has a case study built from one shared template. Opening a case study morphs the chapter's browser frame into the case-study hero.
 
 Design: `docs/superpowers/specs/2026-11-21-portfolio-redesign-design.md`. Build plan: `docs/superpowers/plans/2026-11-21-portfolio-redesign.md`.
 
@@ -58,7 +58,7 @@ npm run check:browser         # Chromium checks at four sizes, transitions, no-J
 ## Content rules
 
 - FluxTrack is credited as “Designed and built it · team of three” (a three-person capstone).
-- Atlas Treasury is an institutional MMCM project; Joshua was the UI/UX designer for its Treasury module. Signed-in names in its screens are replaced with “Demo Requester”.
+- Atlas Accountancy is an institutional MMCM project; Joshua was the UI/UX designer for its Accountancy module. Signed-in names in its screens are replaced with “Demo Requester”.
 - No personal location appears on the site.
 - Every screen's source, capture date and data note are in `public/media/work/<slug>/provenance.json`.
 
