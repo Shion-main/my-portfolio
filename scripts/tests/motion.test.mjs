@@ -2,7 +2,47 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { loadTs } from "./load-ts.mjs";
 
-const { chapterWipe, chapterLocal, giantAxes, fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, snap, trackProgress, range } = await loadTs("src/motion/scroll.ts");
+const { chapterWipe, chapterLocal, giantAxes, fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, snap, trackProgress, range,
+  trackScreens, restStart, restCenter, movesEnd, momentAt, activeChapter, settleTarget, glide, arrivalT, COVER_AT, wallDive } = await loadTs("src/motion/scroll.ts");
+
+const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} ≠ ${b}`);
+
+test("chapter timeline", () => {
+  near(trackScreens(4), 6.9);
+  near(restStart(0), .7); near(restStart(1), 2.25); near(restCenter(1), 2.525); near(movesEnd(4), 5.9);
+  assert.deepEqual(momentAt(-.1, 4), { from: -1, to: 0, t: 0 });
+  near(momentAt(.35, 4).t, .5);
+  assert.deepEqual(momentAt(1, 4), { from: 0, to: 0, t: 1 });
+  const m = momentAt(1.65, 4); assert.equal(m.from, 0); assert.equal(m.to, 1); near(m.t, .4);
+  assert.deepEqual(momentAt(9, 4), { from: 3, to: 3, t: 1 });
+  assert.equal(activeChapter({ from: -1, to: 0, t: .49 }), -1);
+  assert.equal(activeChapter({ from: 0, to: 1, t: .5 }), 1);
+});
+
+test("finishing a move", () => {
+  near(settleTarget(1.65, 1, 4), 2.25);   // forward, t .4
+  near(settleTarget(1.45, 1, 4), 1.25);   // forward, t .2
+  near(settleTarget(1.95, -1, 4), 1.25);  // back, t .7
+  near(settleTarget(2.05, -1, 4), 2.25);  // back, t .8
+  near(settleTarget(.3, 1, 4), .7);       // the arrival counts as a move
+  near(settleTarget(.1, -1, 4), 0);
+  assert.equal(settleTarget(1, 1, 4), null);      // resting
+  assert.equal(settleTarget(1.252, 1, 4), null);  // within .005 of an end
+  assert.equal(settleTarget(-.2, 1, 4), null);
+});
+
+test("glide", () => {
+  near(glide(0, .5, 16, false), .5 * (1 - Math.exp(-16 / 130)));
+  assert.equal(glide(0, 1.2, 16, false), 1.2);   // a jump is drawn at once
+  assert.equal(glide(0, .5, 16, true), .5);      // reduced motion
+  assert.equal(glide(.4999, .5, 16, false), .5); // converged
+});
+
+test("first arrival", () => {
+  near(arrivalT(0), .48); near(arrivalT(.35), .74); near(arrivalT(.7), 1);
+  near(COVER_AT, .7 * .16 / .52);
+  assert.equal(wallDive(-.6), 0); near(wallDive(COVER_AT), 1);
+});
 
 test("chapter wipes", () => {
   assert.equal(chapterWipe(-.2, 0, 4), 0);

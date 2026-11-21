@@ -4,6 +4,9 @@
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+export const easeIn3 = (t: number) => t * t * t;
+export const easeOut3 = (t: number) => 1 - Math.pow(1 - t, 3);
+export const easeOut4 = (t: number) => 1 - Math.pow(1 - t, 4);
 export const range = (v: number, start: number, end: number) => clamp((v - start) / (end - start));
 
 /** With reduced motion, any in-between state jumps to its nearer end. */
@@ -31,6 +34,64 @@ export function giantAxes(local: number, fit: number, first: boolean) {
 /** Font size that makes the giant word span 96% of the viewport, capped by height. `widthAt100` is its width at 100px. */
 export const fitFontSize = (widthAt100: number, viewportW: number, viewportH: number, mobile: boolean) =>
   Math.min((100 * viewportW * 0.96) / widthAt100, viewportH * (mobile ? 0.2 : 0.34));
+
+// ---- Chapter timeline, in screens of scroll from the moment the track pins ----
+// The first project arrives, then each project rests and a move carries it to the next.
+export const ARRIVE = 0.7;
+export const REST = 0.55;
+export const MOVE = 1;
+/** A drawn position further than this from the real one is a jump, drawn at once. */
+export const JUMP = 1;
+export const GLIDE_MS = 130;
+export const SETTLE_MS = 170;
+
+/** Track height in viewport heights. */
+export const trackScreens = (count: number) => ARRIVE + count * REST + (count - 1) * MOVE + 1;
+export const restStart = (i: number) => ARRIVE + i * (REST + MOVE);
+export const restCenter = (i: number) => restStart(i) + REST / 2;
+export const movesEnd = (count: number) => restStart(count - 1) + REST;
+
+/** Where the reader is: arriving (from -1 to 0), resting on a chapter (from === to, t 1), or t of the way through a move. */
+export type Moment = { from: number; to: number; t: number };
+
+export function momentAt(s: number, count: number): Moment {
+  if (s < ARRIVE) return { from: -1, to: 0, t: range(s, 0, ARRIVE) };
+  for (let i = 0; i < count - 1; i++) {
+    const start = restStart(i) + REST;
+    if (s < start) return { from: i, to: i, t: 1 };
+    if (s < start + MOVE) return { from: i, to: i + 1, t: (s - start) / MOVE };
+  }
+  return { from: count - 1, to: count - 1, t: 1 };
+}
+
+/** The chapter that counts as on screen: the incoming one once a move is halfway, -1 before the first arrives. */
+export const activeChapter = (m: Moment) => (m.t >= 0.5 ? m.to : m.from);
+
+/** Where to finish a move the reader stopped inside: forward past a quarter when heading forward, back short of three quarters when heading back. */
+export function settleTarget(s: number, dir: 1 | -1, count: number): number | null {
+  const spans: [number, number][] = [[0, ARRIVE]];
+  for (let i = 0; i < count - 1; i++) spans.push([restStart(i) + REST, restStart(i) + REST + MOVE]);
+  for (const [a, b] of spans) {
+    if (s <= a + 0.005 || s >= b - 0.005) continue;
+    const t = (s - a) / (b - a);
+    return (dir > 0 ? t > 0.25 : t > 0.75) ? b : a;
+  }
+  return null;
+}
+
+/** The drawn position glides toward the real one; jumps and reduced motion are drawn at once. */
+export function glide(cur: number, target: number, dtMs: number, reduced: boolean) {
+  const gap = target - cur;
+  if (reduced || Math.abs(gap) > JUMP || Math.abs(gap) < 0.0004) return target;
+  return cur + gap * (1 - Math.exp(-dtMs / GLIDE_MS));
+}
+
+/** The first project's arrival reuses the incoming half of a move. */
+export const arrivalT = (s: number) => lerp(0.48, 1, range(s, 0, ARRIVE));
+/** From here the first project is fully opaque over the wall. */
+export const COVER_AT = (ARRIVE * 0.16) / 0.52;
+/** The wall of screens rushes toward the camera as the first project arrives. */
+export const wallDive = (s: number) => easeIn3(range(s, -0.6, COVER_AT));
 
 export const WALL_PATTERN = ["d", "p", "d", "d", "p", "d", "p", "d", "d", "p", "d"] as const;
 
