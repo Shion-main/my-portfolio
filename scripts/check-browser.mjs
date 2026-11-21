@@ -370,6 +370,41 @@ check("deep-link-no-yank", async () => {
   await context.close();
 });
 
+check("chapters-landscape", async () => {
+  const { page, context } = await open("/?checks", { width: 844, height: 390, isMobile: true, hasTouch: true });
+  for (const slug of SLUGS) {
+    await page.evaluate(s => { location.hash = `work-${s}`; }, slug);
+    await page.waitForTimeout(500);
+    const st = await page.evaluate(s => {
+      const chapter = document.querySelector(`[data-chapter="${s}"]`);
+      const info = chapter.querySelector(".chapter-info").getBoundingClientRect();
+      const show = chapter.querySelector(".showcase").getBoundingClientRect();
+      const open = chapter.querySelector(".chapter-open").getBoundingClientRect();
+      const head = document.querySelector(".site-head").getBoundingClientRect();
+      const overlap = Math.max(0, Math.min(info.right, show.right) - Math.max(info.left, show.left)) * Math.max(0, Math.min(info.bottom, show.bottom) - Math.max(info.top, show.top));
+      return { overlap: Math.round(overlap), showTop: show.top, headBottom: head.bottom, openInView: open.top >= 0 && open.bottom <= innerHeight };
+    }, slug);
+    assert.equal(st.overlap, 0, `${slug}: the screens cover the chapter text`);
+    assert.ok(st.showTop >= st.headBottom, `${slug}: the screens run under the header`);
+    assert.ok(st.openInView, `${slug}: Open case study is off screen`);
+  }
+  await context.close();
+});
+
+check("list-touch-no-sticky-hover", async () => {
+  const { page, context } = await open("/?checks", { width: 390, height: 844, hasTouch: true, isMobile: true });
+  await page.tap('.row[data-slug="korte"]');
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => window.scrollTo(0, document.getElementById("work").offsetTop));
+  await page.waitForTimeout(500);
+  const st = await page.evaluate(() => ({
+    other: getComputedStyle(document.querySelector('.row[data-slug="space-arabica"]')).opacity,
+    tapped: getComputedStyle(document.querySelector('.row[data-slug="korte"] .name')).fontStyle,
+  }));
+  assert.deepEqual(st, { other: "1", tapped: "normal" }, "the list kept its hover look after a tap");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

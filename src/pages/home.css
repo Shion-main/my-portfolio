@@ -23,10 +23,15 @@
 .row .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); }
 .row .arrow { justify-self: end; font-size: 22px; transition: transform .45s var(--ease-in-out-entry); }
 .row .thumb { display: none; }
-.rows:hover .row:not(:hover) { opacity: .32; }
-.row:hover, .row:focus-visible { color: var(--hover); }
-.row:hover .name, .row:focus-visible .name { transform: translateX(16px); font-style: italic; }
-.row:hover .arrow { transform: translate(4px, 4px) rotate(-45deg); }
+.row:focus-visible { color: var(--hover); }
+.row:focus-visible .name { transform: translateX(16px); font-style: italic; }
+/* Hover only where a pointer can hover: a tap must not leave the list dimmed. */
+@media (hover: hover) {
+  .rows:hover .row:not(:hover) { opacity: .32; }
+  .row:hover { color: var(--hover); }
+  .row:hover .name { transform: translateX(16px); font-style: italic; }
+  .row:hover .arrow { transform: translate(4px, 4px) rotate(-45deg); }
+}
 
 .about { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr); gap: clamp(28px, 4vw, 72px); padding: 130px var(--pad); background: var(--page); }
 .about h2 { font: 300 clamp(34px, 3.6vw, 58px)/1.05 var(--serif); letter-spacing: -.02em; }

@@ -51,6 +51,14 @@
   .showcase { left: 20px; right: 20px; width: auto; top: auto; bottom: 21vh; bottom: 21svh; translate: none; }
   .showcase-caption { display: none; }
 }
+/* Landscape phones: text and screens side by side, screens sized by the short height. */
+@media (max-width: 860px) and (max-height: 500px) {
+  .chapter-info { top: calc(50% + 22px); left: 20px; right: auto; width: 42vw; translate: 0 -50%; }
+  .chapter-info h2 { font-size: 26px; }
+  .chapter-line { font-size: 15px; }
+  .facts { display: none; }
+  .showcase { left: auto; right: 20px; top: calc(50% + 22px); bottom: auto; width: min(46vw, calc((100svh - 130px) * 1.6)); translate: 0 -50%; }
+}
 @media (prefers-reduced-motion: reduce) {
   .chapter-open { transition: none; }
 }
