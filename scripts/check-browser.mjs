@@ -331,6 +331,25 @@ check("chapter-focus-visible", async () => {
   await context.close();
 });
 
+check("back-after-scroll", async () => {
+  const { page, context, errors } = await open("/?checks");
+  await page.click('.row[data-slug="korte"]');
+  await page.waitForTimeout(1500);
+  // Scroll on to Atlas by hand: the address still says #work-korte unless the page keeps it current.
+  await page.evaluate(() => { const a = document.getElementById("work-atlas-treasury"); window.scrollTo(0, a.getBoundingClientRect().top + scrollY); });
+  await page.waitForTimeout(600);
+  await Promise.all([page.waitForNavigation({ waitUntil: "load" }), page.click('[data-chapter="atlas-treasury"] .chapter-open')]);
+  await page.waitForTimeout(1100);
+  await page.goBack({ waitUntil: "load" });
+  await page.waitForFunction(() => {
+    const h2 = document.getElementById("chapter-atlas-treasury");
+    const r = h2.getBoundingClientRect();
+    return r.top >= 0 && r.bottom <= innerHeight && h2.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
+  }, null, { timeout: 2000 }).catch(async () => { throw new Error(`back landed on ${await page.evaluate(() => location.hash)} instead of Atlas`); });
+  assert.deepEqual(errors.filter(e => /view.?transition|duplicate/i.test(e)), [], "view transition errors");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

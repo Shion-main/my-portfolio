@@ -87,6 +87,9 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       const key = `${inside ? current : -1}|${covered}`;
       if (key !== last) {
         last = key;
+        // Keep the address on the chapter being read, so Back from a case study returns here.
+        const hash = inside ? `#work-${projects[current].slug}` : "";
+        if (location.hash !== hash && (inside || slugFromHash())) history.replaceState(history.state, "", `${location.pathname}${location.search}${hash}`);
         setActive(inside ? current : -1);
         report.current(inside ? projects[current].slug : null, covered);
       }
@@ -105,8 +108,9 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       if (index !== onScreen) window.scrollTo({ top: chapterScrollTop(projects[index].slug), behavior: "auto" });
     };
     root.addEventListener("focusin", follow);
-    fit();
+    // Jump to a linked chapter before the first draw, which would otherwise rewrite the address.
     goToHash();
+    fit();
     document.fonts?.ready.then(fit);
     window.addEventListener("load", goToHash, { once: true });
     window.addEventListener("scroll", queue, { passive: true });

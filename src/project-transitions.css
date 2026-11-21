@@ -6,11 +6,12 @@
 :root[data-transition-kind="morph"]::view-transition-old(root),
 :root[data-transition-kind="morph"]::view-transition-new(root) { animation-duration: 600ms; }
 
-/* Arriving home before React has named the active chapter. */
-:root[data-morph-target="space-arabica"] [data-chapter="space-arabica"] .showcase-desk .frame,
-:root[data-morph-target="korte"] [data-chapter="korte"] .showcase-desk .frame,
-:root[data-morph-target="fluxtrack"] [data-chapter="fluxtrack"] .showcase-desk .frame,
-:root[data-morph-target="atlas-treasury"] [data-chapter="atlas-treasury"] .showcase-desk .frame { view-transition-name: project-frame; }
+/* Arriving home before React has named the active chapter. Only before hydration: once .motion is on,
+   React names the active chapter's frame, so the two never both name one. */
+:root[data-morph-target="space-arabica"] .worlds:not(.motion) [data-chapter="space-arabica"] .showcase-desk .frame,
+:root[data-morph-target="korte"] .worlds:not(.motion) [data-chapter="korte"] .showcase-desk .frame,
+:root[data-morph-target="fluxtrack"] .worlds:not(.motion) [data-chapter="fluxtrack"] .showcase-desk .frame,
+:root[data-morph-target="atlas-treasury"] .worlds:not(.motion) [data-chapter="atlas-treasury"] .showcase-desk .frame { view-transition-name: project-frame; }
 
 /* Wipe: the next case study grows as a circle over the current one; heroes don't morph into each other. */
 :root[data-transition-kind="wipe"] .case-hero__frame { view-transition-name: none !important; }
