@@ -12,11 +12,11 @@ Joshua Sabuero's personal portfolio. It presents him as an independent designer 
 | --- | --- | --- |
 | `/` | Serif hero over a slanted, moving wall of real screens; project list (pointing at a row fills the wall with that project); four colour chapters in one layout; about with four services; contact | `src/pages/Home.tsx` |
 | `/work/space-arabica/`, `/work/korte/`, `/work/fluxtrack/`, `/work/atlas-accountancy/` | One case-study template: hero frame, overview and facts, four-tab screen gallery with a larger viewer, three decisions, reflection, next project | `src/pages/ProjectCase.tsx` |
-| `/work/space-arabica/demo/` | The café's seven-page site, hosted as a demo with a work-in-progress banner and every form disabled | `public/work/space-arabica/demo/` |
+| `/work/space-arabica/demo/` | The café's seven-page site, hosted as a demo of Joshua's original design (banner links to the owner's live site) with every form disabled; embedded in the Space Arabica case study | `public/work/space-arabica/demo/` |
 
 ## The four projects (all copy lives in `src/work/projects.ts`)
 
-- **Space Arabica** — café website in Ecoland, Davao City (the café's location). Sole designer & developer. Seven pages, each with its own motion idea. Preview online.
+- **Space Arabica** — café website in Ecoland, Davao City (the café's location). Sole designer & developer. Seven pages, each with its own motion idea. The owner then chose a different type of site, now live at spacearabica.com; the case study tells that as its fourth decision, embeds Joshua's design as a full working demo and links to the live site.
 - **Korte** — pickleball open play in the Philippines. Solo designer & developer, March–November 2026; Korte 3.0 is calmer and light by default. 112 organizers set up 373 meets between 30 March and 29 June 2026 (239 completed). Built with Next.js, Supabase, Convex. Screens are Korte 3.0 App Screens with made-up names.
 - **FluxTrack** — MMCM faculty attendance and facility utilization system. A three-person capstone: Joshua designed and built it; teammates had other responsibilities. 1,637 automated tests passing; campus rollout pending. Screens use demo data. The reporting dashboard with staff-like names (Figma `34:11280`) is never used.
 - **Atlas Accountancy** — an actual MMCM institutional project; Joshua was the UI/UX designer for its Accountancy module. Claims cover that module's design only. Signed-in names in screens are replaced with “Demo Requester”.

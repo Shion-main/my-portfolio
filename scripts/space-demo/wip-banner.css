@@ -1,4 +1,4 @@
-/* Work-in-progress banner for the hosted Space Arabica demo. */
+/* Banner for the hosted Space Arabica demo: my original design; the live site is the owner's version. */
 /* Portfolio demo banner and read-only input lock */
 :root {
   --wip-banner-height: 44px;
@@ -56,7 +56,13 @@
   color: #c9c7c0;
   font-size: 12px;
 }
-.wip-banner__back {
+.wip-banner__links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.wip-banner__back,
+.wip-banner__live {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -69,7 +75,8 @@
   white-space: nowrap;
   transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
 }
-.wip-banner__back:hover {
+.wip-banner__back:hover,
+.wip-banner__live:hover {
   border-color: var(--accent);
   color: var(--accent);
   background: #c18b3e14;
@@ -103,11 +110,15 @@
 @media (max-width: 680px) {
   :root {
     --wip-banner-height: 40px;}
-  .wip-banner__note {
+  .wip-banner__note,
+  .wip-banner__long {
     display: none;}
+  .wip-banner__badge {
+    white-space: nowrap;}
   .wip-banner__inner {
     gap: 10px;}
-  .wip-banner__back {
+  .wip-banner__back,
+  .wip-banner__live {
     padding: 4px 10px;
     font-size: 11px;}
 }

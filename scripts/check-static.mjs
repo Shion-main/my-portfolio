@@ -83,13 +83,21 @@ for (const file of CHROME_ROUTES) {
 for (const p of projects) assert.ok(homeHtml.includes(`media/work/${p.slug}/wall/${p.desktop.src.split("/").pop()} 640w`), `${p.slug}: chapter frame has no small image`);
 
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
-assert.ok(spaceCaseHtml.includes("View demo"));
+// The full demo plays inside the case study; the owner's live site is one link away, in a new tab.
+assert.ok(spaceCaseHtml.includes("Try the full demo") && spaceCaseHtml.includes('href="#demo"'), "Space Arabica: no link to the embedded demo");
+assert.ok(/<iframe[^>]*src="\/work\/space-arabica\/demo\/"[^>]*>/.test(spaceCaseHtml), "Space Arabica: the demo is not embedded");
+const frameTag = spaceCaseHtml.match(/<iframe[^>]*>/)[0];
+assert.ok(frameTag.includes('loading="lazy"') && /title="[^"]+"/.test(frameTag), "Space Arabica: the embedded demo needs lazy loading and a title");
+assert.ok(/<a[^>]*href="https:\/\/spacearabica\.com\/"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/.test(spaceCaseHtml), "Space Arabica: no safe link to the live site");
+assert.ok(spaceCaseHtml.includes("Four decisions"), "Space Arabica: the decisions heading does not count four");
 assert.ok(!spaceCaseHtml.includes("vercel.app"));
 
-// The hosted Space Arabica demo: the current seven pages, each marked as a work in progress, with nothing that sends.
+// The hosted Space Arabica demo: Joshua's original design, seven pages, each with the banner (live-site link, back link that leaves the frame), with nothing that sends.
 for (const page of ["index.html", "menu.html", "full-menu.html", "space.html", "order.html", "story.html", "contact.html"]) {
   const demoHtml = await readFile(`dist/work/space-arabica/demo/${page}`, "utf8");
-  assert.ok(demoHtml.includes("Work in progress") && demoHtml.includes('class="wip-banner"'), `${page}: banner`);
+  assert.ok(demoHtml.includes("My original design") && demoHtml.includes('class="wip-banner"'), `${page}: banner`);
+  assert.ok(/<a class="wip-banner__back" href="\.\.\/" target="_top"/.test(demoHtml), `${page}: the back link would open the portfolio inside the frame`);
+  assert.ok(/<a class="wip-banner__live" href="https:\/\/spacearabica\.com\/" target="_blank" rel="noopener noreferrer"/.test(demoHtml), `${page}: no link to the live site`);
   for (const match of demoHtml.matchAll(/<(?:input|textarea|select)[^>]*>/g))
     assert.ok(match[0].includes("disabled") && match[0].includes("readonly"), `${page}: live field ${match[0].slice(0, 60)}`);
   for (const match of demoHtml.matchAll(/<button[^>]*type="submit"[^>]*>/g))
@@ -99,5 +107,5 @@ for (const page of ["index.html", "menu.html", "full-menu.html", "space.html", "
 }
 
 console.log(
-  "Static checks passed: five prerendered routes, chapters and case studies complete, seven-page Space Arabica demo with the WIP banner and nothing that sends, official email, all local references resolve.",
+  "Static checks passed: five prerendered routes, chapters and case studies complete, seven-page Space Arabica demo with its banner and nothing that sends, official email, all local references resolve.",
 );

@@ -12,7 +12,7 @@ test("every project fills the same template", () => {
   for (const p of projects) {
     assert.equal(p.facts.length, 3, p.slug);
     assert.equal(p.tabs.length, 4, p.slug);
-    assert.equal(p.decisions.length, 3, p.slug);
+    assert.ok([3, 4].includes(p.decisions.length), p.slug);
     assert.ok(p.wall.desktop.length >= 4 && (p.phone ? p.wall.phone.length >= 4 : p.wall.phone.length === 0), p.slug);
     for (const shot of [p.desktop, p.phone, ...p.tabs.flatMap(t => [t.desktop, t.phone])].filter(Boolean)) {
       assert.match(shot.src, new RegExp(`^media/work/${p.slug}/[a-z0-9-]+\\.webp$`));
@@ -56,6 +56,16 @@ test("Atlas has no phone app, so nothing shows it on a phone", () => {
   assert.ok(shots.every(s => /-desktop\.webp$/.test(s.src)), "an Atlas screen is not a desktop screen");
   assert.doesNotMatch([atlas.caption, ...shots.flatMap(s => [s.alt, s.caption])].join(" "), /phone|portrait|-tall/i);
   for (const slug of ["space-arabica", "korte", "fluxtrack"]) assert.ok(projectBySlug(slug).phone && projectBySlug(slug).tabs.every(t => t.phone), slug);
+});
+
+test("Space Arabica tells the pivot and links the owner's live site", () => {
+  const sa = projectBySlug("space-arabica");
+  const last = sa.decisions.at(-1);
+  assert.equal(last.title, "The owner’s call.");
+  assert.match(last.problem, /owner wanted a different type of website/);
+  assert.match(last.result, /spacearabica\.com/);
+  assert.deepEqual(sa.live, { url: "https://spacearabica.com/", label: "See the live site — the owner’s version" });
+  assert.equal(sa.demo, "work/space-arabica/demo/");
 });
 
 test("next project loops", () => {

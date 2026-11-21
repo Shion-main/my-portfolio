@@ -12,6 +12,16 @@
 .case-overview h1 { margin-top: 12px; font: 800 clamp(40px, 8.5vw, 150px)/.84 var(--display); font-variation-settings: "wdth" 118; text-transform: uppercase; color: var(--giant); overflow-wrap: anywhere; }
 .case-question { font: italic 400 clamp(22px, 2vw, 30px)/1.25 var(--serif); }
 .case-intro { margin-top: 16px; max-width: 46ch; font-size: 17px; }
+.case-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.case-actions .case-demo { margin-top: 0; }
+.case-live { display: inline-flex; gap: 8px; align-items: center; padding: 11px 17px; border: 1px solid color-mix(in srgb, var(--ink) 40%, transparent); border-radius: 999px; color: var(--ink); font-weight: 600; font-size: 14px; text-decoration: none; }
+.case-live:hover { border-color: var(--ink); }
+/* The full demo, running inside the case study. */
+.case-embed { padding: 90px var(--pad) 0; }
+.case-embed__head { display: grid; gap: 10px; max-width: 760px; }
+.case-embed__note { font: 400 clamp(17px, 1.3vw, 20px)/1.45 var(--serif); }
+.case-embed__frame { margin-top: 28px; width: 100%; height: 82vh; height: 82svh; aspect-ratio: auto; border-radius: 14px; }
+.case-embed__frame iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: #101116; }
 .case-demo { display: inline-flex; gap: 8px; margin-top: 22px; padding: 12px 18px; border-radius: 999px; background: var(--ink); color: var(--ground); font-weight: 600; font-size: 14px; text-decoration: none; }
 .case-facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 24px; margin-top: 12px; }
 .case-facts div { padding: 14px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); }
@@ -58,6 +68,8 @@
 @media (max-width: 860px) {
   .case-hero { padding-top: 80px; }
   .case-hero .case-hero__frame { height: 40vh; height: 40svh; }
+  .case-embed { padding-top: 64px; }
+  .case-embed__frame { height: 78vh; height: 78svh; }
   .case-overview, .tab-panel { grid-template-columns: 1fr; }
   .tab-shot--phone { width: 60%; }
   .case-decisions li { grid-template-columns: 1fr; }

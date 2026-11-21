@@ -7,6 +7,8 @@ import ScreenTabs from "../components/ScreenTabs";
 import "./case.css";
 
 /** The one case-study template every project uses, in the project's own colours. */
+const COUNT_WORDS: Record<number, string> = { 3: "Three", 4: "Four" };
+
 export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
   const p = projectBySlug(slug);
   const next = nextProject(slug);
@@ -29,7 +31,12 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
           <div>
             <p className="case-question">{p.question}</p>
             <p className="case-intro">{p.intro}</p>
-            {p.demo && <a className="case-demo" href={asset(p.demo)}>View demo <span aria-hidden="true">↗</span></a>}
+            {(p.demo || p.live) && (
+              <div className="case-actions">
+                {p.demo && <a className="case-demo" href="#demo">Try the full demo <span aria-hidden="true">↓</span></a>}
+                {p.live && <a className="case-live" href={p.live.url} target="_blank" rel="noopener noreferrer">{p.live.label} <span aria-hidden="true">↗</span></a>}
+              </div>
+            )}
           </div>
           <dl className="case-facts">
             {p.caseFacts.map(f => <div key={f.term}><dt>{f.term}</dt><dd>{f.detail}</dd></div>)}
@@ -39,7 +46,7 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
         <ScreenTabs tabs={p.tabs} title={p.name} />
 
         <section className="case-decisions" aria-labelledby="decisions-title">
-          <h2 className="label" id="decisions-title">Three decisions</h2>
+          <h2 className="label" id="decisions-title">{`${COUNT_WORDS[p.decisions.length] ?? p.decisions.length} decisions`}</h2>
           <ol>
             {p.decisions.map((d, i) => (
               <li key={d.title}>
@@ -54,6 +61,23 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
             ))}
           </ol>
         </section>
+
+        {p.demo && (
+          <section className="case-embed" id="demo" aria-labelledby="demo-title">
+            <div className="case-embed__head">
+              <h2 className="label" id="demo-title">My design · the full site</h2>
+              <p className="case-embed__note">The whole site as I designed it. Every page works inside this frame; forms are switched off.</p>
+              <div className="case-actions">
+                <a className="case-demo" href={asset(p.demo)}>Open full screen <span aria-hidden="true">↗</span></a>
+                {p.live && <a className="case-live" href={p.live.url} target="_blank" rel="noopener noreferrer">{p.live.label} <span aria-hidden="true">↗</span></a>}
+              </div>
+            </div>
+            <div className="frame frame--browser case-embed__frame">
+              <div className="frame__bar" aria-hidden="true"><i /><i /><i /><span>{p.name} — my design</span></div>
+              <iframe src={asset(p.demo)} title={`${p.name} website — my original design, running as a demo`} loading="lazy" />
+            </div>
+          </section>
+        )}
 
         <section className="case-reflection" aria-labelledby="reflection-title">
           <h2 className="label" id="reflection-title">Looking back</h2>

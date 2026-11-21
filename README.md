@@ -35,7 +35,7 @@ Open the URL Vite prints (port 8080). `npm run build` builds the client and prer
 The build never runs these; their output is committed.
 
 - `node scripts/build-work-media.mjs` — turns captured screens into `public/media/work/<slug>/` WebP files, wall tiles and `provenance.json`, and replaces the signed-in name in Atlas screens. Set `WORK_MEDIA_SOURCE` to the folder of source PNGs.
-- `node scripts/sync-space-demo.mjs` — copies the current Space Arabica build into the hosted demo with the work-in-progress banner and every form disabled. Set `SPACE_ARABICA_SITE` to `space-arabica-2/local-site`.
+- `node scripts/sync-space-demo.mjs` — copies Joshua's Space Arabica design into the hosted demo with a banner (my original design · link to the owner's live site · back to the project) and every form disabled; the case study embeds it. Set `SPACE_ARABICA_SITE` to `space-arabica-2/local-site`.
 - `node scripts/build-social-cover.mjs` — renders `scripts/social-cover.html` to `public/media/social-cover.png`.
 
 ## Validation

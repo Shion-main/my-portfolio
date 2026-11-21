@@ -878,6 +878,23 @@ check("atlas-no-phone", async () => {
   await caseView.context.close();
 });
 
+// ---- Space Arabica: the full demo inside the case study (2026-11-22) ----
+check("space-arabica-demo-embed", async () => {
+  const { page, context, errors } = await open("/work/space-arabica/");
+  await page.click('a[href="#demo"]');
+  await page.waitForTimeout(800);
+  const inView = await page.evaluate(() => { const r = document.getElementById("demo").getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; });
+  assert.ok(inView, "Try the full demo does not bring the demo on screen");
+  const frame = page.frameLocator("#demo iframe");
+  await frame.locator(".wip-banner").waitFor({ timeout: 8000 });
+  assert.equal(await frame.locator(".wip-banner__back").getAttribute("target"), "_top", "the back link would open the portfolio inside the frame");
+  assert.match(await frame.locator("body").innerText(), /Space Arabica|SPACE ARABICA/i, "the demo did not load inside the frame");
+  const live = page.locator('#demo a[href="https://spacearabica.com/"]');
+  assert.equal(await live.getAttribute("target"), "_blank");
+  assert.deepEqual(errors.filter(e => !/aborted|skipped/i.test(e)), [], "console errors");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
