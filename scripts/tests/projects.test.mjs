@@ -13,8 +13,8 @@ test("every project fills the same template", () => {
     assert.equal(p.facts.length, 3, p.slug);
     assert.equal(p.tabs.length, 4, p.slug);
     assert.equal(p.decisions.length, 3, p.slug);
-    assert.ok(p.wall.desktop.length >= 4 && p.wall.phone.length >= 4, p.slug);
-    for (const shot of [p.desktop, p.phone, ...p.tabs.flatMap(t => [t.desktop, t.phone])]) {
+    assert.ok(p.wall.desktop.length >= 4 && (p.phone ? p.wall.phone.length >= 4 : p.wall.phone.length === 0), p.slug);
+    for (const shot of [p.desktop, p.phone, ...p.tabs.flatMap(t => [t.desktop, t.phone])].filter(Boolean)) {
       assert.match(shot.src, new RegExp(`^media/work/${p.slug}/[a-z0-9-]+\\.webp$`));
       assert.ok(shot.alt.length > 10, `${p.slug} alt text`);
     }
@@ -43,6 +43,17 @@ test("credits are worded as Joshua confirmed", () => {
   assert.match(text(projectBySlug("korte")), /112 organizers/);
   for (const p of projects) assert.doesNotMatch(text(p), /concept|Aisha|Dones/i, p.slug);
   assert.doesNotMatch(text(projectBySlug("fluxtrack")), /\b(sole|solo)\b/i);
+});
+
+test("Atlas has no phone app, so nothing shows it on a phone", () => {
+  const atlas = projectBySlug("atlas-accountancy");
+  assert.equal(atlas.phone, undefined);
+  assert.ok(atlas.tabs.every(t => t.phone === undefined));
+  assert.deepEqual(atlas.wall.phone, []);
+  const shots = [atlas.desktop, ...atlas.tabs.map(t => t.desktop)];
+  assert.ok(shots.every(s => /-desktop\.webp$/.test(s.src)), "an Atlas screen is not a desktop screen");
+  assert.doesNotMatch([atlas.caption, ...shots.flatMap(s => [s.alt, s.caption])].join(" "), /phone|portrait|-tall/i);
+  for (const slug of ["space-arabica", "korte", "fluxtrack"]) assert.ok(projectBySlug(slug).phone && projectBySlug(slug).tabs.every(t => t.phone), slug);
 });
 
 test("next project loops", () => {

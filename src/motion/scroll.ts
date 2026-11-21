@@ -139,9 +139,12 @@ export function wallColumn(index: number): { dir: 1 | -1; speed: number; duratio
 
 type ScreenLists = { desktop: string[]; phone: string[] };
 
-/** Which project's screen a tile shows: a mix of all projects, or only the one being pointed at. */
+/** Which project's screen a tile shows: a mix of all projects, or only the one being pointed at.
+ *  Phone tiles never show a project without a phone app; pointing at one returns null (its phone columns hide). */
 export function wallSource(which: "all" | number, type: "desktop" | "phone", col: number, i: number, lists: ScreenLists[]) {
-  const project = which === "all" ? (col * 3 + i) % lists.length : which;
+  const pool = lists.map((_, k) => k).filter(k => lists[k][type].length > 0);
+  if (which !== "all" && !pool.includes(which)) return null;
+  const project = which === "all" ? pool[(col * 3 + i) % pool.length] : which;
   const list = lists[project][type];
   const index = which === "all" ? (col + i) % list.length : (col * 2 + i) % list.length;
   return { project, name: list[index] };

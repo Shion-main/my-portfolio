@@ -4,7 +4,8 @@
 
 export type ProjectSlug = "space-arabica" | "korte" | "fluxtrack" | "atlas-accountancy";
 export type Shot = { src: string; alt: string; caption: string };
-export type Tab = { title: string; desktop: Shot; phone: Shot };
+/** `phone` is absent for projects with no phone app (Atlas). */
+export type Tab = { title: string; desktop: Shot; phone?: Shot };
 export type Fact = { term: string; detail: string };
 export type Decision = { title: string; problem: string; choice: string; result: string };
 
@@ -18,7 +19,7 @@ export type Project = {
   facts: [Fact, Fact, Fact];
   caption: string;
   desktop: Shot & { title: string };
-  phone: Shot;
+  phone?: Shot;
   question: string;
   intro: string;
   caseFacts: Fact[];
@@ -98,7 +99,7 @@ export const projects: readonly Project[] = [
       { term: "In use", detail: "112 organizers ran 373 meets, Mar–Jun 2026" },
     ],
     caption: "Organizer on a laptop · player on a phone",
-    desktop: { ...korte("live-desktop", "Korte live session with four courts, scores to enter and a backup reminder", "Live courts on a laptop"), title: "Korte — Live courts" },
+    desktop: { ...korte("live-desktop", "Korte live session on a laptop: courts in play with scores to enter, and Up next below", "Live courts on a laptop"), title: "Korte — Live courts" },
     phone: korte("upnext-phone", "Korte player view showing You’re up next, tonight’s record and rankings", "Player · you’re up next"),
     question: "How does one app serve the players, the organizers and the venues of a pickleball community?",
     intro: "Korte is an all-in-one app for the pickleball community in the Philippines. Players find open play, book courts and follow their standings on their phones; organizers create meets and run fair sessions from an iPad or laptop beside the court; venues list their courts, take bookings and put the live courts on a TV. I designed and built all of it, from v1 in March to Korte 3.0 in October.",
@@ -186,9 +187,8 @@ export const projects: readonly Project[] = [
       { term: "Size", detail: "100+ screens & states" },
       { term: "Scope", detail: "Flows, UI, design system" },
     ],
-    caption: "Request · form, comments and journey",
+    caption: "New request · step 3 of 5",
     desktop: { ...atlas("step3-desktop", "Atlas reimbursement request at step 3, payment terms and schedule", "New request · step 3 of 5"), title: "Atlas — New request, step 3" },
-    phone: atlas("form-tall", "Atlas request window stacked three ways: the filled form, its comments and its approval journey", "Form, comments and journey"),
     question: "How do you make a payment request easy to file and easy to follow?",
     intro: "Atlas Accountancy is MMCM’s accountancy module, where requesters file reimbursements, vendor payments and cash advances. As its UI/UX designer, I designed how they file each request and how they track it to a decision.",
     caseFacts: [
@@ -198,10 +198,10 @@ export const projects: readonly Project[] = [
       { term: "Delivered", detail: "Request flows, component library, prototype" },
     ],
     tabs: [
-      { title: "File a request", desktop: atlas("step1-desktop", "Reimbursement step 1, requester information", "Step 1 · requester information"), phone: atlas("form-tall", "The submitted request as a form, comments and journey", "The submitted request, three ways") },
-      { title: "Payment terms", desktop: atlas("step3-desktop", "Reimbursement step 3, payment terms and schedule", "Step 3 · payment terms"), phone: atlas("step3-tall", "Close-up of the payment terms step", "Payment terms, close up") },
-      { title: "Track it", desktop: atlas("journey-desktop", "Request journey tab showing each approval step", "The journey view"), phone: atlas("journey-tall", "Close-up of the request journey", "Who has it, and what’s next") },
-      { title: "My requests", desktop: atlas("list-desktop", "My requests list with status for each request", "Every request in one list"), phone: atlas("list-tall", "Close-up of the requests list and navigation", "Requests, close up") },
+      { title: "File a request", desktop: atlas("step1-desktop", "Reimbursement step 1, requester information", "Step 1 · requester information") },
+      { title: "Payment terms", desktop: atlas("step3-desktop", "Reimbursement step 3, payment terms and schedule", "Step 3 · payment terms") },
+      { title: "Track it", desktop: atlas("journey-desktop", "Request journey tab showing each approval step", "The journey view") },
+      { title: "My requests", desktop: atlas("list-desktop", "My requests list with status for each request", "Every request in one list") },
     ],
     decisions: [
       { title: "One shell for four requests.", problem: "Four request types had different fields but the same life cycle.", choice: "One shell for all of them: a request list, a stepper-driven form, a review step and a journey view.", result: "Learning one request teaches all four." },
@@ -212,7 +212,7 @@ export const projects: readonly Project[] = [
     evidence: "Screens come from the Atlas design file. Signed-in names are replaced with a demo requester. Claims cover the Accountancy module’s design only.",
     wall: {
       desktop: ["step3-desktop", "journey-desktop", "list-desktop", "step1-desktop", "login-desktop"],
-      phone: ["form-tall", "list-tall", "journey-tall", "step1-tall", "step3-tall"],
+      phone: [],
     },
     giantFit: 122,
     glow: "rgba(79, 134, 240, .2)",

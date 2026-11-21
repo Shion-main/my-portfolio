@@ -858,6 +858,26 @@ check("names-not-clipped", async () => {
   }
 });
 
+// ---- Atlas has no phone app (2026-11-22) ----
+check("atlas-no-phone", async () => {
+  const { page, context } = await open("/?checks");
+  const home = await page.evaluate(() => [...document.querySelectorAll("[data-chapter]")].map(c => [c.dataset.chapter, !!c.querySelector(".showcase-phone, .frame--phone")]));
+  assert.deepEqual(home, [["space-arabica", true], ["korte", true], ["fluxtrack", true], ["atlas-accountancy", false]], `phones on the home page: ${JSON.stringify(home)}`);
+  await wallReady(page);
+  await page.evaluate(() => window.__wall.show("atlas-accountancy"));
+  await page.waitForTimeout(900);
+  const phoneColumns = await page.evaluate(() => [...document.querySelectorAll(".wall .col--phone")].map(c => getComputedStyle(c).opacity));
+  assert.ok(phoneColumns.length > 0 && phoneColumns.every(o => o === "0"), `pointing at Atlas still shows phone columns: ${phoneColumns.join(", ")}`);
+  await page.evaluate(() => window.__wall.show("korte"));
+  await page.waitForTimeout(900);
+  assert.ok((await page.evaluate(() => [...document.querySelectorAll(".wall .col--phone")].map(c => getComputedStyle(c).opacity))).every(o => o === "1"), "phone columns did not come back for Korte");
+  await context.close();
+  const caseView = await open("/work/atlas-accountancy/");
+  const phones = await caseView.page.evaluate(() => document.querySelectorAll(".frame--phone, .tab-shot--phone").length);
+  assert.equal(phones, 0, "the Atlas case study shows a phone");
+  await caseView.context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

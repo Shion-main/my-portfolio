@@ -87,6 +87,13 @@ test("wall columns alternate and stay in range", () => {
   }
 });
 
+test("phone tiles never show a project without a phone", () => {
+  const lists = [0, 1, 2, 3].map(k => ({ desktop: [`d${k}a`, `d${k}b`], phone: k === 3 ? [] : [`p${k}a`] }));
+  for (let col = 0; col < 11; col++) for (let i = 0; i < 8; i++) assert.notEqual(wallSource("all", "phone", col, i, lists).project, 3);
+  assert.equal(wallSource(3, "phone", 0, 0, lists), null);
+  assert.equal(wallSource(3, "desktop", 0, 1, lists).name, "d3b");
+});
+
 test("wall sources mix in all mode and stay on one project when pointing", () => {
   const lists = [0, 1, 2, 3].map(k => ({ desktop: [`d${k}a`, `d${k}b`], phone: [`p${k}a`] }));
   assert.deepEqual(new Set([0, 1, 2, 3].map(i => wallSource("all", "desktop", 0, i, lists).project)), new Set([0, 1, 2, 3]));

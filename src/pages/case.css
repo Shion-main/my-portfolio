@@ -24,6 +24,7 @@
 .tablist [role="tab"][aria-selected="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
 .tab-panel { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .62fr); gap: 24px; align-items: end; margin-top: 28px; }
 .tab-panel[hidden] { display: none; }
+.tab-panel--solo { grid-template-columns: minmax(0, 1fr); max-width: 1100px; }
 .tab-shot figcaption { margin-top: 10px; }
 .tab-shot__frame { position: relative; }
 .tab-shot--phone .frame { width: 100%; }

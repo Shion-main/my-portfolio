@@ -9,9 +9,10 @@ const lists = projects.map(p => p.wall);
 
 function tileSrc(which: Show, type: "d" | "p", col: number, i: number) {
   const index = which === "all" ? "all" : projects.findIndex(p => p.slug === which);
-  const { project, name } = wallSource(index, type === "d" ? "desktop" : "phone", col, i, lists);
-  return asset(`media/work/${projects[project].slug}/wall/${name}.webp`);
+  const source = wallSource(index, type === "d" ? "desktop" : "phone", col, i, lists);
+  return source && asset(`media/work/${projects[source.project].slug}/wall/${source.name}.webp`);
 }
+const phoneless = (show: Show) => show !== "all" && projects.find(p => p.slug === show)?.wall.phone.length === 0;
 
 const reducedMotion = () => typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -47,7 +48,8 @@ export default function ScreenWall({ show, hidden }: { show: Show; hidden: boole
       const front = a.classList.contains("on") ? a : b;
       const back = front === a ? b : a;
       const src = tileSrc(target, tile.dataset.t as "d" | "p", Number(tile.dataset.c), Number(tile.dataset.i));
-      if (front.getAttribute("src") === src) return;
+      // A project without a phone app keeps the phone tiles as they are; its phone columns fade out instead.
+      if (!src || front.getAttribute("src") === src) return;
       back.src = src;
       back.decode().catch(() => undefined).then(() => {
         if (shown.current !== target || !back.complete || back.naturalWidth === 0) return;
@@ -88,8 +90,8 @@ export default function ScreenWall({ show, hidden }: { show: Show; hidden: boole
             const i = k % count;
             return (
               <div className="tile" key={k} data-t={type} data-c={c} data-i={i} style={{ "--i": (c * 2 + i) % 20 } as React.CSSProperties}>
-                <img className="on" src={tileSrc("all", type, c, i)} alt="" decoding="async" />
-                <img src={tileSrc("all", type, c, i)} alt="" decoding="async" />
+                <img className="on" src={tileSrc("all", type, c, i)!} alt="" decoding="async" />
+                <img src={tileSrc("all", type, c, i)!} alt="" decoding="async" />
               </div>
             );
           })}
@@ -102,7 +104,7 @@ export default function ScreenWall({ show, hidden }: { show: Show; hidden: boole
   const glow = pointing ? projects.find(p => p.slug === current)?.glow : undefined;
   return (
     <>
-      <div ref={wall} className={`wall${hidden ? " off" : ""}`} aria-hidden="true" data-show={current}>
+      <div ref={wall} className={`wall${hidden ? " off" : ""}${phoneless(current) ? " no-phones" : ""}`} aria-hidden="true" data-show={current}>
         <div className="wall-tilt">{columns}</div>
       </div>
       <div ref={shade} className={`wall-shade${hidden ? " off" : ""}`} aria-hidden="true" />

@@ -15,10 +15,10 @@ Current build: the dark “Index & Worlds” redesign (design: `docs/superpowers
 
 ## Results (2026-11-22, push-through transitions, branch redesign/index-worlds)
 
-- `npm test`: 30 passed, 0 failed.
+- `npm test`: 32 passed, 0 failed.
 - `npm run typecheck`, `npm run lint`: clean.
 - `npm run build`: five routes prerendered; JS 60.0 KB and CSS 5.7 KB gzipped.
-- `npm run check:browser`: 45 of 45 passed (Chromium 153), including seven added from the final review and one for long names; `node scripts/check-static.mjs`: passed.
+- `npm run check:browser`: 46 of 46 passed (Chromium 153), including seven added from the final review, one for long names and one that Atlas shows no phone; `node scripts/check-static.mjs`: passed.
 - Frame budget, wheel-scrolling the arrival and all three moves at 1440×900 on this laptop's integrated AMD Radeon (D3D11): p95 16.7 ms, no frame over 20 ms; a warm arrival p95 16.8 ms. At 4× CPU throttle p95 33 ms. Headless Chromium draws in software by default (SwiftShader), where the blurs cost several times more (p95 33–50 ms); the budget is judged on the GPU.
 - Known cost: a visitor's very first arrival (cold page) drops 7–12 frames on that GPU, against 1 for the old circle; every later pass holds 60 fps. It is the sum of the new effects (wall dive, chapter blur, the screen-blend flash, giant stretch); no single one removes it. The check fails above 14.
 - Frames reviewed at .2, .4, .5, .6, .75 and .95 of the first move at 1440×900, 390×844 and 844×390, plus the first arrival.

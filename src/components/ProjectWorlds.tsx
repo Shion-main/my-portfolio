@@ -17,7 +17,7 @@ const slugFromHash = () => {
 };
 
 type Rect = { x: number; y: number; w: number; h: number };
-type Parts = { chapter: HTMLElement; scene: HTMLElement; info: HTMLElement; words: HTMLElement[]; desk: HTMLElement; screen: HTMLElement; phone: HTMLElement; giant: HTMLElement };
+type Parts = { chapter: HTMLElement; scene: HTMLElement; info: HTMLElement; words: HTMLElement[]; desk: HTMLElement; screen: HTMLElement; phone: HTMLElement | null; giant: HTMLElement };
 /** Everything one frame writes for one chapter. Word groups: 0 label, 1 heading (moves in % inside its mask), 2 line and facts, 3 button. */
 type Pose = {
   shown: boolean; z: number; opacity: number;
@@ -62,7 +62,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       words: [...chapter.querySelectorAll<HTMLElement>("[data-word]")],
       desk: chapter.querySelector<HTMLElement>(".showcase-desk")!,
       screen: chapter.querySelector<HTMLElement>(".showcase-desk img")!,
-      phone: chapter.querySelector<HTMLElement>(".showcase-phone")!,
+      phone: chapter.querySelector<HTMLElement>(".showcase-phone"),
       giant: chapter.querySelector<HTMLElement>(".giant")!,
     }));
     const opts = { settle: true };
@@ -139,8 +139,10 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       });
       p.desk.style.transform = o.deskT;
       p.desk.style.opacity = o.deskO === 1 ? "" : o.deskO.toFixed(3);
-      p.phone.style.transform = o.phoneT;
-      p.phone.style.opacity = o.phoneO === 1 ? "" : o.phoneO.toFixed(3);
+      if (p.phone) {
+        p.phone.style.transform = o.phoneT;
+        p.phone.style.opacity = o.phoneO === 1 ? "" : o.phoneO.toFixed(3);
+      }
       const g = p.giant.style;
       g.setProperty("--wd", o.giantW.toFixed(1));
       g.setProperty("--wt", o.giantWt.toFixed(0));
@@ -357,13 +359,13 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
                 </dl>
                 <a className="chapter-open" data-word="3" href={asset(`work/${p.slug}/`)}>Open case study<span className="visually-hidden">: {p.name}</span> <span aria-hidden="true">→</span></a>
               </div>
-              <div className="showcase" aria-hidden="true">
+              <div className={`showcase${p.phone ? "" : " showcase--solo"}`} aria-hidden="true">
                 <div className="showcase-desk">
                   <BrowserFrame title={p.desktop.title} src={asset(p.desktop.src)} srcSet={`${asset(small(p.desktop.src))} 640w, ${asset(p.desktop.src)} 1440w`} sizes="(max-width: 860px) 90vw, 54vw" alt="" morph={active === i} />
                 </div>
-                <div className="showcase-phone">
+                {p.phone && <div className="showcase-phone">
                   <PhoneFrame src={asset(p.phone.src)} srcSet={`${asset(small(p.phone.src))} 300w, ${asset(p.phone.src)} 780w`} sizes="(max-width: 860px) 30vw, 14vw" alt="" />
-                </div>
+                </div>}
                 <p className="showcase-caption label">{p.caption}</p>
               </div>
               <p className="giant" aria-hidden="true"><span>{p.name}</span></p>

@@ -1,6 +1,7 @@
 // Turns the captured project screens into the WebP files the site serves, plus the
 // small tiles for the background wall and a provenance.json per project.
 // Run by hand: WORK_MEDIA_SOURCE=<folder of source PNGs> node scripts/build-work-media.mjs
+// To refresh some projects only: WORK_MEDIA_ONLY=korte WORK_MEDIA_CAPTURED=2026-11-22 (the others are left untouched).
 // The build never runs this; its output in public/media/work is committed.
 import sharp from "sharp";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -8,7 +9,8 @@ import { join } from "node:path";
 
 const SOURCE = process.env.WORK_MEDIA_SOURCE ?? "docs/designs/redesign-2026-11-21/assets/v2";
 const OUT = "public/media/work";
-const CAPTURED = "2026-11-21";
+const CAPTURED = process.env.WORK_MEDIA_CAPTURED ?? "2026-11-21";
+const ONLY = process.env.WORK_MEDIA_ONLY?.split(",");
 
 const DATA = {
   "space-arabica": "Real café content and photography from the local build; no customer data.",
@@ -59,17 +61,13 @@ const MEDIA = {
     ["util-phone", "flux-util-phone", "phone", F("34:12685")],
     ["terms-phone", "flux-terms-phone", "phone", F("34:13640")],
   ],
+  // Atlas has no phone app: desktop screens only.
   "atlas-accountancy": [
     ["step3-desktop", "atlas-desktop", "desktop", A("1:3542")],
     ["journey-desktop", "atlas-journey", "desktop", A("1:3005")],
     ["list-desktop", "atlas-list-desktop", "desktop", A("1:2981")],
     ["step1-desktop", "atlas-step1-desktop", "desktop", A("1:3432")],
     ["login-desktop", "atlas-login-desktop", "desktop", A("1:7433")],
-    ["form-tall", "atlas-portrait", "phone", A("1:6739")],
-    ["list-tall", "atlas-list-desktop", "tall", A("1:2981"), 0],
-    ["journey-tall", "atlas-journey", "tall", A("1:3005"), 560],
-    ["step1-tall", "atlas-step1-desktop", "tall", A("1:3432"), 300],
-    ["step3-tall", "atlas-desktop", "tall", A("1:3542"), 300],
   ],
 };
 
@@ -111,6 +109,7 @@ async function render(file, kind, x, width, height, quality) {
 }
 
 for (const [slug, entries] of Object.entries(MEDIA)) {
+  if (ONLY && !ONLY.includes(slug)) continue;
   const dir = join(OUT, slug);
   await rm(dir, { recursive: true, force: true });
   await mkdir(join(dir, "wall"), { recursive: true });

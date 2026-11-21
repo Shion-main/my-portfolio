@@ -57,8 +57,8 @@ export default function ScreenTabs({ tabs, title }: { tabs: Tab[]; title: string
         ))}
       </div>
       {tabs.map((tab, i) => (
-        <div key={tab.title} role="tabpanel" id={`panel-${i}`} aria-labelledby={`tab-${i}`} hidden={i !== active} className="tab-panel">
-          {([["desk", tab.desktop], ["phone", tab.phone]] as const).map(([kind, shot]) => (
+        <div key={tab.title} role="tabpanel" id={`panel-${i}`} aria-labelledby={`tab-${i}`} hidden={i !== active} className={`tab-panel${tab.phone ? "" : " tab-panel--solo"}`}>
+          {([["desk", tab.desktop], ["phone", tab.phone]] as const).flatMap(([kind, shot]) => (shot ? [[kind, shot] as const] : [])).map(([kind, shot]) => (
             <figure className={`tab-shot tab-shot--${kind}`} key={kind}>
               <div className="tab-shot__frame">
                 {kind === "desk"

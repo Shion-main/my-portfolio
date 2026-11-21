@@ -7,7 +7,9 @@
 .wall-tilt { scale: calc(1 + var(--dive, 0) * 1.4); }
 /* The blur is only set while diving, so the wall carries no filter the rest of the time. */
 @media (min-width: 861px) { .wall { filter: var(--dive-blur, none); } }
-.col { flex: none; width: var(--cw); will-change: transform; }
+.col { flex: none; width: var(--cw); will-change: transform; transition: opacity .5s var(--ease-in-out-entry); }
+/* Pointing at a project without a phone app (Atlas): only its desktop screens stay. */
+.wall.no-phones .col--phone { opacity: 0; }
 .col--desk { --cw: 300px; }
 .col--phone { --cw: 140px; }
 .col-track { display: flex; flex-direction: column; gap: 18px; animation: wall-drift var(--dur, 80s) linear infinite; }
