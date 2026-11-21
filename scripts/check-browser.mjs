@@ -895,6 +895,20 @@ check("space-arabica-demo-embed", async () => {
   await context.close();
 });
 
+check("space-arabica-demo-transitions", async () => {
+  // The demo must keep the site's own page transitions: Home → Menu runs a cross-document view transition to the end.
+  const { page, context } = await open("/work/space-arabica/demo/");
+  await context.addInitScript(() => addEventListener("pagereveal", e => {
+    window.__vt = e.viewTransition ? "started" : "none";
+    e.viewTransition?.finished.then(() => { window.__vt = "finished"; }, () => { window.__vt = "aborted"; });
+  }));
+  await page.waitForTimeout(800);
+  await Promise.all([page.waitForURL(/menu\.html$/), page.click('.site-nav a[href="menu.html"], nav a[href="menu.html"]')]);
+  await page.waitForFunction(() => window.__vt && window.__vt !== "started", null, { timeout: 5000 });
+  assert.equal(await page.evaluate(() => window.__vt), "finished", "the demo's page transition did not run");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
