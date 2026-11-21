@@ -1,14 +1,19 @@
-/* Project chapters. Stacked full-screen sections by default; pinned and wiped once `.motion` is added. */
+/* Project chapters. Stacked full-screen sections by default; pinned once `.motion` is added, and scroll flies the camera from one into the next. */
 .worlds { position: relative; z-index: 1; }
 .chapter { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: var(--ground); color: var(--ink); }
-.worlds.motion { height: 560vh; }
+.worlds.motion { height: 690vh; } /* trackScreens(4) × 100: arrival, four rests, three moves, one screen */
 .worlds.motion .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
-.worlds.motion .chapter { position: absolute; inset: 0; min-height: 0; clip-path: circle(0 at 62% 46%); }
-.chapter-anchor { position: absolute; left: 0; top: calc((100% - 100vh) * var(--k)); width: 1px; height: 1px; pointer-events: none; }
+/* Hidden until the draw loop shows it: still in the accessibility tree and focusable, but takes no pointer. */
+.worlds.motion .chapter { position: absolute; inset: 0; min-height: 0; opacity: 0; pointer-events: none; }
+.chapter-anchor { position: absolute; left: 0; top: calc(var(--rest) * 100vh); width: 1px; height: 1px; pointer-events: none; }
+.scene { position: absolute; inset: 0; }
+.stage-flash { position: absolute; inset: 0; z-index: 20; opacity: 0; pointer-events: none; mix-blend-mode: screen; }
+.worlds:not(.motion) .stage-flash { display: none; }
 
 .chapter .label { color: inherit; opacity: .72; }
 .chapter-info { position: absolute; left: var(--pad); top: calc(50% - 30px); translate: 0 -50%; width: min(360px, 28vw); z-index: 3; }
-.chapter-info h2 { margin-top: 14px; font: 800 clamp(30px, 3vw, 46px)/.95 var(--display); font-variation-settings: "wdth" 112; text-transform: uppercase; }
+.chapter-mask { margin-top: 14px; padding-bottom: 3px; overflow: hidden; }
+.chapter-info h2 { font: 800 clamp(30px, 3vw, 46px)/.95 var(--display); font-variation-settings: "wdth" 112; text-transform: uppercase; }
 .chapter-line { margin-top: 16px; font: 400 clamp(17px, 1.3vw, 21px)/1.4 var(--serif); }
 .facts { margin-top: 22px; font-size: 14px; }
 .facts div { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); }
@@ -42,7 +47,6 @@
   .chapter-open { margin-top: 14px; padding: 11px 16px; }
 }
 @media (max-width: 860px) {
-  .worlds.motion { height: 520vh; }
   .chapter-info { top: 76px; left: 20px; right: 20px; width: auto; translate: none; }
   .facts div:nth-child(n + 3) { display: none; }
   .chapter-line { margin-top: 10px; font-size: 16px; }

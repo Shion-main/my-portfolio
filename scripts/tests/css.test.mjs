@@ -35,3 +35,8 @@ test("the dark base tokens are defined", () => {
   const css = readFileSync("src/styles/base.css", "utf8");
   for (const token of ["--page: #0d0f11", "--surface: #16191c", "--text: #e8eaeb", "--muted: #8d959c", "--rule: #262b30"]) assert.ok(css.includes(token), token);
 });
+
+test("the pinned chapter track matches the timeline", () => {
+  // Must equal trackScreens(4) × 100 in src/motion/scroll.ts: arrival .7 + four rests of .55 + three moves of 1 + one screen.
+  assert.match(readFileSync("src/components/worlds.css", "utf8"), /\.worlds\.motion \{ height: 690vh; \}/);
+});

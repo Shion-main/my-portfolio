@@ -405,6 +405,123 @@ check("list-touch-no-sticky-hover", async () => {
   await context.close();
 });
 
+// ---- Push-through (2026-11-22). Positions are screens of scroll from the moment the track pins. ----
+const goTo = (page, s) => page.evaluate(s => scrollTo(0, document.querySelector(".worlds").offsetTop + s * innerHeight), s);
+async function worldsOpen(options = {}) {
+  const opened = await open("/?checks", options);
+  await opened.page.evaluate(() => document.fonts.ready);
+  await opened.page.waitForFunction(() => window.__worlds, null, { timeout: 3000 });
+  await opened.page.evaluate(() => window.__worlds.settle(false));
+  return opened;
+}
+// The drawn position has caught up with the real scroll position.
+// Two frames first, so the scroll event has reached the page before asking.
+const caughtUp = async page => {
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.waitForFunction(() => window.__worlds.caught(), null, { timeout: 4000 });
+};
+const chapterLook = (page, slug) => page.evaluate(s => {
+  const ch = document.querySelector(`[data-chapter="${s}"]`);
+  const scene = ch.querySelector(".scene");
+  const ss = scene ? getComputedStyle(scene) : null;
+  return {
+    opacity: Number(getComputedStyle(ch).opacity),
+    transform: ss ? ss.transform : "missing",
+    scale: ss && ss.transform !== "none" ? new DOMMatrix(ss.transform).a : 1,
+    filter: ss ? ss.filter : "missing",
+  };
+}, slug);
+const flashOpacity = page => page.evaluate(() => {
+  const f = document.querySelector(".stage-flash");
+  return f ? Number(getComputedStyle(f).opacity) : -1;
+});
+
+check("push-through-mid-move", async () => {
+  const { page, context } = await worldsOpen();
+  // At .45 of the move the dolly is .52 of the way in: about 1.66× at 1440×900, where the laptop is already large.
+  await goTo(page, 1.25 + .45); await caughtUp(page);
+  let sa = await chapterLook(page, "space-arabica"), ko = await chapterLook(page, "korte");
+  assert.ok(sa.scale > 1.5, `Space Arabica is not flying into its screen (scale ${sa.scale})`);
+  assert.equal(ko.opacity, 0, "Korte shows too early");
+  await goTo(page, 1.25 + .6); await caughtUp(page);
+  ko = await chapterLook(page, "korte");
+  assert.ok(ko.opacity > .5, `Korte is not in (opacity ${ko.opacity})`);
+  assert.ok(ko.scale > .62 && ko.scale < 1, `Korte is not growing toward the camera (scale ${ko.scale})`);
+  assert.ok(await flashOpacity(page) > 0, "no flash at the hand-off");
+  await goTo(page, 2.25); await caughtUp(page);
+  ko = await chapterLook(page, "korte"); sa = await chapterLook(page, "space-arabica");
+  assert.equal(ko.transform, "none", `Korte is not at rest (${ko.transform})`);
+  assert.equal(sa.opacity, 0, "Space Arabica still shows over Korte at rest");
+  await context.close();
+});
+
+check("push-through-resize", async () => {
+  const { page, context } = await worldsOpen();
+  await goTo(page, 1.25 + .3); await caughtUp(page);
+  await page.setViewportSize({ width: 1159, height: 668 });
+  await page.waitForTimeout(300);
+  await goTo(page, 1.25 + .3); await caughtUp(page);
+  const st = await page.evaluate(() => {
+    const ch = document.querySelector('[data-chapter="space-arabica"]'), scene = ch.querySelector(".scene"), desk = ch.querySelector(".showcase-desk");
+    const [ox, oy] = getComputedStyle(scene).transformOrigin.split(" ").map(parseFloat);
+    const saved = [ch.style.transform, scene.style.transform, desk.style.transform];
+    ch.style.transform = scene.style.transform = desk.style.transform = "";
+    const r = desk.querySelector("img").getBoundingClientRect();
+    [ch.style.transform, scene.style.transform, desk.style.transform] = saved;
+    return { ox, oy, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+  });
+  assert.ok(Math.abs(st.ox - st.cx) <= 2 && Math.abs(st.oy - st.cy) <= 2, `the dolly aims at ${st.ox},${st.oy} but the screen is at ${st.cx},${st.cy}`);
+  await context.close();
+});
+
+check("glide-and-jump", async () => {
+  const { page, context } = await worldsOpen();
+  await goTo(page, .975); await caughtUp(page);
+  await page.mouse.move(700, 450);
+  await page.mouse.wheel(0, 100);
+  const position = () => ({ drawn: window.__worlds.drawn(), real: (scrollY - document.querySelector(".worlds").offsetTop) / innerHeight });
+  const lag = await page.evaluate(`new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r((${position})()))))`);
+  assert.ok(lag.drawn < lag.real - .01, `no glide after a wheel click: drawn ${lag.drawn}, real ${lag.real}`);
+  await page.waitForTimeout(700);
+  const caught = await page.evaluate(position);
+  assert.ok(Math.abs(caught.drawn - caught.real) < .001, `the glide never caught up: ${caught.drawn} vs ${caught.real}`);
+  await goTo(page, 5.625);
+  const seen = await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() =>
+    r([...document.querySelectorAll(".chapter")].filter(c => Number(getComputedStyle(c).opacity) > 0).map(c => c.dataset.chapter))))));
+  assert.deepEqual(seen, ["atlas-treasury"], `a jump to Atlas drew ${seen.join(", ")}`);
+  await context.close();
+});
+
+check("chapters-reduced", async () => {
+  const { page, context } = await worldsOpen({ reducedMotion: "reduce" });
+  await goTo(page, 1.25 + .3); await caughtUp(page);
+  let sa = await chapterLook(page, "space-arabica"), ko = await chapterLook(page, "korte");
+  assert.equal(sa.transform, "none", `reduced motion still moves the scene (${sa.transform})`);
+  assert.equal(sa.filter, "none", "reduced motion still blurs");
+  assert.equal(ko.opacity, 0, "Korte shows before the midpoint");
+  assert.equal(await flashOpacity(page), 0, "reduced motion still flashes");
+  await goTo(page, 1.25 + .7); await caughtUp(page);
+  sa = await chapterLook(page, "space-arabica"); ko = await chapterLook(page, "korte");
+  assert.equal(ko.opacity, 1, "Korte is not shown after the midpoint");
+  assert.equal(ko.transform, "none", "Korte is not at rest");
+  assert.equal(sa.opacity, 0, "Space Arabica still shows after the midpoint");
+  await context.close();
+});
+
+check("hidden-words-no-click", async () => {
+  const { page, context } = await worldsOpen();
+  await goTo(page, 1.25 + .2); await caughtUp(page);
+  const st = await page.evaluate(() => {
+    const link = document.querySelector('[data-chapter="space-arabica"] .chapter-open');
+    const r = link.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const el = document.elementFromPoint(x, y);
+    return { inView: x > 0 && y > 0 && x < innerWidth && y < innerHeight, hit: !!el && (el === link || link.contains(el)) };
+  });
+  assert.ok(st.inView, "the faded button left the screen, so this check proves nothing");
+  assert.equal(st.hit, false, "the faded-out button can still be clicked");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

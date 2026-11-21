@@ -3,33 +3,10 @@
 
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-export const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 export const easeIn3 = (t: number) => t * t * t;
 export const easeOut3 = (t: number) => 1 - Math.pow(1 - t, 3);
 export const easeOut4 = (t: number) => 1 - Math.pow(1 - t, 4);
 export const range = (v: number, start: number, end: number) => clamp((v - start) / (end - start));
-
-/** With reduced motion, any in-between state jumps to its nearer end. */
-export const snap = (t: number, reduced: boolean) => (reduced ? (t < 0.5 ? 0 : 1) : t);
-
-/** How far a tall track has scrolled: 0 when its top meets the viewport top, 1 when its bottom meets the viewport bottom. Not clamped. */
-export const trackProgress = (top: number, height: number, viewport: number) => -top / Math.max(1, height - viewport);
-
-/** How much of chapter `index` has wiped in. The first chapter opens as the section arrives. */
-export function chapterWipe(raw: number, index: number, count: number) {
-  if (index === 0) return range(raw, -0.07, 0.02);
-  const start = index / count;
-  return range(clamp(raw), start - 0.03, start + 0.05);
-}
-
-/** Progress through chapter `index`'s own share of the track. */
-export const chapterLocal = (raw: number, index: number, count: number) => range(clamp(raw), index / count, (index + 1) / count);
-
-/** The giant name stretches from condensed to its fitted width during the first half of its chapter. */
-export function giantAxes(local: number, fit: number, first: boolean) {
-  const t = easeInOutCubic(range(local, first ? 0 : 0.08, 0.55));
-  return { wdth: lerp(50, fit, t), wght: lerp(300, 820, t) };
-}
 
 /** Font size that makes the giant word span 96% of the viewport, capped by height. `widthAt100` is its width at 100px. */
 export const fitFontSize = (widthAt100: number, viewportW: number, viewportH: number, mobile: boolean) =>
@@ -54,12 +31,15 @@ export const movesEnd = (count: number) => restStart(count - 1) + REST;
 /** Where the reader is: arriving (from -1 to 0), resting on a chapter (from === to, t 1), or t of the way through a move. */
 export type Moment = { from: number; to: number; t: number };
 
+/** Within this much of a move's ends (about 2px) the reader is at rest: offsetTop is rounded to whole pixels. */
+const EDGE = 0.002;
+
 export function momentAt(s: number, count: number): Moment {
   if (s < ARRIVE) return { from: -1, to: 0, t: range(s, 0, ARRIVE) };
   for (let i = 0; i < count - 1; i++) {
     const start = restStart(i) + REST;
-    if (s < start) return { from: i, to: i, t: 1 };
-    if (s < start + MOVE) return { from: i, to: i + 1, t: (s - start) / MOVE };
+    if (s < start + EDGE) return { from: i, to: i, t: 1 };
+    if (s < start + MOVE - EDGE) return { from: i, to: i + 1, t: (s - start) / MOVE };
   }
   return { from: count - 1, to: count - 1, t: 1 };
 }

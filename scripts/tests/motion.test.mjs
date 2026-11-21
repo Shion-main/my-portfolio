@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { loadTs } from "./load-ts.mjs";
 
-const { chapterWipe, chapterLocal, giantAxes, fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, snap, trackProgress, range,
+const { fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, range,
   trackScreens, restStart, restCenter, movesEnd, momentAt, activeChapter, settleTarget, glide, arrivalT, COVER_AT, wallDive,
   pushOut, pushIn, landing, leaveWords, dolly, restDrift } = await loadTs("src/motion/scroll.ts");
 
@@ -16,6 +16,9 @@ test("chapter timeline", () => {
   assert.deepEqual(momentAt(1, 4), { from: 0, to: 0, t: 1 });
   const m = momentAt(1.65, 4); assert.equal(m.from, 0); assert.equal(m.to, 1); near(m.t, .4);
   assert.deepEqual(momentAt(9, 4), { from: 3, to: 3, t: 1 });
+  // Within ~2px of a move's ends counts as at rest (offsetTop is rounded to whole pixels).
+  assert.deepEqual(momentAt(2.2495, 4), { from: 1, to: 1, t: 1 });
+  assert.deepEqual(momentAt(1.2505, 4), { from: 0, to: 0, t: 1 });
   assert.equal(activeChapter({ from: -1, to: 0, t: .49 }), -1);
   assert.equal(activeChapter({ from: 0, to: 1, t: .5 }), 1);
 });
@@ -64,29 +67,7 @@ test("first arrival", () => {
   assert.equal(wallDive(-.6), 0); near(wallDive(COVER_AT), 1);
 });
 
-test("chapter wipes", () => {
-  assert.equal(chapterWipe(-.2, 0, 4), 0);
-  assert.equal(chapterWipe(.02, 0, 4), 1);
-  assert.equal(chapterWipe(.21, 1, 4), 0);
-  assert.equal(chapterWipe(.30, 1, 4), 1);
-  let prev = 0;
-  for (let r = -.1; r <= 1.1; r += .001) {
-    const w = chapterWipe(r, 2, 4);
-    assert.ok(w >= prev - 1e-9);
-    prev = w;
-  }
-});
-
-test("chapter local progress spans its own quarter", () => {
-  assert.equal(chapterLocal(.25, 1, 4), 0);
-  assert.equal(chapterLocal(.375, 1, 4), .5);
-  assert.equal(chapterLocal(2, 3, 4), 1);
-});
-
-test("giant stretch and fit", () => {
-  assert.deepEqual(giantAxes(0, 122, false), { wdth: 50, wght: 300 });
-  assert.deepEqual(giantAxes(.6, 122, false), { wdth: 122, wght: 820 });
-  assert.equal(giantAxes(0, 122, true).wdth, 50);
+test("giant fit", () => {
   assert.equal(fitFontSize(500, 1440, 900, false), Math.min(100 * 1440 * .96 / 500, 900 * .34));
   assert.equal(fitFontSize(200, 390, 844, true), 844 * .2);
 });
@@ -113,15 +94,7 @@ test("shade darkens behind the list and lightens while pointing", () => {
   assert.ok(Math.abs(shadeEdge(900, 900, true) - .58) < 1e-9);
 });
 
-test("track progress is raw and range is clamped", () => {
-  assert.equal(trackProgress(100, 2000, 1000), -.1);
-  assert.equal(trackProgress(-1000, 2000, 1000), 1);
+test("range is clamped", () => {
   assert.equal(range(5, 0, 1), 1);
   assert.equal(range(-5, 0, 1), 0);
-});
-
-test("reduced motion snaps", () => {
-  assert.equal(snap(.4, true), 0);
-  assert.equal(snap(.6, true), 1);
-  assert.equal(snap(.4, false), .4);
 });

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { projects, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
 import { BrowserFrame, PhoneFrame } from "./DeviceFrames";
-import { chapterLocal, chapterWipe, easeInOutCubic, fitFontSize, giantAxes, range, snap, trackProgress } from "../motion/scroll";
+import { ARRIVE, COVER_AT, activeChapter, arrivalT, dolly, fitFontSize, glide, landing, leaveWords, momentAt, movesEnd, pushIn, pushOut, restCenter, restDrift } from "../motion/scroll";
 import { chapterScrollTop } from "./chapterScroll";
 import "./worlds.css";
 
@@ -16,9 +16,31 @@ const slugFromHash = () => {
   return match && projects.some(p => p.slug === match[1]) ? (match[1] as ProjectSlug) : null;
 };
 
+type Rect = { x: number; y: number; w: number; h: number };
+type Parts = { chapter: HTMLElement; scene: HTMLElement; info: HTMLElement; words: HTMLElement[]; desk: HTMLElement; screen: HTMLElement; phone: HTMLElement; giant: HTMLElement };
+/** Everything one frame writes for one chapter. Word groups: 0 label, 1 heading (moves in % inside its mask), 2 line and facts, 3 button. */
+type Pose = {
+  shown: boolean; z: number; opacity: number;
+  sceneT: string; sceneO: string; blur: number;
+  infoO: number; wordO: number[]; wordY: number[];
+  deskT: string; deskO: number; phoneT: string; phoneO: number;
+  giantW: number; giantWt: number; giantT: string; giantO: number;
+};
+
+function restPose(i: number, s: number): Pose {
+  const drift = restDrift(s, i);
+  return {
+    shown: false, z: 1, opacity: 1, sceneT: "", sceneO: "", blur: 0,
+    infoO: 1, wordO: [1, 1, 1, 1], wordY: [0, 0, 0, 0],
+    deskT: `translateY(${(-drift * 26).toFixed(1)}px)`, deskO: 1,
+    phoneT: `translateY(${(-drift * 48).toFixed(1)}px)`, phoneO: 1,
+    giantW: projects[i].giantFit, giantWt: 820, giantT: "", giantO: 1,
+  };
+}
+
 /**
  * The four project chapters, one template. Prerendered as stacked full-screen sections;
- * once hydrated they pin to one stage and each wipes in as a circle of its ground colour.
+ * once hydrated they pin to one stage, and scrolling flies the camera from one project's laptop screen into the next.
  */
 export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSlug | null, covered: boolean) => void }) {
   const track = useRef<HTMLElement>(null);
@@ -32,70 +54,162 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
   useEffect(() => {
     if (!motion || !track.current) return;
     const root = track.current;
-    const chapters = [...root.querySelectorAll<HTMLElement>(".chapter")];
+    const flashEl = root.querySelector<HTMLElement>(".stage-flash")!;
+    const parts: Parts[] = [...root.querySelectorAll<HTMLElement>(".chapter")].map(chapter => ({
+      chapter,
+      scene: chapter.querySelector<HTMLElement>(".scene")!,
+      info: chapter.querySelector<HTMLElement>(".chapter-info")!,
+      words: [...chapter.querySelectorAll<HTMLElement>("[data-word]")],
+      desk: chapter.querySelector<HTMLElement>(".showcase-desk")!,
+      screen: chapter.querySelector<HTMLElement>(".showcase-desk img")!,
+      phone: chapter.querySelector<HTMLElement>(".showcase-phone")!,
+      giant: chapter.querySelector<HTMLElement>(".giant")!,
+    }));
+    const opts = { settle: true };
     let frame = 0;
-    let last = "";
+    let last = 0;
+    let cur = Number.NaN;
+    let target = 0;
+    let key = "";
     let onScreen = -1;
+    let flashFor = -1;
+    let rects: (Rect | null)[] = [];
+
+    if (import.meta.env.DEV || location.search.includes("checks")) {
+      (window as unknown as { __worlds: unknown }).__worlds = { drawn: () => cur, caught: () => cur === target && !frame, settle: (on: boolean) => { opts.settle = on; } };
+    }
+
+    // Where a chapter's laptop screen sits at rest, measured with this frame's transforms cleared.
+    const screenRect = (i: number): Rect => {
+      const cached = rects[i];
+      if (cached) return cached;
+      const { chapter, scene, desk, screen } = parts[i];
+      const saved = [chapter.style.transform, scene.style.transform, desk.style.transform];
+      chapter.style.transform = scene.style.transform = desk.style.transform = "";
+      const r = screen.getBoundingClientRect();
+      [chapter.style.transform, scene.style.transform, desk.style.transform] = saved;
+      return (rects[i] = { x: r.left, y: r.top, w: r.width, h: r.height });
+    };
+
+    const leaving = (pose: Pose, i: number, t: number, blurs: boolean) => {
+      const o = pushOut(t);
+      const d = dolly(screenRect(i), innerWidth, innerHeight, o.zoom);
+      const words = leaveWords(o.words);
+      Object.assign(pose, {
+        shown: o.shown, z: 1, opacity: 1, blur: blurs ? o.blur : 0, giantO: o.giantOpacity,
+        sceneO: `${d.originX.toFixed(1)}px ${d.originY.toFixed(1)}px`,
+        sceneT: `translate(${d.dx.toFixed(1)}px, ${d.dy.toFixed(1)}px) scale(${d.scale.toFixed(4)})`,
+        infoO: words.opacity, wordY: words.y,
+      });
+    };
+
+    const arriving = (pose: Pose, i: number, t: number, s: number, blurs: boolean) => {
+      const n = pushIn(t);
+      const l = landing(n.land, projects[i].giantFit);
+      const drift = restDrift(s, i);
+      Object.assign(pose, {
+        shown: n.shown, z: 2, opacity: n.opacity, blur: blurs ? n.blur : 0,
+        sceneO: "62% 46%", sceneT: `scale(${n.scale.toFixed(4)})`,
+        infoO: 1, wordO: l.words.map((w, j) => (j === 1 ? (w > 0 ? 1 : 0) : w)), wordY: l.words.map((w, j) => (1 - w) * (j === 1 ? 108 : 18)),
+        deskT: `translateY(${(-drift * 26).toFixed(1)}px) translateY(${l.deskY.toFixed(2)}vh) scale(${l.deskScale.toFixed(4)})`, deskO: l.deskO,
+        phoneT: `translateY(${(-drift * 48).toFixed(1)}px) translateY(${l.phoneY.toFixed(2)}vh) rotate(${l.phoneTurn.toFixed(2)}deg)`, phoneO: l.phoneO,
+        giantW: l.giantW, giantWt: l.giantWt, giantT: `translateY(${l.giantY.toFixed(2)}%)`, giantO: l.giantO,
+      });
+      return n.flash;
+    };
+
+    const paint = (p: Parts, o: Pose) => {
+      const c = p.chapter.style;
+      c.opacity = o.shown ? o.opacity.toFixed(3) : "0";
+      c.zIndex = o.shown ? String(o.z) : "0";
+      // Hidden chapters stay in the accessibility tree and focusable; they just take no pointer.
+      c.pointerEvents = o.shown && o.opacity >= 0.5 ? "auto" : "none";
+      if (!o.shown) return;
+      const s = p.scene.style;
+      s.transform = o.sceneT;
+      s.transformOrigin = o.sceneO;
+      s.filter = o.blur > 0.05 ? `blur(${o.blur.toFixed(1)}px)` : "";
+      p.info.style.opacity = o.infoO === 1 ? "" : o.infoO.toFixed(3);
+      p.info.style.pointerEvents = o.infoO >= 0.5 && o.wordO[3] >= 0.5 ? "" : "none";
+      p.words.forEach(el => {
+        const j = Number(el.dataset.word);
+        el.style.opacity = o.wordO[j] === 1 ? "" : o.wordO[j].toFixed(3);
+        el.style.transform = o.wordY[j] ? `translateY(${o.wordY[j].toFixed(2)}${j === 1 ? "%" : "px"})` : "";
+      });
+      p.desk.style.transform = o.deskT;
+      p.desk.style.opacity = o.deskO === 1 ? "" : o.deskO.toFixed(3);
+      p.phone.style.transform = o.phoneT;
+      p.phone.style.opacity = o.phoneO === 1 ? "" : o.phoneO.toFixed(3);
+      const g = p.giant.style;
+      g.setProperty("--wd", o.giantW.toFixed(1));
+      g.setProperty("--wt", o.giantWt.toFixed(0));
+      g.transform = o.giantT;
+      g.opacity = o.giantO === 1 ? "" : o.giantO.toFixed(3);
+    };
+
+    const draw = (now: number) => {
+      frame = 0;
+      const still = reduced();
+      const dt = last ? Math.min(64, now - last) : 16;
+      last = now;
+      target = -root.getBoundingClientRect().top / innerHeight;
+      cur = Number.isNaN(cur) ? target : glide(cur, target, dt, still);
+      const m = momentAt(cur, COUNT);
+      const poses = parts.map((_, i) => restPose(i, cur));
+      const blurs = innerWidth > 860;
+      let flash = 0;
+      let lit = -1;
+      if (still) {
+        const a = activeChapter(m);
+        if (a >= 0) poses[a].shown = true;
+      } else if (m.from === -1) {
+        if (cur >= 0) { flash = arriving(poses[0], 0, arrivalT(cur), cur, blurs); lit = 0; }
+      } else if (m.from === m.to) {
+        poses[m.from].shown = true;
+      } else {
+        leaving(poses[m.from], m.from, m.t, blurs);
+        flash = arriving(poses[m.to], m.to, m.t, cur, blurs);
+        lit = m.to;
+      }
+      parts.forEach((p, i) => paint(p, poses[i]));
+      if (lit >= 0 && lit !== flashFor) {
+        flashFor = lit;
+        flashEl.style.background = `radial-gradient(circle at 50% 50%, ${projects[lit].tokens.giant} 0%, transparent 65%)`;
+      }
+      flashEl.style.opacity = flash > 0.001 ? flash.toFixed(3) : "0";
+
+      const current = activeChapter(m);
+      const inside = current >= 0 && cur <= movesEnd(COUNT) + 0.1;
+      onScreen = inside ? current : -1;
+      // The wall turns off once the first project fully covers it, and stays off below.
+      const covered = still ? cur >= ARRIVE / 2 : cur >= COVER_AT;
+      const next = `${onScreen}|${covered}`;
+      if (next !== key) {
+        key = next;
+        // Keep the address on the chapter being read, so Back from a case study returns here.
+        const hash = inside ? `#work-${projects[current].slug}` : "";
+        if (location.hash !== hash && (inside || slugFromHash())) history.replaceState(history.state, "", `${location.pathname}${location.search}${hash}`);
+        setActive(onScreen);
+        report.current(inside ? projects[current].slug : null, covered);
+      }
+      if (cur !== target) frame = requestAnimationFrame(draw);
+    };
+
+    const queue = () => { if (!frame) { last = 0; frame = requestAnimationFrame(draw); } };
 
     const fit = () => {
       const mobile = innerWidth <= 860;
-      chapters.forEach((chapter, i) => {
-        const giant = chapter.querySelector<HTMLElement>(".giant");
-        if (!giant) return;
+      rects = [];
+      parts.forEach(({ giant }, i) => {
         giant.style.fontSize = "100px";
         giant.style.setProperty("--wd", String(projects[i].giantFit));
         giant.style.setProperty("--wt", "820");
         const width = giant.firstElementChild!.getBoundingClientRect().width;
         giant.style.fontSize = `${fitFontSize(width, innerWidth, innerHeight, mobile)}px`;
       });
-      draw();
+      queue();
     };
 
-    const draw = () => {
-      frame = 0;
-      const still = reduced();
-      const rect = root.getBoundingClientRect();
-      const raw = trackProgress(rect.top, rect.height, innerHeight);
-      let current = -1;
-      chapters.forEach((chapter, i) => {
-        const wipe = snap(chapterWipe(raw, i, COUNT), still);
-        const radius = Math.hypot(innerWidth, innerHeight) * easeInOutCubic(wipe);
-        // Hidden by its clip alone, so screen readers and the keyboard can still reach it.
-        chapter.style.clipPath = `circle(${radius.toFixed(1)}px at 62% 46%)`;
-        if (wipe > 0.5) current = i;
-        const local = chapterLocal(raw, i, COUNT);
-        const axes = giantAxes(still ? 1 : local, projects[i].giantFit, i === 0);
-        const giant = chapter.querySelector<HTMLElement>(".giant")!;
-        giant.style.setProperty("--wd", axes.wdth.toFixed(1));
-        giant.style.setProperty("--wt", axes.wght.toFixed(0));
-        const info = chapter.querySelector<HTMLElement>(".chapter-info")!;
-        const shown = still ? 1 : i === 0 ? range(raw, -0.02, 0.05) : range(local, 0.14, 0.3);
-        info.style.opacity = String(shown);
-        info.style.transform = `translateY(${((1 - shown) * 26).toFixed(1)}px)`;
-        const enter = i === 0 ? range(raw, -0.05, 0.07) : range(local, 0.04, 0.32);
-        chapter.querySelectorAll<HTMLElement>("[data-depth]").forEach(el => {
-          const depth = Number(el.dataset.depth);
-          const rise = still ? 0 : 1 - easeInOutCubic(enter);
-          const drift = still ? 0 : local * 50 * depth;
-          el.style.transform = `translateY(${(rise * 34 * depth).toFixed(2)}vh) translateY(${(-drift).toFixed(1)}px)`;
-        });
-      });
-      const inside = current >= 0 && raw > -0.03 && raw < 1.02;
-      onScreen = inside ? current : -1;
-      // The wall fades out as soon as the first chapter's wipe is under way, and stays off below.
-      const covered = raw > -0.04;
-      const key = `${inside ? current : -1}|${covered}`;
-      if (key !== last) {
-        last = key;
-        // Keep the address on the chapter being read, so Back from a case study returns here.
-        const hash = inside ? `#work-${projects[current].slug}` : "";
-        if (location.hash !== hash && (inside || slugFromHash())) history.replaceState(history.state, "", `${location.pathname}${location.search}${hash}`);
-        setActive(inside ? current : -1);
-        report.current(inside ? projects[current].slug : null, covered);
-      }
-    };
-
-    const queue = () => { if (!frame) frame = requestAnimationFrame(draw); };
     const goToHash = () => {
       const slug = slugFromHash();
       if (slug) window.scrollTo({ top: chapterScrollTop(slug), behavior: "auto" });
@@ -104,7 +218,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     const follow = (event: FocusEvent) => {
       const chapter = (event.target as HTMLElement).closest<HTMLElement>("[data-chapter]");
       if (!chapter) return;
-      const index = chapters.indexOf(chapter);
+      const index = parts.findIndex(p => p.chapter === chapter);
       if (index !== onScreen) window.scrollTo({ top: chapterScrollTop(projects[index].slug), behavior: "auto" });
     };
     root.addEventListener("focusin", follow);
@@ -136,7 +250,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     <section ref={track} className={`worlds${motion ? " motion" : ""}`} aria-label="Projects">
       {/* Once pinned, each chapter's anchor sits at the scroll position where that chapter is at rest. */}
       {motion && projects.map((p, i) => (
-        <span key={p.slug} id={`work-${p.slug}`} className="chapter-anchor" style={{ "--k": (i + 0.5) / COUNT } as CSSProperties} aria-hidden="true" />
+        <span key={p.slug} id={`work-${p.slug}`} className="chapter-anchor" style={{ "--rest": restCenter(i) } as CSSProperties} aria-hidden="true" />
       ))}
       <div className="stage">
         {projects.map((p, i) => (
@@ -146,29 +260,32 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
             data-chapter={p.slug}
             className="chapter"
             aria-labelledby={`chapter-${p.slug}`}
-            style={{ "--ground": p.tokens.ground, "--ink": p.tokens.text, "--giant": p.tokens.giant, zIndex: i + 1 } as CSSProperties}
+            style={{ "--ground": p.tokens.ground, "--ink": p.tokens.text, "--giant": p.tokens.giant } as CSSProperties}
           >
-            <div className="chapter-info">
-              <p className="label">{p.label}</p>
-              <h2 id={`chapter-${p.slug}`}>{p.name}</h2>
-              <p className="chapter-line">{p.line}</p>
-              <dl className="facts">
-                {p.facts.map(f => <div key={f.term}><dt>{f.term}</dt><dd>{f.detail}</dd></div>)}
-              </dl>
-              <a className="chapter-open" href={asset(`work/${p.slug}/`)}>Open case study<span className="visually-hidden">: {p.name}</span> <span aria-hidden="true">→</span></a>
-            </div>
-            <div className="showcase" aria-hidden="true">
-              <div className="showcase-desk" data-depth="1">
-                <BrowserFrame title={p.desktop.title} src={asset(p.desktop.src)} srcSet={`${asset(small(p.desktop.src))} 640w, ${asset(p.desktop.src)} 1440w`} sizes="(max-width: 860px) 90vw, 54vw" alt="" morph={active === i} />
+            <div className="scene">
+              <div className="chapter-info">
+                <p className="label" data-word="0">{p.label}</p>
+                <div className="chapter-mask"><h2 id={`chapter-${p.slug}`} data-word="1">{p.name}</h2></div>
+                <p className="chapter-line" data-word="2">{p.line}</p>
+                <dl className="facts" data-word="2">
+                  {p.facts.map(f => <div key={f.term}><dt>{f.term}</dt><dd>{f.detail}</dd></div>)}
+                </dl>
+                <a className="chapter-open" data-word="3" href={asset(`work/${p.slug}/`)}>Open case study<span className="visually-hidden">: {p.name}</span> <span aria-hidden="true">→</span></a>
               </div>
-              <div className="showcase-phone" data-depth="1.6">
-                <PhoneFrame src={asset(p.phone.src)} srcSet={`${asset(small(p.phone.src))} 300w, ${asset(p.phone.src)} 780w`} sizes="(max-width: 860px) 30vw, 14vw" alt="" />
+              <div className="showcase" aria-hidden="true">
+                <div className="showcase-desk">
+                  <BrowserFrame title={p.desktop.title} src={asset(p.desktop.src)} srcSet={`${asset(small(p.desktop.src))} 640w, ${asset(p.desktop.src)} 1440w`} sizes="(max-width: 860px) 90vw, 54vw" alt="" morph={active === i} />
+                </div>
+                <div className="showcase-phone">
+                  <PhoneFrame src={asset(p.phone.src)} srcSet={`${asset(small(p.phone.src))} 300w, ${asset(p.phone.src)} 780w`} sizes="(max-width: 860px) 30vw, 14vw" alt="" />
+                </div>
+                <p className="showcase-caption label">{p.caption}</p>
               </div>
-              <p className="showcase-caption label">{p.caption}</p>
+              <p className="giant" aria-hidden="true"><span>{p.name}</span></p>
             </div>
-            <p className="giant" aria-hidden="true"><span>{p.name}</span></p>
           </article>
         ))}
+        <div className="stage-flash" aria-hidden="true" />
         <nav className={`chapter-index${active >= 0 ? " on" : ""}`} aria-label="Project chapters">
           {projects.map((p, i) => (
             <a key={p.slug} href={`#work-${p.slug}`} className={active === i ? "on" : undefined} aria-current={active === i ? "true" : undefined}>{p.name}</a>
