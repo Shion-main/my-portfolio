@@ -23,7 +23,8 @@
 /* Pinned once hydrated: 300vh is the dive's end plus the pinned screen (handoffTrackScreens in scroll.ts).
    The stage starts as dark as the contact block above it; the next project emerges from it. */
 .handoff.motion { height: 300vh; background: #070809; }
-.handoff.motion .handoff__stage { position: sticky; top: 0; }
+/* Pinned, the stage is exactly one screen, even on a landscape phone shorter than the static section's 560px. */
+.handoff.motion .handoff__stage { position: sticky; top: 0; min-height: 0; }
 .handoff.motion .handoff__world { opacity: 0; }
 
 @media (max-width: 860px) {

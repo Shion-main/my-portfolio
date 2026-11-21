@@ -26,7 +26,8 @@ Open the URL Vite prints (port 8080). `npm run build` builds the client and prer
 | Project chapters | `src/components/ProjectWorlds.tsx`, `worlds.css`, `chapterScroll.ts` |
 | Case-study template and screen tabs | `src/pages/ProjectCase.tsx`, `src/pages/case.css`, `src/components/ScreenTabs.tsx` |
 | Header, contact, footer | `src/components/SiteChrome.tsx`, `chrome.css` |
-| Page transitions (morph and wipe) | `public/project-transitions.js`, `src/project-transitions.css` |
+| Page transitions (morph home ↔ case, dive case → next case) | `public/project-transitions.js`, `src/project-transitions.css` |
+| End of a case study: the hand-off into the next project | `src/components/CaseHandoff.tsx`, `handoff.css` |
 | Titles, descriptions, canonical URLs, structured data, sitemap | `scripts/prerender.mjs` |
 | Hosted Space Arabica demo | `public/work/space-arabica/demo/` (generated) |
 

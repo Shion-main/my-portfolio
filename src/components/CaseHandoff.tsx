@@ -91,7 +91,8 @@ export default function CaseHandoff({ next }: { next: Project }) {
         sceneT = `translate(${dl.dx.toFixed(1)}px, ${dl.dy.toFixed(1)}px) scale(${dl.scale.toFixed(4)})`;
       }
 
-      world.style.opacity = worldO >= 1 ? "" : worldO.toFixed(3);
+      // Always written: in motion mode the stylesheet starts the world hidden, so clearing it would hide it again.
+      world.style.opacity = worldO.toFixed(3);
       scene.style.transform = sceneT;
       scene.style.transformOrigin = sceneO;
       scene.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : "";

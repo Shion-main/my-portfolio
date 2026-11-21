@@ -945,6 +945,25 @@ check("handoff-continues", async () => {
   await context.close();
 });
 
+check("handoff-visible-at-hold", async () => {
+  // At the hold the next project is on screen: its world is opaque and its heading can be seen and hit.
+  for (const [w, h] of [[1440, 900], [390, 844], [844, 390]]) {
+    const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h });
+    await page.evaluate(() => window.__handoff.settle(false));
+    await handoffGoTo(page, .85); await handoffCaught(page);
+    const st = await page.evaluate(() => {
+      const hd = document.getElementById("handoff-title"), r = hd.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + Math.min(r.width / 2, 40), r.top + r.height / 2);
+      const desk = document.querySelector(".handoff__desk").getBoundingClientRect();
+      return { world: getComputedStyle(document.querySelector(".handoff__world")).opacity, seen: !!hit && hd.contains(hit), deskInView: desk.top >= 0 && desk.bottom <= innerHeight && desk.right <= innerWidth };
+    });
+    assert.ok(st.deskInView, `${w}×${h}: the next project's laptop runs off the screen at the hold`);
+    assert.equal(st.world, "1", `${w}px: the next project's world is not shown at the hold (opacity ${st.world})`);
+    assert.ok(st.seen, `${w}px: the next project's heading cannot be seen at the hold`);
+    await context.close();
+  }
+});
+
 check("handoff-overscroll-once", async () => {
   const { page, context } = await handoffOpen("/work/space-arabica/");
   await page.keyboard.press("Shift");
