@@ -58,13 +58,16 @@ test("Atlas has no phone app, so nothing shows it on a phone", () => {
   for (const slug of ["space-arabica", "korte", "fluxtrack"]) assert.ok(projectBySlug(slug).phone && projectBySlug(slug).tabs.every(t => t.phone), slug);
 });
 
-test("Space Arabica tells the pivot and links the owner's live site", () => {
+// Both Space Arabica sites are Joshua's design: the demo is his original direction, the live site a second design to the owner's brief.
+test("Space Arabica tells the pivot and credits both sites to Joshua", () => {
   const sa = projectBySlug("space-arabica");
   const last = sa.decisions.at(-1);
   assert.equal(last.title, "The owner’s call.");
   assert.match(last.problem, /owner wanted a different type of website/);
+  assert.match(last.choice, /designed and built a second site to the owner’s brief/);
   assert.match(last.result, /spacearabica\.com/);
-  assert.deepEqual(sa.live, { url: "https://spacearabica.com/", label: "See the live site — the owner’s version" });
+  assert.deepEqual(sa.live, { url: "https://spacearabica.com/", label: "See the live site — my design to the owner’s brief" });
+  assert.doesNotMatch(JSON.stringify(sa), /owner’s version/);
   assert.equal(sa.demo, "work/space-arabica/demo/");
 });
 

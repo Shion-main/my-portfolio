@@ -83,7 +83,8 @@ for (const file of CHROME_ROUTES) {
 for (const p of projects) assert.ok(homeHtml.includes(`media/work/${p.slug}/wall/${p.desktop.src.split("/").pop()} 640w`), `${p.slug}: chapter frame has no small image`);
 
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");
-// The full demo plays inside the case study; the owner's live site is one link away, in a new tab.
+// The full demo (Joshua's original direction) plays inside the case study; the live site (his second design, to the owner's brief) is one link away, in a new tab.
+assert.ok(!spaceCaseHtml.includes("owner’s version"), "Space Arabica: the live site is still called the owner's version");
 assert.ok(spaceCaseHtml.includes("Try the full demo") && spaceCaseHtml.includes('href="#demo"'), "Space Arabica: no link to the embedded demo");
 assert.ok(/<iframe[^>]*src="\/work\/space-arabica\/demo\/"[^>]*>/.test(spaceCaseHtml), "Space Arabica: the demo is not embedded");
 const frameTag = spaceCaseHtml.match(/<iframe[^>]*>/)[0];
@@ -96,6 +97,7 @@ assert.ok(!spaceCaseHtml.includes("vercel.app"));
 for (const page of ["index.html", "menu.html", "full-menu.html", "space.html", "order.html", "story.html", "contact.html"]) {
   const demoHtml = await readFile(`dist/work/space-arabica/demo/${page}`, "utf8");
   assert.ok(demoHtml.includes("My original design") && demoHtml.includes('class="wip-banner"'), `${page}: banner`);
+  assert.ok(demoHtml.includes("my second design, made to the owner’s brief") && !demoHtml.includes("owner’s version"), `${page}: the banner must credit the live site as Joshua's design too`);
   assert.ok(/<a class="wip-banner__back" href="\.\.\/" target="_top"/.test(demoHtml), `${page}: the back link would open the portfolio inside the frame`);
   assert.ok(/<a class="wip-banner__live" href="https:\/\/spacearabica\.com\/" target="_blank" rel="noopener noreferrer"/.test(demoHtml), `${page}: no link to the live site`);
   for (const match of demoHtml.matchAll(/<(?:input|textarea|select)[^>]*>/g))

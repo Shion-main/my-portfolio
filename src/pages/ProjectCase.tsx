@@ -65,15 +65,15 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
         {p.demo && (
           <section className="case-embed" id="demo" aria-labelledby="demo-title">
             <div className="case-embed__head">
-              <h2 className="label" id="demo-title">My design · the full site</h2>
-              <p className="case-embed__note">The whole site as I designed it. Every page works inside this frame; forms are switched off.</p>
+              <h2 className="label" id="demo-title">My original direction · the full site</h2>
+              <p className="case-embed__note">The whole site as I first designed it. Every page works inside this frame; forms are switched off.</p>
               <div className="case-actions">
                 <a className="case-demo" href={asset(p.demo)}>Open full screen <span aria-hidden="true">↗</span></a>
                 {p.live && <a className="case-live" href={p.live.url} target="_blank" rel="noopener noreferrer">{p.live.label} <span aria-hidden="true">↗</span></a>}
               </div>
             </div>
             <div className="frame frame--browser case-embed__frame">
-              <div className="frame__bar" aria-hidden="true"><i /><i /><i /><span>{p.name} — my design</span></div>
+              <div className="frame__bar" aria-hidden="true"><i /><i /><i /><span>{p.name} — original direction</span></div>
               <iframe src={asset(p.demo)} title={`${p.name} website — my original design, running as a demo`} loading="lazy" />
             </div>
           </section>

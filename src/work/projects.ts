@@ -28,7 +28,7 @@ export type Project = {
   reflection: string;
   evidence: string;
   demo?: string;
-  /** The live site, when it differs from the work shown here (Space Arabica: the owner's version). */
+  /** The live site, when it differs from the work shown here (Space Arabica: Joshua's second design, made to the owner's brief). */
   live?: { url: string; label: string };
   wall: { desktop: string[]; phone: string[] };
   giantFit: number;
@@ -47,7 +47,7 @@ export const projects: readonly Project[] = [
     slug: "space-arabica",
     name: "Space Arabica",
     label: "Café website · Davao City",
-    list: { what: "Café website, Davao City", part: "Design + build", status: "Live, owner’s version", dot: "#c9934a", hover: "#d9a45f" },
+    list: { what: "Café website, Davao City", part: "Design + build", status: "Live", dot: "#c9934a", hover: "#d9a45f" },
     tokens: { ground: "#1b130d", text: "#f1e3cc", giant: "#c9934a" },
     line: "A café’s character, carried online — signature drinks lead, the full menu stays one tap away.",
     facts: [
@@ -59,13 +59,13 @@ export const projects: readonly Project[] = [
     desktop: { ...space("home-desktop", "Space Arabica home page with the Timeless Americano in the signature drink carousel", "Home · signature carousel"), title: "Space Arabica — Home" },
     phone: space("home-phone", "Space Arabica home page on a phone with the signature carousel", "Home on a phone"),
     question: "How do you translate the feeling of a place into a website?",
-    intro: "Space Arabica is a café in Ecoland, Davao City. I designed and built a seven-page website so the drinks, the room and the practical details all carry the same character. The owner then chose a different type of site for launch; this is my original design, kept whole as a demo you can try on this page.",
+    intro: "Space Arabica is a café in Ecoland, Davao City. I designed and built a seven-page website so the drinks, the room and the practical details all carry the same character. The owner then asked for a different type of site, which I also designed and built for launch; this page shows my original direction, kept whole as a demo you can try.",
     caseFacts: [
       { term: "Role", detail: "Sole designer & developer" },
       { term: "Pages", detail: "Home, Menu, Full Menu, Spaces, Order & Book, Our Story, Visit" },
       { term: "Built with", detail: "HTML, CSS, JavaScript" },
       { term: "Menu", detail: "104 entries and 23 drink photos" },
-      { term: "Status", detail: "Live at spacearabica.com as the owner’s version; my design runs here as a demo" },
+      { term: "Status", detail: "Live at spacearabica.com: a second design I made to the owner’s brief. My original direction runs here as a demo" },
     ],
     tabs: [
       { title: "Home", desktop: space("home-desktop", "Home page with the orbiting signature drink carousel", "Signature drinks lead"), phone: space("home-phone", "Home page on a phone", "The same carousel, one cup at a time") },
@@ -77,12 +77,12 @@ export const projects: readonly Project[] = [
       { title: "Let the drinks lead.", problem: "A café has a personality before anyone opens its menu, and a generic coffee template would hide it.", choice: "I built the visual direction around the café’s real signature drinks: large type, transparent cup cutouts and an orbiting carousel.", result: "Each drink gets its own stage, with keyboard and touch control and a quiet version for reduced motion." },
       { title: "Separate discovery from detail.", problem: "Expressive browsing slows down someone who just wants a familiar drink and its price.", choice: "Signature drinks live on Menu as episodes; Full Menu is plain, filterable and lists every entry.", result: "Exploring and finding are two clear routes from the same navigation." },
       { title: "One motion idea per page.", problem: "Seven animated pages felt like seven separate rooms.", choice: "An amber line links every page and one framed window morphs between them, while each page keeps a single idea of its own.", result: "The site reads as one continuous visit, and reduced motion turns it all off." },
-      { title: "The owner’s call.", problem: "After seeing this direction, the owner wanted a different type of website — not the one I would have chosen.", choice: "It is their café, so I put my direction aside, built the type of site the owner asked for and made their final tweaks.", result: "The owner’s version is live at spacearabica.com. The design on this page is my original direction, kept whole as a working demo you can try below." },
+      { title: "The owner’s call.", problem: "After seeing this direction, the owner wanted a different type of website — not the one I would have chosen.", choice: "It is their café, so I set this direction aside and designed and built a second site to the owner’s brief, through their final tweaks.", result: "That second design is live at spacearabica.com. This page keeps my original direction whole, as a working demo you can try below." },
     ],
     reflection: "The useful tension was between atmosphere and access. I used expressive motion for discovery, then a clearer, quieter layout when someone needs to find something specific.",
-    evidence: "Screens and the demo are my original design, captured from its local build on 21 November 2026. The live site at spacearabica.com is the owner’s version and is not shown here. No commercial impact or visitor research is claimed.",
+    evidence: "Screens and the demo show my original direction, captured from its local build on 21 November 2026. The live site at spacearabica.com is the second design I made to the owner’s brief and is not shown here. No commercial impact or visitor research is claimed.",
     demo: "work/space-arabica/demo/",
-    live: { url: "https://spacearabica.com/", label: "See the live site — the owner’s version" },
+    live: { url: "https://spacearabica.com/", label: "See the live site — my design to the owner’s brief" },
     wall: {
       desktop: ["home-desktop", "menu-desktop", "fullmenu-desktop", "spaces-desktop", "visit-desktop", "story-desktop"],
       phone: ["home-phone", "menu-phone", "spaces-phone", "story-phone", "visit-phone"],
