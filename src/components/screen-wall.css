@@ -3,6 +3,10 @@
 .wall.off, .wall-shade.off { opacity: 0; visibility: hidden; }
 .wall.off .col-track { animation-play-state: paused; }
 .wall-tilt { position: absolute; left: 50%; top: 50%; width: 200vmax; height: 200vmax; translate: -50% -50%; rotate: -14deg; display: flex; justify-content: center; gap: 18px; }
+/* --dive (0–1, set by the project chapters): the camera rushes into the wall as the first project arrives. */
+.wall-tilt { scale: calc(1 + var(--dive, 0) * 1.4); }
+/* The blur is only set while diving, so the wall carries no filter the rest of the time. */
+@media (min-width: 861px) { .wall { filter: var(--dive-blur, none); } }
 .col { flex: none; width: var(--cw); will-change: transform; }
 .col--desk { --cw: 300px; }
 .col--phone { --cw: 140px; }
@@ -28,6 +32,8 @@
   .wall-shade { background: rgba(13, 15, 17, .86); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .wall-tilt { scale: none; }
+  .wall { filter: none; }
   .col-track { animation: none; }
   .tile img { transition: none; }
 }

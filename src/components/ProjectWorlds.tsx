@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { projects, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
 import { BrowserFrame, PhoneFrame } from "./DeviceFrames";
-import { ARRIVE, COVER_AT, SETTLE_MS, activeChapter, clamp, easeInOut3, arrivalT, dolly, fitFontSize, glide, landing, leaveWords, momentAt, movesEnd, pushIn, pushOut, restCenter, restDrift, settleTarget } from "../motion/scroll";
+import { ARRIVE, COVER_AT, SETTLE_MS, activeChapter, clamp, easeInOut3, arrivalT, dolly, fitFontSize, glide, landing, leaveWords, momentAt, movesEnd, pushIn, pushOut, restCenter, restDrift, settleTarget, wallDive } from "../motion/scroll";
 import { chapterScrollTop } from "./chapterScroll";
 import "./worlds.css";
 
@@ -73,6 +73,7 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
     let key = "";
     let onScreen = -1;
     let flashFor = -1;
+    let dive = "";
     let rects: (Rect | null)[] = [];
 
     if (import.meta.env.DEV || location.search.includes("checks")) {
@@ -177,6 +178,19 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
         flashEl.style.background = `radial-gradient(circle at 50% 50%, ${projects[lit].tokens.giant} 0%, transparent 65%)`;
       }
       flashEl.style.opacity = flash > 0.001 ? flash.toFixed(3) : "0";
+      // The wall of screens behind the list rushes toward the camera as the first project arrives.
+      const nextDive = still ? "" : wallDive(cur).toFixed(3);
+      if (nextDive !== dive) {
+        dive = nextDive;
+        const rootStyle = document.documentElement.style;
+        if (dive && dive !== "0.000") {
+          rootStyle.setProperty("--dive", dive);
+          rootStyle.setProperty("--dive-blur", `blur(${(Number(dive) * 10).toFixed(1)}px)`);
+        } else {
+          rootStyle.removeProperty("--dive");
+          rootStyle.removeProperty("--dive-blur");
+        }
+      }
 
       const current = activeChapter(m);
       const inside = current >= 0 && cur <= movesEnd(COUNT) + 0.1;
@@ -283,6 +297,8 @@ export default function ProjectWorlds({ onActive }: { onActive: (slug: ProjectSl
       window.removeEventListener("load", settle);
       for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) window.removeEventListener(type, mark);
       clearTimeout(finishTimer);
+      document.documentElement.style.removeProperty("--dive");
+      document.documentElement.style.removeProperty("--dive-blur");
       stopFinishing();
       for (const type of ["wheel", "keydown", "pointerdown"]) window.removeEventListener(type, stopFinishing);
       window.removeEventListener("scroll", scrolled);

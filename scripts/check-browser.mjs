@@ -610,6 +610,44 @@ check("settle-input-wins", async () => {
   await context.close();
 });
 
+// ---- First arrival through the wall (2026-11-22) ----
+const arrivalLook = page => page.evaluate(() => {
+  const tilt = document.querySelector(".wall-tilt");
+  return {
+    dive: getComputedStyle(document.documentElement).getPropertyValue("--dive").trim(),
+    scale: tilt ? getComputedStyle(tilt).scale : "missing",
+    first: Number(getComputedStyle(document.querySelector('[data-chapter="space-arabica"]')).opacity),
+    off: !!document.querySelector(".wall.off"),
+  };
+});
+
+check("first-arrival", async () => {
+  const { page, context } = await worldsOpen();
+  await wallReady(page);
+  await goTo(page, -.3); await caughtUp(page);
+  let st = await arrivalLook(page);
+  assert.ok(Number(st.dive) > 0, `the wall does not dive as the list leaves (--dive ${st.dive || "unset"})`);
+  assert.ok(st.scale !== "none" && parseFloat(st.scale) > 1, `the wall is not scaling toward the camera (scale ${st.scale})`);
+  assert.equal(st.first, 0, "Space Arabica shows before its section is pinned");
+  await goTo(page, -.05); await caughtUp(page);
+  assert.equal((await arrivalLook(page)).first, 0, "Space Arabica's edge would show sliding up");
+  await goTo(page, .12); await caughtUp(page);
+  st = await arrivalLook(page);
+  assert.ok(st.first > 0 && st.first < 1, `Space Arabica is not emerging (opacity ${st.first})`);
+  assert.ok(await flashOpacity(page) > 0, "no flash as Space Arabica emerges");
+  await goTo(page, .6); await caughtUp(page); await page.waitForTimeout(700);
+  st = await arrivalLook(page);
+  assert.equal(st.first, 1, "Space Arabica is not fully in");
+  assert.ok(st.off, "the wall is still on under Space Arabica");
+  await context.close();
+
+  const reduced = await worldsOpen({ reducedMotion: "reduce" });
+  await goTo(reduced.page, -.3); await caughtUp(reduced.page);
+  const dive = (await arrivalLook(reduced.page)).dive;
+  assert.ok(dive === "" || Number(dive) === 0, `reduced motion still dives into the wall (--dive ${dive})`);
+  await reduced.context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;
