@@ -130,6 +130,38 @@ export function dolly(rect: { x: number; y: number; w: number; h: number }, vw: 
 /** Slow parallax while a project rests: the desk moves -drift × 26px, the phone -drift × 48px. */
 export const restDrift = (s: number, i: number) => clamp(s - restCenter(i), -1.2, 1.2);
 
+// ---- Case hand-off: the end of a case study carries on into the next project ----
+// Positions are screens of scroll from the moment the hand-off stage pins.
+export const HANDOFF = { FROM: -0.6, ARRIVE: 0.6, HOLD: 0.85, DIVE_FROM: 1.1, DIVE_TO: 2 } as const;
+
+/** Track height in viewport heights: the dive's end plus the pinned screen. */
+export const handoffTrackScreens = () => HANDOFF.DIVE_TO + 1;
+
+export type HandoffPhase = { phase: "before" | "arrive" | "hold" | "dive" | "done"; t: number };
+
+/** Where the reader is in the hand-off: the next project arriving, holding, the camera diving, or done (open the next case). */
+export function handoffPhase(s: number): HandoffPhase {
+  if (s < 0) return { phase: "before", t: 0 };
+  if (s < HANDOFF.ARRIVE) return { phase: "arrive", t: s / HANDOFF.ARRIVE };
+  if (s < HANDOFF.DIVE_FROM) return { phase: "hold", t: 1 };
+  if (s < HANDOFF.DIVE_TO - 0.002) return { phase: "dive", t: (s - HANDOFF.DIVE_FROM) / (HANDOFF.DIVE_TO - HANDOFF.DIVE_FROM) };
+  return { phase: "done", t: 1 };
+}
+
+/** Where to finish a hand-off move the reader stopped inside, the way they were heading: the arrival ends at the hold
+ *  or back with the contact block in view; the dive completes (opening the next case) or returns to the hold. */
+export function handoffSettle(s: number, dir: 1 | -1): number | null {
+  const spans: [number, number, number, number][] = [
+    [HANDOFF.FROM, HANDOFF.ARRIVE, HANDOFF.ARRIVE, HANDOFF.FROM],
+    [HANDOFF.DIVE_FROM, HANDOFF.DIVE_TO, HANDOFF.DIVE_TO, HANDOFF.HOLD],
+  ];
+  for (const [a, b, forward, back] of spans) {
+    if (s <= a + 0.005 || s >= b - 0.005) continue;
+    return dir > 0 ? forward : back;
+  }
+  return null;
+}
+
 export const WALL_PATTERN = ["d", "p", "d", "d", "p", "d", "p", "d", "d", "p", "d"] as const;
 
 /** Neighbouring columns drift in opposite directions at slightly different speeds. */

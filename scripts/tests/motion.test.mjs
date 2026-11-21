@@ -4,7 +4,7 @@ import { loadTs } from "./load-ts.mjs";
 
 const { fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, range,
   trackScreens, restStart, restCenter, movesEnd, momentAt, activeChapter, settleTarget, glide, arrivalT, COVER_AT, wallDive,
-  pushOut, pushIn, landing, leaveWords, dolly, restDrift, DIVE_FROM } = await loadTs("src/motion/scroll.ts");
+  pushOut, pushIn, landing, leaveWords, dolly, restDrift, DIVE_FROM, HANDOFF, handoffTrackScreens, handoffPhase, handoffSettle } = await loadTs("src/motion/scroll.ts");
 
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} ≠ ${b}`);
 
@@ -110,4 +110,20 @@ test("shade darkens behind the list and lightens while pointing", () => {
 test("range is clamped", () => {
   assert.equal(range(5, 0, 1), 1);
   assert.equal(range(-5, 0, 1), 0);
+});
+
+test("case hand-off timeline", () => {
+  assert.equal(handoffPhase(-0.3).phase, "before");
+  assert.equal(handoffPhase(0.3).phase, "arrive"); near(handoffPhase(0.3).t, .5);
+  assert.deepEqual(handoffPhase(.85), { phase: "hold", t: 1 });
+  const d = handoffPhase(1.55); assert.equal(d.phase, "dive"); near(d.t, .5);
+  assert.equal(handoffPhase(1.999).phase, "done");
+  near(handoffTrackScreens(), 3);
+  near(HANDOFF.HOLD, .85);
+});
+
+test("case hand-off finishing", () => {
+  near(handoffSettle(.2, 1), .6); near(handoffSettle(-.2, 1), .6); near(handoffSettle(.2, -1), -.6);
+  near(handoffSettle(1.3, 1), 2); near(handoffSettle(1.9, -1), .85);
+  assert.equal(handoffSettle(.85, 1), null); assert.equal(handoffSettle(-.8, 1), null); assert.equal(handoffSettle(1.997, 1), null);
 });
