@@ -18,7 +18,7 @@ Open the URL Vite prints (port 8080). `npm run build` builds the client and prer
 | What | Where |
 | --- | --- |
 | All project copy, credits, colours, screens, gallery tabs and wall lists | `src/work/projects.ts` |
-| Scroll and motion maths (wipes, giant names, wall columns) | `src/motion/scroll.ts` |
+| Scroll and motion maths (chapter timeline, push-through poses, glide and finishing, wall columns) | `src/motion/scroll.ts` |
 | Dark base: tokens, fonts, labels, device frames | `src/styles/base.css` |
 | Home page: hero, list, chapters, about, contact | `src/pages/Home.tsx`, `src/pages/home.css` |
 | Screen wall | `src/components/ScreenWall.tsx`, `screen-wall.css` |

@@ -25,7 +25,7 @@ No personal location appears anywhere on the site.
 
 ## Look and motion
 
-Dark base (`#0d0f11`), Newsreader for Joshua's voice, Anybody for project names (its width axis stretches as chapters arrive), Instrument Sans for UI. Each chapter has its own ground: espresso/amber, Korte navy/lime, MMCM navy/red, graphite/blue. Chapters wipe in as a circle of their colour. Home → case study is a cross-document View Transition where the chapter's browser frame morphs into the hero; case → next case is a circle wipe. Reduced motion turns all of it off; without JavaScript every chapter is a readable stacked section. No text is smaller than 11 px.
+Dark base (`#0d0f11`), Newsreader for Joshua's voice, Anybody for project names (its width axis stretches as chapters arrive), Instrument Sans for UI. Each chapter has its own ground: espresso/amber, Korte navy/lime, MMCM navy/red, graphite/blue. Chapters change with a push-through camera move: into the current project's laptop screen and out into the next project, which lands piece by piece; the first project arrives out of the wall of screens. Scroll glides, and a move stopped halfway finishes itself. Home → case study is a cross-document View Transition where the chapter's browser frame morphs into the hero; case → next case is a circle wipe. Reduced motion turns all of it off; without JavaScript every chapter is a readable stacked section. No text is smaller than 11 px.
 
 ## Technical map
 

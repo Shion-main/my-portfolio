@@ -648,6 +648,75 @@ check("first-arrival", async () => {
   await reduced.context.close();
 });
 
+// ---- Phones and frame budget (2026-11-22) ----
+check("push-through-phone", async () => {
+  for (const [width, height] of [[390, 844], [844, 390]]) {
+    const { page, context } = await worldsOpen({ width, height, isMobile: true, hasTouch: true });
+    // At .55 of the move both chapters would be blurred on a desktop.
+    await goTo(page, 1.25 + .55); await caughtUp(page);
+    const sa = await chapterLook(page, "space-arabica"), ko = await chapterLook(page, "korte");
+    assert.equal(sa.filter, "none", `${width}×${height}: the outgoing project is blurred on a phone`);
+    assert.equal(ko.filter, "none", `${width}×${height}: the incoming project is blurred on a phone`);
+    assert.ok(sa.scale > 1.3, `${width}×${height}: no fly-in on a phone (scale ${sa.scale})`);
+    await context.close();
+  }
+});
+
+// Wheel through the arrival and all three moves like a reader, recording frame intervals.
+async function wheelFrames(page, from = -.4, steps = 60) {
+  await page.evaluate(s => scrollTo(0, document.querySelector(".worlds").offsetTop + s * innerHeight), from);
+  await page.waitForTimeout(800);
+  // One recorder per run: a new run stops the previous one.
+  await page.evaluate(() => { const run = (window.__run = (window.__run || 0) + 1); window.__frames = []; let last = performance.now(); const tick = now => { if (window.__run !== run) return; window.__frames.push(now - last); last = now; requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < steps; i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(90); }
+  await page.waitForTimeout(500);
+  return page.evaluate(() => {
+    const f = window.__frames.slice(2).sort((a, b) => a - b);
+    const at = q => f[Math.min(f.length - 1, Math.floor(f.length * q))];
+    return { frames: f.length, median: +at(.5).toFixed(1), p95: +at(.95).toFixed(1), max: +f[f.length - 1].toFixed(1), over20: f.filter(v => v > 20).length, over34: f.filter(v => v > 34).length };
+  });
+}
+
+// Measured on the machine's real GPU: headless Chromium otherwise draws in software (SwiftShader),
+// where any blur costs several times what it does on hardware. Software numbers are printed for reference.
+const GPU_ARGS = ["--enable-gpu", "--use-angle=d3d11", "--ignore-gpu-blocklist"];
+async function framesWith(launched) {
+  const context = await launched.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  await page.goto(BASE + "/?checks", { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => window.__worlds, null, { timeout: 3000 });
+  await wallReady(page);
+  // The first arrival on its own, first on a fresh page (cold: reported, see implementation-checks.md),
+  // then again (warm: what every later arrival is like). Slow frames bunched into one moment are visible
+  // stutter even when a whole run averages out.
+  const cold = await wheelFrames(page, -.6, 13);
+  const arrival = await wheelFrames(page, -.6, 13);
+  const normal = await wheelFrames(page);
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  const slow = await wheelFrames(page);
+  const renderer = await page.evaluate(() => { const c = document.createElement("canvas").getContext("webgl"); const e = c && c.getExtension("WEBGL_debug_renderer_info"); return e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : "unknown"; });
+  await context.close();
+  return { normal, cold, arrival, slow, renderer };
+}
+
+check("chapters-frame-budget", async () => {
+  const gpu = await chromium.launch({ headless: !process.env.HEADED, args: GPU_ARGS });
+  const onGpu = await framesWith(gpu);
+  await gpu.close();
+  const inSoftware = await framesWith(browser);
+  console.log(`     GPU (${onGpu.renderer.slice(0, 48)}) 1× ${JSON.stringify(onGpu.normal)}`);
+  console.log(`     GPU first arrival, cold 1× ${JSON.stringify(onGpu.cold)}`);
+  console.log(`     GPU arrival, warm 1× ${JSON.stringify(onGpu.arrival)}`);
+  console.log(`     GPU 4× CPU ${JSON.stringify(onGpu.slow)}`);
+  console.log(`     software 1× ${JSON.stringify(inSoftware.normal)}`);
+  assert.ok(!/SwiftShader/.test(onGpu.renderer), "no real GPU available, so the frame budget cannot be judged here");
+  assert.ok(onGpu.normal.p95 <= 17, `95% of frames should take at most 17 ms at full speed on the GPU; p95 was ${onGpu.normal.p95} ms`);
+  assert.ok(onGpu.arrival.p95 <= 17, `the first arrival stutters on the GPU: p95 ${onGpu.arrival.p95} ms`);
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

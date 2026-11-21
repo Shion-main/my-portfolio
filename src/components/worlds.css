@@ -7,7 +7,8 @@
 .worlds.motion .chapter { position: absolute; inset: 0; min-height: 0; opacity: 0; pointer-events: none; }
 .chapter-anchor { position: absolute; left: 0; top: calc(var(--rest) * 100vh); width: 1px; height: 1px; pointer-events: none; }
 .scene { position: absolute; inset: 0; }
-.stage-flash { position: absolute; inset: 0; z-index: 20; opacity: 0; pointer-events: none; mix-blend-mode: screen; }
+/* Ordinary blending: a screen blend over the blurring wall made the first arrival stutter. */
+.stage-flash { position: absolute; inset: 0; z-index: 20; opacity: 0; pointer-events: none; }
 .worlds:not(.motion) .stage-flash { display: none; }
 
 .chapter .label { color: inherit; opacity: .72; }
