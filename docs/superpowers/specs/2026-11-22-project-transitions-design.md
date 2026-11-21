@@ -1,6 +1,6 @@
 # Project transitions: push-through — design
 
-Date: 2026-11-22 · Branch: `redesign/index-worlds` · Builds on: `2026-11-21-portfolio-redesign-design.md`
+Date: 2026-11-22 (corrected while planning: 690vh track, wall cover timing) · Branch: `redesign/index-worlds` · Builds on: `2026-11-21-portfolio-redesign-design.md`
 
 ## Intent
 
@@ -37,12 +37,12 @@ The approved prototype is `.superpowers/brainstorm/517-1795276536/content/transi
 ## How scrolling feels
 
 - **Glide.** The page itself scrolls natively. Only the drawn progress of the chapters is smoothed: each frame it moves toward the real scroll position with a 130 ms time constant, so a wheel click glides instead of jumping.
-- **Room.** Each project rests for 0.55 of a screen of scroll, and each move takes 1 full screen. With four projects that is 5.2 screens of scroll, so the pinned track is 620vh, on every screen size.
+- **Room.** The first arrival takes 0.7 of a screen of scroll once the section is pinned, each project rests for 0.55 of a screen, and each move takes 1 full screen. With four projects that is 5.9 screens of scroll, so the pinned track is 690vh, on every screen size.
 - **Finish the move.** If scrolling stops partway through a move (no scroll for 170 ms), the page smoothly scrolls to the nearer end. The tie-break follows the reader's direction: going forward, anything past a quarter finishes forward; going back, anything short of three quarters finishes back. It never fires while a finger is still on the screen, and it never fires again once a move has ended.
 
 ## First arrival and the exit
 
-- **Arriving from the list (Space Arabica).** Today the first chapter opens as a circle over the list while its section scrolls in. It now arrives in the same camera language: as the list scrolls away, the wall of UI screens behind it rushes toward the camera (scales up and blurs), and Space Arabica emerges out of it with the same incoming half as above (fade, grow from 62%, blur clearing, staggered landing, flash). The section's top edge must never show as a hard line sliding up. Space Arabica stays invisible until the stage is almost pinned, with the wall covering the gap. The wall's existing "covered" signal fires as this arrival begins.
+- **Arriving from the list (Space Arabica).** Today the first chapter opens as a circle over the list while its section scrolls in. It now arrives in the same camera language: as the list scrolls away, the wall of UI screens behind it rushes toward the camera (scales up and blurs), and Space Arabica emerges out of it with the same incoming half as above (fade, grow from 62%, blur clearing, staggered landing, flash). The section's top edge must never show as a hard line sliding up: the dive starts while the list is still scrolling away, and Space Arabica only begins to emerge once the stage is pinned (the stage itself is transparent, so the diving wall shows through it). The wall's existing "covered" signal (which fades the wall out over half a second) fires once Space Arabica is fully opaque over it, so that fade is never seen.
 - **Leaving after Atlas Treasury.** Unchanged. The pinned stage scrolls away natively into About.
 
 ## Everything else that must keep working
