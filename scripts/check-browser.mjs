@@ -257,13 +257,19 @@ check("morph-into-case", async () => {
   await context.close();
 });
 
-check("wipe-next-case", async () => {
-  const { page, context } = await open("/work/atlas-accountancy/");
-  await context.addInitScript(RECORD);
-  const reveal = await navigateBy(page, ".case-next");
-  assert.equal(new URL(page.url()).pathname, "/work/space-arabica/");
-  assert.deepEqual(reveal, { vt: true, kind: "wipe" });
-  await context.close();
+check("dive-next-case", async () => {
+  // Case → next case: the hand-off's laptop frame morphs into the next case's hero ("dive"), including the loop back.
+  for (const [from, to] of [["atlas-accountancy", "space-arabica"], ["space-arabica", "korte"]]) {
+    const { page, context } = await open(`/work/${from}/?checks`);
+    await context.addInitScript(RECORD);
+    await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
+    await page.evaluate(() => window.__handoff.settle(false));
+    await handoffGoTo(page, .85); await handoffCaught(page);
+    const reveal = await navigateBy(page, ".handoff__continue");
+    assert.equal(new URL(page.url()).pathname, `/work/${to}/`);
+    assert.deepEqual(reveal, { vt: true, kind: "dive" }, `${from} → ${to}: ${JSON.stringify(reveal)}`);
+    await context.close();
+  }
 });
 
 check("back-lands-on-chapter", async () => {

@@ -1,6 +1,7 @@
 /* Runs before first paint so cross-document View Transitions can be prepared.
    Home ↔ case study: the chapter's browser frame morphs into the case hero ("morph").
-   Case study → another case study: a circle of the next page wipes in ("wipe").
+   Case study → the next case study: the hand-off's laptop frame, already filling the screen, settles into the
+   next case's hero ("dive"). Only the leaving page's hand-off frame and the arriving page's hero carry the name.
    Links, loading and history stay ordinary browser navigation. */
 (() => {
   const root = document.documentElement;
@@ -26,18 +27,20 @@
   const kindBetween = (from, to) => {
     const a = place(from), b = place(to);
     if (!a || !b) return null;
-    if (a.page === 'case' && b.page === 'case' && a.slug !== b.slug) return 'wipe';
+    if (a.page === 'case' && b.page === 'case' && a.slug !== b.slug) return 'dive';
     if (a.page !== b.page) return 'morph';
     return null;
   };
   const reset = () => {
     delete root.dataset.transitionKind;
+    delete root.dataset.transitionSide;
     delete root.dataset.morphTarget;
     delete root.dataset.projectArrival;
   };
   let active = null;
-  const begin = (transition, kind, to) => {
+  const begin = (transition, kind, to, side) => {
     root.dataset.transitionKind = kind;
+    root.dataset.transitionSide = side;
     // Arriving on the home page before React has run: name the right chapter's frame from CSS.
     const target = place(to);
     if (kind === 'morph' && target && target.page === 'home' && target.slug) root.dataset.morphTarget = target.slug;
@@ -50,7 +53,7 @@
     const to = event.activation && event.activation.entry && event.activation.entry.url;
     const kind = kindBetween(location.href, to);
     if (!kind || reduced.matches) { event.viewTransition.skipTransition(); return; }
-    begin(event.viewTransition, kind, to);
+    begin(event.viewTransition, kind, to, 'old');
   });
   window.addEventListener('pagereveal', (event) => {
     reset();
@@ -58,7 +61,7 @@
     const from = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
     const kind = kindBetween(from, location.href);
     if (!kind || reduced.matches) { event.viewTransition.skipTransition(); return; }
-    begin(event.viewTransition, kind, location.href);
+    begin(event.viewTransition, kind, location.href, 'new');
   });
   // A page restored from the back/forward cache never keeps a transition state.
   window.addEventListener('pageshow', (event) => { if (event.persisted) reset(); });
