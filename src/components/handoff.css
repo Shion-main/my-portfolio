@@ -5,7 +5,8 @@
 .handoff { position: relative; z-index: 1; }
 .handoff__anchor { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }
 .handoff__stage { position: relative; }
-.handoff__world { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; color: var(--ink); background: var(--ground); }
+/* Clipped, not a scroll container: mid-whip its name and laptop overflow it, and focus must never shift it sideways. */
+.handoff__world { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; overflow: clip; color: var(--ink); background: var(--ground); }
 .handoff__scene { position: absolute; inset: 0; }
 .handoff__streaks, .handoff__bar { display: none; }
 
@@ -31,21 +32,26 @@
 .can-move .handoff__stage, .handoff.motion .handoff__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; overflow: clip; }
 .can-move .handoff__contact, .handoff.motion .handoff__contact,
 .can-move .handoff__world, .handoff.motion .handoff__world { position: absolute; inset: 0; min-height: 0; }
-/* The contact block keeps its look as it scrolls in; its top padding gives way on short screens (landscape phones). */
-.can-move .handoff__contact, .handoff.motion .handoff__contact { padding-top: min(150px, 16svh); }
-/* The moving shots get their own layers up front, so the first whip does not pay for creating them. */
-.handoff.motion .handoff__contact, .handoff.motion .handoff__world, .handoff.motion .handoff__scene { will-change: transform, filter; }
+/* The contact block keeps its look as it scrolls in; its top padding gives way on short screens (landscape phones),
+   but never so far that its label slides under the fixed header. */
+.can-move .handoff__contact, .handoff.motion .handoff__contact { padding-top: clamp(72px, 16svh, 150px); }
+/* Near the hand-off the moving shots get their own layers, so the first whip does not pay for creating them. */
+.handoff--near .handoff__contact, .handoff--near .handoff__world, .handoff--near .handoff__scene { will-change: transform, filter; }
 /* Before the app draws, the next project waits off to the right so the contact block shows. */
 .can-move .handoff:not(.motion) .handoff__world { transform: translateX(105vw); }
-/* Motion streaks: one wide layer of thin lines, slid sideways during a whip. */
+/* Motion streaks: one wide layer of thin lines, slid sideways during a whip. A slanted mask breaks each line into
+   dashes at a different place, so the slide reads as streaks sweeping past. */
 .can-move .handoff__streaks, .handoff.motion .handoff__streaks {
   display: block; position: absolute; inset: 0 -100%; z-index: 15; pointer-events: none; opacity: 0;
   background: repeating-linear-gradient(0deg, transparent 0 22px, rgba(255, 255, 255, .06) 22px 23px, transparent 23px 61px, color-mix(in srgb, var(--giant) 28%, transparent) 61px 62px);
+  -webkit-mask-image: repeating-linear-gradient(86deg, #000 0 38vw, transparent 38vw 47vw, #000 47vw 63vw, transparent 63vw 66vw, #000 66vw 92vw, transparent 92vw 110vw);
+  mask-image: repeating-linear-gradient(86deg, #000 0 38vw, transparent 38vw 47vw, #000 47vw 63vw, transparent 63vw 66vw, #000 66vw 92vw, transparent 92vw 110vw);
 }
-/* Cinema bars close in at the fastest point of a whip. */
-.can-move .handoff__bar, .handoff.motion .handoff__bar { display: block; position: absolute; left: 0; right: 0; z-index: 18; height: 0; background: #000; pointer-events: none; }
-.handoff__bar--top { top: 0; }
-.handoff__bar--bottom { bottom: 0; }
+/* Cinema bars close in at the fastest point of a whip: full height (9vh, the peak) scaled from their edge, so a whip
+   never lays the page out again. */
+.can-move .handoff__bar, .handoff.motion .handoff__bar { display: block; position: absolute; left: 0; right: 0; z-index: 18; height: 9vh; background: #000; pointer-events: none; transform: scaleY(0); }
+.handoff__bar--top { top: 0; transform-origin: top; }
+.handoff__bar--bottom { bottom: 0; transform-origin: bottom; }
 
 @media (max-width: 860px) {
   .handoff__info { top: 76px; left: 20px; right: 20px; width: auto; translate: none; }

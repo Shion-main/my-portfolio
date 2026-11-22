@@ -272,6 +272,9 @@ check("whip-next-case", async () => {
       const name = sel => { const e = document.querySelector(sel); return e ? getComputedStyle(e).viewTransitionName : "missing"; };
       window.__names = { hero: name(".case-hero__frame"), head: name(".site-head") };
     }, 0)));
+    await context.addInitScript(() => addEventListener("pagereveal", e => e.viewTransition?.ready.then(() => {
+      window.__rootAnimations = document.getAnimations().filter(a => /^::view-transition-(old|new)\(root\)$/.test(a.effect?.pseudoElement || "")).map(a => a.animationName).sort();
+    }, () => {})));
     await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
     await page.evaluate(() => window.__handoff.settle(false));
     await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
@@ -279,6 +282,11 @@ check("whip-next-case", async () => {
     assert.equal(new URL(page.url()).pathname, `/work/${to}/`);
     assert.deepEqual(reveal, { vt: true, kind: "whip" }, `${from} → ${to}: ${JSON.stringify(reveal)}`);
     assert.deepEqual(await page.evaluate(() => window.__names), { hero: "none", head: "site-header" }, `${from} → ${to}: named parts during the whip`);
+    // The landing runs the whip's own moves on the two root images, and only those: Chromium blends a crossfade's
+    // images with a "-ua-mix-blend-mode-plus-lighter" animation, which would brighten the overlap as one slides over
+    // the other. (The explicit mix-blend-mode: normal is pinned in css.test.mjs.)
+    await page.waitForFunction(() => window.__rootAnimations, null, { timeout: 3000 });
+    assert.deepEqual(await page.evaluate(() => window.__rootAnimations), ["whip-new", "whip-old"], `${from} → ${to}: the landing does not run the whip`);
     await page.waitForTimeout(1200);
     const after = await page.evaluate(() => ({ state: !!document.querySelector("[data-transition-kind]"), hero: getComputedStyle(document.querySelector(".case-hero__frame")).viewTransitionName }));
     assert.deepEqual(after, { state: false, hero: "project-frame" }, `${from} → ${to}: the whip left its state behind`);
@@ -766,9 +774,12 @@ async function handoffFramesWith(launched) {
   };
   const cold = await run();
   const warm = await run();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  const slow = await run();
   const renderer = await page.evaluate(() => { const c = document.createElement("canvas").getContext("webgl"); const e = c && c.getExtension("WEBGL_debug_renderer_info"); return e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : "unknown"; });
   await context.close();
-  return { cold, warm, renderer };
+  return { cold, warm, slow, renderer };
 }
 
 check("handoff-frame-budget", async () => {
@@ -778,6 +789,7 @@ check("handoff-frame-budget", async () => {
   const inSoftware = await handoffFramesWith(browser);
   console.log(`     GPU (${onGpu.renderer.slice(0, 48)}) whip, cold 1× ${JSON.stringify(onGpu.cold)}`);
   console.log(`     GPU whip, warm 1× ${JSON.stringify(onGpu.warm)}`);
+  console.log(`     GPU whip, 4× CPU ${JSON.stringify(onGpu.slow)}`);
   console.log(`     software whip, warm 1× ${JSON.stringify(inSoftware.warm)}`);
   assert.ok(!/SwiftShader/.test(onGpu.renderer), "no real GPU available, so the frame budget cannot be judged here");
   assert.ok(onGpu.warm.p95 <= 17, `the whip stutters on the GPU: p95 ${onGpu.warm.p95} ms`);
@@ -995,7 +1007,10 @@ async function handoffWheelThrough(page, from = "space-arabica", to = "korte") {
 
 check("handoff-continues", async () => {
   const { page, context } = await handoffOpen("/work/space-arabica/");
+  await context.addInitScript(RECORD);
   await handoffWheelThrough(page);
+  await page.waitForFunction(() => window.__kinds?.length > 0, null, { timeout: 3000 });
+  assert.deepEqual(await page.evaluate(() => window.__kinds[0]), { vt: true, kind: "whip" }, "opening by itself is not the whip");
   const top = await page.evaluate(() => document.querySelector(".case-hero__frame").getBoundingClientRect().top);
   assert.ok(top < 200, `Korte opened but its hero is not at the top (${top}px)`);
   await context.close();
@@ -1011,10 +1026,10 @@ check("handoff-visible-at-hold", async () => {
       const hd = document.getElementById("handoff-title"), r = hd.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left + Math.min(r.width / 2, 40), r.top + r.height / 2);
       const desk = document.querySelector(".handoff__desk").getBoundingClientRect();
-      return { world: getComputedStyle(document.querySelector(".handoff__world")).opacity, seen: !!hit && hd.contains(hit), deskInView: desk.top >= 0 && desk.bottom <= innerHeight && desk.right <= innerWidth };
+      return { world: document.querySelector(".handoff__world").getBoundingClientRect().left, seen: !!hit && hd.contains(hit), deskInView: desk.top >= 0 && desk.bottom <= innerHeight && desk.right <= innerWidth };
     });
     assert.ok(st.deskInView, `${w}×${h}: the next project's laptop runs off the screen at the hold`);
-    assert.equal(st.world, "1", `${w}px: the next project's world is not shown at the hold (opacity ${st.world})`);
+    assert.ok(Math.abs(st.world) <= 1, `${w}px: the next project is not at rest on the screen at the hold (left ${st.world})`);
     assert.ok(st.seen, `${w}px: the next project's heading cannot be seen at the hold`);
     await context.close();
   }
@@ -1196,12 +1211,36 @@ check("handoff-back-fades", async () => {
 
 check("handoff-sized-before-app", async () => {
   // The hand-off has its full track before the app runs, so a restored scroll position is never clamped short.
+  // The app's code is held back (not failed), as on a slow connection.
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  let release;
+  const gate = new Promise(r => { release = r; });
+  await ctx.route(/\/assets\/.*\.js$/, async route => { await gate; await route.continue(); });
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/work/space-arabica/", { waitUntil: "commit" });
+  await page.waitForSelector(".handoff", { state: "attached", timeout: 10000 });
+  const st = await page.evaluate(hs => ({ track: document.querySelector(".handoff").offsetHeight, full: hs * innerHeight }), HS);
+  release();
+  assert.ok(Math.abs(st.track - st.full) <= 2, `before the app runs the hand-off is ${st.track}px, not ${st.full}px`);
+  await ctx.close();
+});
+
+check("handoff-app-failed", async () => {
+  // If the app's code fails to load, the page falls back to the plain ending: the next project and its link can be
+  // reached and clicked, instead of hiding behind the contact block in a pinned stage nothing moves.
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await ctx.route(/\/assets\/.*\.js$/, route => route.abort());
   const page = await ctx.newPage();
   await page.goto(BASE + "/work/space-arabica/", { waitUntil: "load" });
-  const st = await page.evaluate(hs => ({ track: document.querySelector(".handoff").offsetHeight, full: hs * innerHeight }), HS);
-  assert.ok(Math.abs(st.track - st.full) <= 2, `before the app runs the hand-off is ${st.track}px, not ${st.full}px`);
+  await page.waitForTimeout(500);
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForTimeout(400);
+  const st = await page.evaluate(() => {
+    const a = document.querySelector(".handoff__continue"), r = a.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return { onScreen: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight, hit: !!hit && a.contains(hit) };
+  });
+  assert.ok(st.onScreen && st.hit, `with the app's code failed, Continue cannot be reached (${JSON.stringify(st)})`);
   await ctx.close();
 });
 
@@ -1271,11 +1310,19 @@ check("handoff-whip-frames", async () => {
   assert.ok(v.streaks > .5, `no streaks mid-whip (${v.streaks})`);
   assert.ok(v.giantX < 0 && v.deskX > 0, `no parallax mid-whip (name ${v.giantX}, laptop ${v.deskX})`);
   assert.match(v.worldFilter, /blur/, "no motion blur mid-whip");
+  assert.equal(v.head, "", "the header took the next project's colour before it covered the screen");
+  // 5. The cinema bars scale; they never change their laid-out height.
+  const barBox = () => page.evaluate(() => getComputedStyle(document.querySelector(".handoff__bar--top")).height);
+  const midBox = await barBox();
+
+  v = await at(HANDOFF.IN_FROM + .6 * (HANDOFF.IN_TO - HANDOFF.IN_FROM));
+  assert.equal(v.head, "#eef2ea", "the header kept the case's colour once the next project covered the screen");
 
   v = await at(HANDOFF.HOLD);
   assert.ok(v.contact.r <= 0, `the contact block still shows at the hold (right ${v.contact.r})`);
   assert.ok(Math.abs(v.world.l) <= 1, `the next project is not at rest at the hold (left ${v.world.l})`);
   assert.equal(v.bar, 0, "cinema bars at the hold");
+  assert.equal(await barBox(), midBox, "the cinema bars animate their height (layout every frame) instead of scaling");
   assert.equal(v.worldFilter, "none", "blur at the hold");
   assert.equal(v.streaks, 0, "streaks at the hold");
   assert.equal(v.head, "#eef2ea", "the header does not take Korte's colour at the hold");
@@ -1354,6 +1401,70 @@ check("handoff-open-fallback-arrival", async () => {
   assert.equal(await page.evaluate(() => window.__native), false, "could not switch off native view transitions for this check");
   await handoffWheelThrough(page);
   assert.equal(await page.evaluate(() => window.__arrival), "true", "opening by itself skipped the fallback arrival fade");
+  await context.close();
+});
+
+// ---- Whip-pan minor fixes (2026-11-22) ----
+check("handoff-rotate-contact-approach", async () => {
+  // 2. Rotating while the contact block scrolls in keeps the reader's place, even without the browser's scroll
+  // anchoring (Safari has none).
+  const { page, context } = await handoffOpen("/work/space-arabica/", { width: 390, height: 844, isMobile: true, hasTouch: true });
+  await page.evaluate(() => { document.documentElement.style.overflowAnchor = "none"; });
+  await page.keyboard.press("Shift");
+  await handoffGoTo(page, -.5); await handoffCaught(page); await page.waitForTimeout(400);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.waitForTimeout(2000);
+  const at = await handoffPos(page);
+  assert.ok(Math.abs(at + .5) <= .05, `rotating while the contact block scrolled in moved the hand-off to ${at.toFixed(3)}`);
+  await context.close();
+});
+
+check("handoff-contact-clears-header", async () => {
+  // 3. At rest the contact block's label sits below the fixed header, and the email still fits, down to a landscape
+  // phone with its toolbar showing.
+  for (const [w, h] of [[1440, 900], [390, 844], [844, 340], [667, 375]]) {
+    const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h, ...(w < 900 ? { isMobile: true, hasTouch: true } : {}) });
+    await page.evaluate(() => window.__handoff.settle(false));
+    await handoffGoTo(page, .2); await handoffCaught(page);
+    const st = await page.evaluate(() => ({
+      head: document.querySelector(".site-head").getBoundingClientRect().bottom,
+      label: document.querySelector(".handoff__contact .label").getBoundingClientRect().top,
+      mail: document.querySelector(".handoff__contact .contact-mail").getBoundingClientRect().bottom,
+      h: innerHeight,
+    }));
+    assert.ok(st.label >= st.head, `${w}×${h}: the contact label (top ${st.label}) slides under the header (bottom ${st.head})`);
+    assert.ok(st.mail <= st.h, `${w}×${h}: the email runs off the screen (bottom ${st.mail} of ${st.h})`);
+    await context.close();
+  }
+});
+
+check("handoff-streaks-sweep", async () => {
+  // 4. The streaks are broken lines, so their sideways slide shows (uniform lines would only fade).
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  const mask = await page.evaluate(() => { const st = getComputedStyle(document.querySelector(".handoff__streaks")); return st.maskImage || st.webkitMaskImage || "none"; });
+  assert.match(mask, /gradient/, `the streaks have no horizontal breaks (mask ${mask})`);
+  await context.close();
+});
+
+check("handoff-layers-near-only", async () => {
+  // 6. The moving shots get their own layers only near the hand-off, not for the whole case study.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  const layer = () => page.evaluate(() => getComputedStyle(document.querySelector(".handoff__world")).willChange);
+  await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
+  assert.equal(await layer(), "auto", "the hand-off's layers are promoted at the top of the case study");
+  await handoffGoTo(page, .2); await handoffCaught(page);
+  assert.match(await layer(), /transform/, "the hand-off's layers are not promoted on the contact block");
+  await context.close();
+});
+
+check("handoff-world-not-scrollable", async () => {
+  // 7. The next project's shot clips like the stage: it is not a scroll container focus could shift sideways.
+  // Mid-whip its laptop and name overflow it, which is when a scroll container could be shifted.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, HANDOFF.IN_FROM + .5 * (HANDOFF.IN_TO - HANDOFF.IN_FROM)); await handoffCaught(page);
+  const left = await page.evaluate(() => { const w = document.querySelector(".handoff__world"); w.scrollLeft = 80; return w.scrollLeft; });
+  assert.equal(left, 0, `the next project's shot scrolled sideways by ${left}px`);
   await context.close();
 });
 

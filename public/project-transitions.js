@@ -10,9 +10,15 @@
   const native = 'onpageswap' in window && 'onpagereveal' in window;
   const arrivalKey = 'portfolio-arrival';
   const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-accountancy'];
-  // Before first paint: pages that will move get their full layout now (the case hand-off's 300vh track),
+  // Before first paint: pages that will move get their full layout now (the case hand-off's 360vh track),
   // so a restored scroll position is never clamped to a shorter page than the app will build.
   if (!reduced.matches) root.classList.add('can-move');
+  // If the app's own code fails to load, nothing would ever move that layout: fall back to the plain one, so the end
+  // of a case study can still be read and its link reached. (Once the app runs, its own classes keep the layout.)
+  window.addEventListener('error', (event) => {
+    const script = event.target;
+    if (script instanceof HTMLScriptElement && script.type === 'module' && script.src.startsWith(location.origin)) root.classList.remove('can-move');
+  }, true);
 
   // Returns { page: 'home' | 'case', slug } for same-origin portfolio URLs.
   const place = (value) => {

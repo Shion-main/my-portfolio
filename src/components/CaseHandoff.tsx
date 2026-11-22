@@ -35,6 +35,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
     let target = 0;
     let headOn = false;
     let primed = false;
+    let nearOn = false;
     // Opening the next case needs a reader: some input since load (or since a restore), and only once per page view.
     let moved = false;
     let opened = false;
@@ -60,6 +61,9 @@ export default function CaseHandoff({ next }: { next: Project }) {
       // The next project's screenshot is lazy: load and decode it as the reader nears the hand-off, so it is never
       // fetched and decoded in the middle of the whip.
       if (!primed && cur > -1.5) { primed = true; screen.loading = "eager"; screen.decode?.().catch(() => {}); }
+      // Near the hand-off its moving shots get their own layers (handoff.css); far from it they don't hold memory.
+      const near = cur > -1.5;
+      if (near !== nearOn) { nearOn = near; el.classList.toggle("handoff--near", near); }
       const { phase, t } = handoffPhase(cur);
       const cap = innerWidth > 860 ? 10 : 6;
       const blurOf = (b: number) => (b * cap > 0.05 ? `blur(${(b * cap).toFixed(1)}px)` : "none");
@@ -111,7 +115,8 @@ export default function CaseHandoff({ next }: { next: Project }) {
       desk.style.transform = deskT;
       streaksEl.style.opacity = streaks > 0.001 ? streaks.toFixed(3) : "0";
       streaksEl.style.transform = `translateX(${streakX.toFixed(2)}vw)`;
-      for (const bar of bars) bar.style.height = barH > 0.01 ? `${barH.toFixed(2)}vh` : "0px";
+      // The bars are laid out at their peak (9vh) and scaled from their edge.
+      for (const bar of bars) bar.style.transform = `scaleY(${barH > 0.01 ? (barH / 9).toFixed(4) : "0"})`;
 
       // The header takes the next project's text colour once its world covers most of the screen.
       if (head !== headOn) {
@@ -201,7 +206,8 @@ export default function CaseHandoff({ next }: { next: Project }) {
       const widthChanged = innerWidth !== lastWidth;
       lastWidth = innerWidth;
       fit();
-      if (widthChanged && keep >= 0 && keep <= HANDOFF.OUT_TO) window.scrollTo(0, topFor(Math.min(keep, HANDOFF.HOLD)));
+      // From the contact block scrolling in (a screen before the stage pins) to the end of the second whip.
+      if (widthChanged && keep >= -1 && keep <= HANDOFF.OUT_TO) window.scrollTo(0, topFor(Math.min(keep, HANDOFF.HOLD)));
       waitToFinish();
     };
     const fit = () => {
@@ -234,6 +240,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
       clearTimeout(finishTimer);
       stopFinishing();
       page.removeProperty("--head");
+      el.classList.remove("handoff--near");
       window.removeEventListener("scroll", scrolled);
       window.removeEventListener("resize", resized);
       window.removeEventListener("keydown", endKey);

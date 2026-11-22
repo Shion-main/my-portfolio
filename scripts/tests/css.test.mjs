@@ -40,3 +40,13 @@ test("the pinned chapter track matches the timeline", () => {
   // Must equal trackScreens(4) × 100 in src/motion/scroll.ts: arrival .7 + four rests of .55 + three moves of 1 + one screen.
   assert.match(readFileSync("src/components/worlds.css", "utf8"), /\.worlds\.motion \{ height: 690vh; \}/);
 });
+
+test("the case-to-case whip's two root images blend normally", () => {
+  // They overlap while one slides over the other; the crossfade's default plus-lighter blending would brighten the overlap.
+  const css = readFileSync("src/project-transitions.css", "utf8");
+  for (const part of ["old", "new"]) {
+    const rule = css.match(new RegExp(`:root\\[data-transition-kind="whip"\\]::view-transition-${part}\\(root\\)\\s*\\{([^}]*)\\}`));
+    assert.ok(rule, `no whip rule for the ${part} root image`);
+    assert.match(rule[1], /mix-blend-mode:\s*normal/, `the whip's ${part} root image does not blend normally`);
+  }
+});
