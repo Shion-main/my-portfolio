@@ -9,7 +9,7 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const native = 'onpageswap' in window && 'onpagereveal' in window;
   const arrivalKey = 'portfolio-arrival';
-  const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-accountancy'];
+  const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-treasury'];
   // Before first paint: pages that will move get their full layout now (the case hand-off's 360vh track),
   // so a restored scroll position is never clamped to a shorter page than the app will build.
   if (!reduced.matches) root.classList.add('can-move');

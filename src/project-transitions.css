@@ -13,7 +13,7 @@
 :root[data-morph-target="space-arabica"] .worlds:not(.motion) [data-chapter="space-arabica"] .showcase-desk .frame,
 :root[data-morph-target="korte"] .worlds:not(.motion) [data-chapter="korte"] .showcase-desk .frame,
 :root[data-morph-target="fluxtrack"] .worlds:not(.motion) [data-chapter="fluxtrack"] .showcase-desk .frame,
-:root[data-morph-target="atlas-accountancy"] .worlds:not(.motion) [data-chapter="atlas-accountancy"] .showcase-desk .frame { view-transition-name: project-frame; }
+:root[data-morph-target="atlas-treasury"] .worlds:not(.motion) [data-chapter="atlas-treasury"] .showcase-desk .frame { view-transition-name: project-frame; }
 
 /* Whip: the page change finishes the hand-off's whip pan. The scroll accelerated into the cut; here the old page keeps
    sliding left and fades while the next case study slows in from the right, its blur clearing. Nothing is morphed

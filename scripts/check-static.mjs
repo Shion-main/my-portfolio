@@ -9,7 +9,7 @@ for (const [file, name] of [
   ["dist/work/space-arabica/index.html", "Space Arabica"],
   ["dist/work/korte/index.html", "Korte"],
   ["dist/work/fluxtrack/index.html", "FluxTrack"],
-  ["dist/work/atlas-accountancy/index.html", "Atlas Accountancy"],
+  ["dist/work/atlas-treasury/index.html", "Atlas Treasury"],
 ]) {
   const html = await readFile(file, "utf8");
   assert.ok(html.includes(name));
@@ -30,9 +30,11 @@ for (const [file, name] of [
 
 // Home: hero and project list, with Joshua's confirmed credits and no personal location.
 const homeHtml = await readFile("dist/index.html", "utf8");
-for (const text of ["I design how an idea", "Space Arabica", "Korte", "FluxTrack", "Atlas Accountancy", "Design + build · team of 3", "UI/UX · Accountancy module", "Independent designer &amp; developer"])
+for (const text of ["I design how an idea", "Space Arabica", "Korte", "FluxTrack", "Atlas Treasury", "Research, design + build · team of 3", "UI/UX · Accounting module", "Independent designer &amp; developer"])
   assert.ok(homeHtml.includes(text), `home is missing: ${text}`);
-const withoutClientLocation = homeHtml.replaceAll("Café website, Davao City", "").replaceAll("Café website · Davao City", "");
+// The café's own address is the client's, not Joshua's.
+const clientLocation = html => html.replaceAll("Café website, Davao City", "").replaceAll("Café website · Ecoland, Davao City", "").replaceAll("a café in Ecoland, Davao City", "");
+const withoutClientLocation = clientLocation(homeHtml);
 assert.ok(!withoutClientLocation.includes("Davao City"), "no personal location on the home page");
 
 // Home: four chapters, readable in the prerendered HTML before any script runs.
@@ -52,7 +54,7 @@ for (const file of CHROME_ROUTES) {
   const page = await readFile(file, "utf8");
   assert.ok(page.includes("Let’s make"), `${file} is missing the contact block`);
   assert.ok(!/Syne|DM Sans/.test(page), `${file} still references a retired font`);
-  const rest = page.replaceAll("Café website, Davao City", "").replaceAll("Café website · Davao City", "").replace(/Space Arabica is a café in Ecoland, Davao City/g, "");
+  const rest = clientLocation(page);
   assert.ok(!rest.includes("Davao City"), `${file} shows a personal location`);
 }
 const notFound = await readFile("public/404.html", "utf8");
@@ -64,7 +66,10 @@ for (const [i, p] of projects.entries()) {
   const page = await readFile(`dist/work/${p.slug}/index.html`, "utf8");
   const next = projects[(i + 1) % projects.length];
   assert.ok(new RegExp(`<h1[^>]*>${p.name}</h1>`).test(page), `${p.slug}: h1`);
-  for (const text of [p.question, ...p.decisions.map(d => d.title), ...p.tabs.map(t => t.title)]) assert.ok(page.includes(html(text)), `${p.slug} case is missing: ${text}`);
+  // The approved template: headline, at a glance, the challenge, what I did, results, screens, the line for clients, a note.
+  for (const text of [p.headline, ...p.caseFacts.map(f => f.detail), p.challenge, ...p.did.flatMap(d => [d.title, d.text]), ...p.results, ...p.tabs.map(t => t.title), p.forYou, p.note]) assert.ok(page.includes(html(text)), `${p.slug} case is missing: ${text}`);
+  assert.ok(page.includes('class="case-cta" href="#contact"'), `${p.slug}: no contact link after the line for clients`);
+  for (const gone of ["Looking back", "decisions</h2>", "case-question"]) assert.ok(!page.includes(gone), `${p.slug} still has the old template (${gone})`);
   assert.ok(page.includes(`href="/work/${next.slug}/"`), `${p.slug}: next project link`);
   assert.ok(page.includes(`<link rel="canonical" href="https://by-shion.dev/work/${p.slug}/"`), `${p.slug}: canonical`);
   assert.ok(page.includes(`${p.name} — Joshua Sabuero</title>`), `${p.slug}: title`);
@@ -102,7 +107,7 @@ assert.ok(/<iframe[^>]*src="\/work\/space-arabica\/demo\/"[^>]*>/.test(spaceCase
 const frameTag = spaceCaseHtml.match(/<iframe[^>]*>/)[0];
 assert.ok(frameTag.includes('loading="lazy"') && /title="[^"]+"/.test(frameTag), "Space Arabica: the embedded demo needs lazy loading and a title");
 assert.ok(/<a[^>]*href="https:\/\/spacearabica\.com\/"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/.test(spaceCaseHtml), "Space Arabica: no safe link to the live site");
-assert.ok(spaceCaseHtml.includes("Four decisions"), "Space Arabica: the decisions heading does not count four");
+assert.ok(spaceCaseHtml.includes("Built what the owner chose"), "Space Arabica: the pivot to the owner’s brief is not told");
 assert.ok(!spaceCaseHtml.includes("vercel.app"));
 
 // The hosted Space Arabica demo: Joshua's original design, seven pages, each with the banner (live-site link, back link that leaves the frame), with nothing that sends.

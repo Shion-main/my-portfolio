@@ -1,6 +1,6 @@
 # Product
 
-> Current scope (2026-11-21): a dark, scroll-driven portfolio of four projects — Space Arabica, Korte, FluxTrack and Atlas Accountancy — shown in one consistent chapter layout, each with a case study from one shared template. It serves freelance clients and hiring teams equally. Credits follow Joshua's confirmations: sole designer and developer of Space Arabica and Korte; designer and builder of FluxTrack within a three-person capstone team; UI/UX designer of Atlas Accountancy (the Accountancy module), his first UI/UX work. See `docs/superpowers/specs/2026-11-21-portfolio-redesign-design.md` and `src/work/projects.ts`; older notes below are historical.
+> Current scope (2026-11-21): a dark, scroll-driven portfolio of four projects — Space Arabica, Korte, FluxTrack and Atlas Treasury — shown in one consistent chapter layout, each with a case study from one shared template. It serves freelance clients and hiring teams equally. Credits follow Joshua's confirmations: sole designer and developer of Space Arabica and Korte; researcher, designer and builder of FluxTrack within a three-person capstone team; UI/UX designer of the accounting module of Atlas Treasury (Mapúa's in-house system), his first UI/UX work. Case studies are written for clients: outcomes and plain language, no technical stats. See `docs/superpowers/specs/2026-11-21-portfolio-redesign-design.md` and `src/work/projects.ts`; older notes below are historical.
 
 ## Register
 

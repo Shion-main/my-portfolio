@@ -16,7 +16,7 @@ const DATA = {
   "space-arabica": "Real café content and photography from the local build; no customer data.",
   korte: "Korte 3.0 App Screens with made-up player and organizer names.",
   fluxtrack: "Captured from the running app with demo data on a throwaway database; names are demo data (confirmed by Joshua).",
-  "atlas-accountancy": "Design file with placeholder data; the signed-in name is replaced with “Demo Requester”.",
+  "atlas-treasury": "Design file with placeholder data; the signed-in name is replaced with “Demo Requester”.",
 };
 const local = page => `local:space-arabica-2@9ba1c45/${page}`;
 const figma = (file, node) => `figma:${file}#${node}`;
@@ -62,7 +62,7 @@ const MEDIA = {
     ["terms-phone", "flux-terms-phone", "phone", F("34:13640")],
   ],
   // Atlas has no phone app: desktop screens only.
-  "atlas-accountancy": [
+  "atlas-treasury": [
     ["step3-desktop", "atlas-desktop", "desktop", A("1:3542")],
     ["journey-desktop", "atlas-journey", "desktop", A("1:3005")],
     ["list-desktop", "atlas-list-desktop", "desktop", A("1:2981")],

@@ -11,7 +11,7 @@ const routes = [
   [
     "/",
     "Joshua Sabuero — Web Designer & Developer",
-    "I design and build websites and digital products. Explore Space Arabica, Korte, FluxTrack and Atlas Accountancy.",
+    "I design and build websites and digital products. Explore Space Arabica, Korte, FluxTrack and Atlas Treasury.",
     "#0d0f11",
   ],
   ...projects.map(p => [`/work/${p.slug}/`, `${p.name} — Joshua Sabuero`, p.line, p.tokens.ground]),

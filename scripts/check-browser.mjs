@@ -120,7 +120,7 @@ check("list-touch", async () => {
 
 // ---- Project chapters ----
 const SIZES = [[1440, 900], [1159, 668], [390, 844], [320, 740]];
-const SLUGS = ["space-arabica", "korte", "fluxtrack", "atlas-accountancy"];
+const SLUGS = ["space-arabica", "korte", "fluxtrack", "atlas-treasury"];
 const chapterState = (page, slug) => page.evaluate(s => {
   const h2 = document.getElementById(`chapter-${s}`);
   const r = h2.getBoundingClientRect();
@@ -186,7 +186,7 @@ check("header-contrast", async () => {
     return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
   });
   assert.ok(ratio >= 4.5, `header contrast ${ratio.toFixed(2)}`);
-  const tokens = { "space-arabica": "rgb(241, 227, 204)", korte: "rgb(238, 242, 234)", fluxtrack: "rgb(255, 255, 255)", "atlas-accountancy": "rgb(232, 237, 246)" };
+  const tokens = { "space-arabica": "rgb(241, 227, 204)", korte: "rgb(238, 242, 234)", fluxtrack: "rgb(255, 255, 255)", "atlas-treasury": "rgb(232, 237, 246)" };
   for (const slug of SLUGS) {
     await page.evaluate(s => { location.hash = `work-${s}`; }, slug);
     await page.waitForTimeout(600);
@@ -265,7 +265,7 @@ check("morph-into-case", async () => {
 check("whip-next-case", async () => {
   // Case → next case: the page change finishes the whip ("whip"), including the loop back. Nothing is morphed between
   // the two pages (the hero frame carries no name) and the header holds still as its own named part.
-  for (const [from, to] of [["atlas-accountancy", "space-arabica"], ["space-arabica", "korte"]]) {
+  for (const [from, to] of [["atlas-treasury", "space-arabica"], ["space-arabica", "korte"]]) {
     const { page, context } = await open(`/work/${from}/?checks`);
     await context.addInitScript(RECORD);
     await context.addInitScript(() => addEventListener("pagereveal", () => setTimeout(() => {
@@ -336,7 +336,7 @@ const focusedIsVisible = page => page.evaluate(() => {
 check("chapters-accessible", async () => {
   const { page, context } = await open("/?checks");
   await page.waitForTimeout(300);
-  for (const p of ["Space Arabica", "Korte", "FluxTrack", "Atlas Accountancy"]) {
+  for (const p of ["Space Arabica", "Korte", "FluxTrack", "Atlas Treasury"]) {
     assert.equal(await page.getByRole("heading", { level: 2, name: p, exact: true }).count(), 1, `${p} heading missing from the accessibility tree`);
     assert.equal(await page.getByRole("link", { name: new RegExp(`Open case study.*${p}`) }).count(), 1, `${p} case-study link has no project in its name`);
   }
@@ -345,14 +345,14 @@ check("chapters-accessible", async () => {
 
 check("chapter-focus-visible", async () => {
   const { page, context } = await open("/?checks");
-  await page.focus('.row[data-slug="atlas-accountancy"]');
+  await page.focus('.row[data-slug="atlas-treasury"]');
   await page.keyboard.press("Tab");
   await page.waitForTimeout(400);
   let st = await focusedIsVisible(page);
   assert.ok(st.ok, `Tab from the list focused something you cannot see: ${st.what}`);
-  await page.evaluate(() => { location.hash = "work-atlas-accountancy"; });
+  await page.evaluate(() => { location.hash = "work-atlas-treasury"; });
   await page.waitForTimeout(500);
-  await page.focus('[data-chapter="atlas-accountancy"] .chapter-open');
+  await page.focus('[data-chapter="atlas-treasury"] .chapter-open');
   await page.keyboard.press("Shift+Tab");
   await page.waitForTimeout(400);
   st = await focusedIsVisible(page);
@@ -365,13 +365,13 @@ check("back-after-scroll", async () => {
   await page.click('.row[data-slug="korte"]');
   await page.waitForTimeout(1500);
   // Scroll on to Atlas by hand: the address still says #work-korte unless the page keeps it current.
-  await page.evaluate(() => { const a = document.getElementById("work-atlas-accountancy"); window.scrollTo(0, a.getBoundingClientRect().top + scrollY); });
+  await page.evaluate(() => { const a = document.getElementById("work-atlas-treasury"); window.scrollTo(0, a.getBoundingClientRect().top + scrollY); });
   await page.waitForTimeout(600);
-  await Promise.all([page.waitForNavigation({ waitUntil: "load" }), page.click('[data-chapter="atlas-accountancy"] .chapter-open')]);
+  await Promise.all([page.waitForNavigation({ waitUntil: "load" }), page.click('[data-chapter="atlas-treasury"] .chapter-open')]);
   await page.waitForTimeout(1100);
   await page.goBack({ waitUntil: "load" });
   await page.waitForFunction(() => {
-    const h2 = document.getElementById("chapter-atlas-accountancy");
+    const h2 = document.getElementById("chapter-atlas-treasury");
     const r = h2.getBoundingClientRect();
     return r.top >= 0 && r.bottom <= innerHeight && h2.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
   }, null, { timeout: 2000 }).catch(async () => { throw new Error(`back landed on ${await page.evaluate(() => location.hash)} instead of Atlas`); });
@@ -517,7 +517,7 @@ check("glide-and-jump", async () => {
   await goTo(page, 5.625);
   const seen = await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() =>
     r([...document.querySelectorAll(".chapter")].filter(c => Number(getComputedStyle(c).opacity) > 0).map(c => c.dataset.chapter))))));
-  assert.deepEqual(seen, ["atlas-accountancy"], `a jump to Atlas drew ${seen.join(", ")}`);
+  assert.deepEqual(seen, ["atlas-treasury"], `a jump to Atlas drew ${seen.join(", ")}`);
   await context.close();
 });
 
@@ -810,10 +810,10 @@ check("settle-small-steps", async () => {
   assert.ok(nearScreens(end, 3.8, 900), `one wheel notch forward from Korte ended at ${end.toFixed(3)} instead of FluxTrack (3.8)`);
   // Tapping the down arrow walks out of FluxTrack's rest and on to Atlas.
   await goTo(page, 4.075); await caughtUp(page); await page.waitForTimeout(400);
-  for (let i = 0; i < 10 && new URL(page.url()).hash !== "#work-atlas-accountancy"; i++) { await page.keyboard.press("ArrowDown"); await page.waitForTimeout(600); }
+  for (let i = 0; i < 10 && new URL(page.url()).hash !== "#work-atlas-treasury"; i++) { await page.keyboard.press("ArrowDown"); await page.waitForTimeout(600); }
   await page.waitForTimeout(1200);
   end = await page.evaluate(position);
-  assert.equal(new URL(page.url()).hash, "#work-atlas-accountancy", `arrow keys could not leave FluxTrack (stuck at ${end.toFixed(3)})`);
+  assert.equal(new URL(page.url()).hash, "#work-atlas-treasury", `arrow keys could not leave FluxTrack (stuck at ${end.toFixed(3)})`);
   assert.ok(atRest(end, 900), `arrow keys left the page mid-move at ${end.toFixed(3)}`);
   await context.close();
 });
@@ -907,16 +907,16 @@ check("list-click-one-move", async () => {
     const tick = () => { document.querySelectorAll(".chapter").forEach(c => { if (Number(getComputedStyle(c).opacity) > 0) window.__seen.add(c.dataset.chapter); }); window.__seenRaf = requestAnimationFrame(tick); };
     tick();
   });
-  await page.click('.row[data-slug="atlas-accountancy"]');
+  await page.click('.row[data-slug="atlas-treasury"]');
   await page.waitForTimeout(2500);
   const seen = await page.evaluate(() => { cancelAnimationFrame(window.__seenRaf); return [...window.__seen].sort(); });
-  assert.deepEqual(seen, ["atlas-accountancy", "fluxtrack"], `clicking Atlas in the list played ${seen.join(", ")}`);
-  assert.equal(new URL(page.url()).hash, "#work-atlas-accountancy");
-  assert.deepEqual(await visibleChapters(page), ["atlas-accountancy"], "Atlas is not on screen after the click");
+  assert.deepEqual(seen, ["atlas-treasury", "fluxtrack"], `clicking Atlas in the list played ${seen.join(", ")}`);
+  assert.equal(new URL(page.url()).hash, "#work-atlas-treasury");
+  assert.deepEqual(await visibleChapters(page), ["atlas-treasury"], "Atlas is not on screen after the click");
   await context.close();
 });
 
-// ---- Long names (2026-11-22: Atlas Accountancy) ----
+// ---- Long names (2026-11-22: Atlas) ----
 check("names-not-clipped", async () => {
   for (const [width, height] of [...SIZES, [844, 390], [1366, 768], [1920, 1080]]) {
     const { page, context } = await open("/?checks", { width, height });
@@ -924,7 +924,7 @@ check("names-not-clipped", async () => {
     const clipped = await page.evaluate(() => [...document.querySelectorAll(".chapter-info h2")].filter(h => h.scrollWidth - h.clientWidth > 1).map(h => `${h.textContent} by ${h.scrollWidth - h.clientWidth}px`));
     assert.deepEqual(clipped, [], `${width}×${height}: chapter heading clipped: ${clipped.join(", ")}`);
     await context.close();
-    const caseView = await open("/work/atlas-accountancy/", { width, height });
+    const caseView = await open("/work/atlas-treasury/", { width, height });
     await caseView.page.evaluate(() => document.fonts.ready);
     const h1 = await caseView.page.evaluate(() => { const h = document.querySelector("h1"); return h.scrollWidth - h.clientWidth; });
     assert.ok(h1 <= 1, `${width}×${height}: the Atlas case title runs ${h1}px past its box`);
@@ -936,9 +936,9 @@ check("names-not-clipped", async () => {
 check("atlas-no-phone", async () => {
   const { page, context } = await open("/?checks");
   const home = await page.evaluate(() => [...document.querySelectorAll("[data-chapter]")].map(c => [c.dataset.chapter, !!c.querySelector(".showcase-phone, .frame--phone")]));
-  assert.deepEqual(home, [["space-arabica", true], ["korte", true], ["fluxtrack", true], ["atlas-accountancy", false]], `phones on the home page: ${JSON.stringify(home)}`);
+  assert.deepEqual(home, [["space-arabica", true], ["korte", true], ["fluxtrack", true], ["atlas-treasury", false]], `phones on the home page: ${JSON.stringify(home)}`);
   await wallReady(page);
-  await page.evaluate(() => window.__wall.show("atlas-accountancy"));
+  await page.evaluate(() => window.__wall.show("atlas-treasury"));
   await page.waitForTimeout(900);
   const phoneColumns = await page.evaluate(() => [...document.querySelectorAll(".wall .col--phone")].map(c => getComputedStyle(c).opacity));
   assert.ok(phoneColumns.length > 0 && phoneColumns.every(o => o === "0"), `pointing at Atlas still shows phone columns: ${phoneColumns.join(", ")}`);
@@ -946,7 +946,7 @@ check("atlas-no-phone", async () => {
   await page.waitForTimeout(900);
   assert.ok((await page.evaluate(() => [...document.querySelectorAll(".wall .col--phone")].map(c => getComputedStyle(c).opacity))).every(o => o === "1"), "phone columns did not come back for Korte");
   await context.close();
-  const caseView = await open("/work/atlas-accountancy/");
+  const caseView = await open("/work/atlas-treasury/");
   const phones = await caseView.page.evaluate(() => document.querySelectorAll(".frame--phone, .tab-shot--phone").length);
   assert.equal(phones, 0, "the Atlas case study shows a phone");
   await caseView.context.close();
@@ -1466,6 +1466,24 @@ check("handoff-world-not-scrollable", async () => {
   const left = await page.evaluate(() => { const w = document.querySelector(".handoff__world"); w.scrollLeft = 80; return w.scrollLeft; });
   assert.equal(left, 0, `the next project's shot scrolled sideways by ${left}px`);
   await context.close();
+});
+
+// ---- The case-study template for clients (2026-11-22) ----
+check("case-template", async () => {
+  // Every case study reads in the approved order, and its line for clients ends in a link to the contact block.
+  const ORDER = [".case-headline", ".case-facts", ".case-challenge", ".case-did", ".case-results", ".screen-tabs", ".case-close"];
+  for (const slug of SLUGS) {
+    const { page, context } = await open(`/work/${slug}/?checks`);
+    const tops = await page.evaluate(sels => sels.map(sel => { const e = document.querySelector(sel); return e ? e.getBoundingClientRect().top + scrollY : null; }), ORDER);
+    assert.ok(tops.every(t => t !== null), `${slug}: missing ${ORDER.filter((_, i) => tops[i] === null).join(", ")}`);
+    assert.ok(tops.every((t, i) => i === 0 || t > tops[i - 1]), `${slug}: sections out of order (${tops.map(Math.round).join(", ")})`);
+    await page.click(".case-cta");
+    await page.waitForTimeout(1500);
+    const seen = await page.evaluate(() => { const r = document.getElementById("contact-title").getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
+    assert.ok(seen, `${slug}: "Let’s talk" does not bring the contact block into view`);
+    assert.match(page.url(), new RegExp(`/work/${slug}/`), `${slug}: "Let’s talk" left the case study`);
+    await context.close();
+  }
 });
 
 let failed = 0;

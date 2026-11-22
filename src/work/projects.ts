@@ -2,12 +2,13 @@
 // so the home chapters and case studies stay consistent. No imports: tests
 // load this file directly.
 
-export type ProjectSlug = "space-arabica" | "korte" | "fluxtrack" | "atlas-accountancy";
+export type ProjectSlug = "space-arabica" | "korte" | "fluxtrack" | "atlas-treasury";
 export type Shot = { src: string; alt: string; caption: string };
 /** `phone` is absent for projects with no phone app (Atlas). */
 export type Tab = { title: string; desktop: Shot; phone?: Shot };
 export type Fact = { term: string; detail: string };
-export type Decision = { title: string; problem: string; choice: string; result: string };
+/** One thing Joshua did on the project: a short title and a sentence or two. */
+export type Move = { title: string; text: string };
 
 export type Project = {
   slug: ProjectSlug;
@@ -20,13 +21,16 @@ export type Project = {
   caption: string;
   desktop: Shot & { title: string };
   phone?: Shot;
-  question: string;
-  intro: string;
+  /** The case study, in order: headline, at a glance, the challenge, what I did, results, screens, a line for the
+   *  client, and an honest note. */
+  headline: string;
   caseFacts: Fact[];
+  challenge: string;
+  did: Move[];
+  results: string[];
   tabs: Tab[];
-  decisions: Decision[];
-  reflection: string;
-  evidence: string;
+  forYou: string;
+  note: string;
   demo?: string;
   /** The live site, when it differs from the work shown here (Space Arabica: Joshua's second design, made to the owner's brief). */
   live?: { url: string; label: string };
@@ -40,47 +44,48 @@ const shot = (slug: ProjectSlug, name: string, alt: string, caption: string): Sh
 const space = (name: string, alt: string, caption: string) => shot("space-arabica", name, alt, caption);
 const korte = (name: string, alt: string, caption: string) => shot("korte", name, alt, caption);
 const flux = (name: string, alt: string, caption: string) => shot("fluxtrack", name, alt, caption);
-const atlas = (name: string, alt: string, caption: string) => shot("atlas-accountancy", name, alt, caption);
+const atlas = (name: string, alt: string, caption: string) => shot("atlas-treasury", name, alt, caption);
 
 export const projects: readonly Project[] = [
   {
     slug: "space-arabica",
     name: "Space Arabica",
-    label: "Café website · Davao City",
+    label: "Café website · Ecoland, Davao City",
     list: { what: "Café website, Davao City", part: "Design + build", status: "Live", dot: "#c9934a", hover: "#d9a45f" },
     tokens: { ground: "#1b130d", text: "#f1e3cc", giant: "#c9934a" },
-    line: "A café’s character, carried online — signature drinks lead, the full menu stays one tap away.",
+    line: "A café’s character, carried online — the drinks lead, the full menu is one tap away.",
     facts: [
       { term: "Role", detail: "Sole designer & developer" },
-      { term: "Scope", detail: "7 pages, each with its own motion" },
-      { term: "Built with", detail: "HTML, CSS, JavaScript" },
+      { term: "Scope", detail: "7 pages" },
+      { term: "Status", detail: "Live" },
     ],
     caption: "Home · desktop and phone",
     desktop: { ...space("home-desktop", "Space Arabica home page with the Timeless Americano in the signature drink carousel", "Home · signature carousel"), title: "Space Arabica — Home" },
     phone: space("home-phone", "Space Arabica home page on a phone with the signature carousel", "Home on a phone"),
-    question: "How do you translate the feeling of a place into a website?",
-    intro: "Space Arabica is a café in Ecoland, Davao City. I designed and built a seven-page website so the drinks, the room and the practical details all carry the same character. The owner then asked for a different type of site, which I also designed and built for launch; this page shows my original direction, kept whole as a demo you can try.",
+    headline: "A seven-page website for a Davao café, where the signature drinks lead and the practical details are easy to find.",
     caseFacts: [
-      { term: "Role", detail: "Sole designer & developer" },
-      { term: "Pages", detail: "Home, Menu, Full Menu, Spaces, Order & Book, Our Story, Visit" },
+      { term: "Client", detail: "Space Arabica, a café in Ecoland, Davao City" },
+      { term: "Role", detail: "Sole designer and developer" },
+      { term: "Scope", detail: "7 pages · a 104-item menu · 23 drink photos" },
       { term: "Built with", detail: "HTML, CSS, JavaScript" },
-      { term: "Menu", detail: "104 entries and 23 drink photos" },
-      { term: "Status", detail: "Live at spacearabica.com: a second design I made to the owner’s brief. My original direction runs here as a demo" },
+      { term: "Status", detail: "Live at spacearabica.com" },
     ],
+    challenge: "The café has a feel people know in person. The site had to carry that feel, and still let someone find a drink, the hours or a booking fast.",
+    did: [
+      { title: "Let the drinks lead", text: "Large type, cup cutouts and a carousel of the nine signature drinks, which works by swipe or keyboard." },
+      { title: "Kept browsing and finding apart", text: "Signature drinks are told as stories on Menu; Full Menu is a plain, filterable list of all 104 items." },
+      { title: "Made seven pages feel like one visit", text: "One motion idea per page, linked by a single amber line, all switched off for anyone who prefers reduced motion." },
+      { title: "Built what the owner chose", text: "The owner wanted a different type of site, so I designed and built a second one to their brief, through their final tweaks. That’s the site live today. My original direction is kept here as a working demo." },
+    ],
+    results: ["Live at spacearabica.com", "7 pages", "My original direction, playable below"],
     tabs: [
       { title: "Home", desktop: space("home-desktop", "Home page with the orbiting signature drink carousel", "Signature drinks lead"), phone: space("home-phone", "Home page on a phone", "The same carousel, one cup at a time") },
       { title: "Menu", desktop: space("menu-desktop", "Menu page telling each signature drink as an episode", "Menu · signature episodes"), phone: space("menu-phone", "Menu page on a phone", "Episodes on a phone") },
       { title: "Spaces", desktop: space("spaces-desktop", "Spaces page with the café floor plan and meeting room", "Spaces · the room and the meeting room"), phone: space("spaces-phone", "Spaces page on a phone", "Spaces on a phone") },
       { title: "Visit", desktop: space("visit-desktop", "Visit page with live opening hours and directions", "Visit · live opening hours"), phone: space("visit-phone", "Visit page on a phone", "Visit on a phone") },
     ],
-    decisions: [
-      { title: "Let the drinks lead.", problem: "A café has a personality before anyone opens its menu, and a generic coffee template would hide it.", choice: "I built the visual direction around the café’s real signature drinks: large type, transparent cup cutouts and an orbiting carousel.", result: "Each drink gets its own stage, with keyboard and touch control and a quiet version for reduced motion." },
-      { title: "Separate discovery from detail.", problem: "Expressive browsing slows down someone who just wants a familiar drink and its price.", choice: "Signature drinks live on Menu as episodes; Full Menu is plain, filterable and lists every entry.", result: "Exploring and finding are two clear routes from the same navigation." },
-      { title: "One motion idea per page.", problem: "Seven animated pages felt like seven separate rooms.", choice: "An amber line links every page and one framed window morphs between them, while each page keeps a single idea of its own.", result: "The site reads as one continuous visit, and reduced motion turns it all off." },
-      { title: "The owner’s call.", problem: "After seeing this direction, the owner wanted a different type of website — not the one I would have chosen.", choice: "It is their café, so I set this direction aside and designed and built a second site to the owner’s brief, through their final tweaks.", result: "That second design is live at spacearabica.com. This page keeps my original direction whole, as a working demo you can try below." },
-    ],
-    reflection: "The useful tension was between atmosphere and access. I used expressive motion for discovery, then a clearer, quieter layout when someone needs to find something specific.",
-    evidence: "Screens and the demo show my original direction, captured from its local build on 21 November 2026. The live site at spacearabica.com is the second design I made to the owner’s brief and is not shown here. No commercial impact or visitor research is claimed.",
+    forYou: "If your business has a feel people love in person, I can carry it online and still make the menu, hours and booking easy to find.",
+    note: "The screens and the demo show my original direction. No visitor numbers are claimed.",
     demo: "work/space-arabica/demo/",
     live: { url: "https://spacearabica.com/", label: "See the live site — my design to the owner’s brief" },
     wall: {
@@ -93,41 +98,43 @@ export const projects: readonly Project[] = [
   {
     slug: "korte",
     name: "Korte",
-    label: "All-in-one pickleball app · Philippines",
-    list: { what: "All-in-one pickleball community app", part: "Design + build", status: "In use", dot: "#9acb2d", hover: "#9acb2d" },
+    label: "Pickleball community app · Philippines",
+    list: { what: "Pickleball community app", part: "Design + build", status: "In use", dot: "#9acb2d", hover: "#9acb2d" },
     tokens: { ground: "#0c1626", text: "#eef2ea", giant: "#9acb2d" },
-    line: "Find open play, book a court, run a fair queue and follow your rankings — one app for the whole pickleball community.",
+    line: "One app for the pickleball community — find open play, book a court, run a fair queue and follow your rankings.",
     facts: [
       { term: "Role", detail: "Solo designer & developer" },
-      { term: "For", detail: "Players, organizers and venues" },
-      { term: "In use", detail: "112 organizers ran 373 meets, Mar–Jun 2026" },
+      { term: "Users", detail: "1,800+" },
+      { term: "Sessions", detail: "700+ completed" },
     ],
     caption: "Live courts on a laptop · the podium on a phone",
     desktop: { ...korte("live-desktop", "Korte live session on a laptop: courts in play with scores to enter, and Up next below", "Live courts on a laptop"), title: "Korte — Live courts" },
     phone: korte("podium-phone", "Korte final results on a phone: the podium for the top three players, with their Korte Points", "Final results · the podium"),
-    question: "How does one app serve the players, the organizers and the venues of a pickleball community?",
-    intro: "Korte is an all-in-one app for the pickleball community in the Philippines. Players find open play, book courts and follow their standings on their phones; organizers create meets and run fair sessions from an iPad or laptop beside the court; venues list their courts, take bookings and put the live courts on a TV. I designed and built all of it, from v1 in March to Korte 3.0 in October.",
+    headline: "One app for the whole pickleball community, with 1,800+ users and 700+ sessions completed, and counting.",
     caseFacts: [
-      { term: "Role", detail: "Solo designer & developer" },
+      { term: "Role", detail: "Solo designer and developer" },
+      { term: "Timeline", detail: "March to November 2026 · three versions" },
+      { term: "Users", detail: "1,800+ and growing" },
+      { term: "Sessions completed", detail: "700+ and counting" },
       { term: "For", detail: "Players, organizers and venues" },
-      { term: "When", detail: "March to November 2026 · v1, v2, then 3.0" },
       { term: "Built with", detail: "Next.js, Supabase, Convex" },
-      { term: "In use", detail: "112 organizers set up 373 meets between 30 March and 29 June 2026; 239 were completed" },
-      { term: "Status", detail: "In use" },
     ],
+    challenge: "Organizers were using one to four different apps just to run open play. Korte brings all of it into one app, and gives players and venues their side of it too.",
+    did: [
+      { title: "For players", text: "Find open play, book a court, check in at the door, see when you’re up next, and follow the results and rankings, all from your phone." },
+      { title: "For organizers", text: "Create a meet, check players in, and let Korte decide who plays next. The longest wait goes first, repeat partners get flagged with a one-tap fix, and results post on their own when the night ends." },
+      { title: "For venues", text: "List your courts, take bookings, and put the live courts on a TV for everyone to follow." },
+      { title: "Built for courtside", text: "The session keeps running when the connection drops, and organizers get a tablet layout with the courts and the next group side by side." },
+    ],
+    results: ["1,800+ users", "700+ sessions completed, and counting", "Three versions in eight months; Korte 3.0 launched on 28 October 2026"],
     tabs: [
       { title: "Run a session", desktop: korte("live-desktop", "Live courts on a laptop with four courts in play", "Courts, scores and the next lineup"), phone: korte("courts-phone", "Live courts on a phone while a game is playing", "The same session on a phone") },
       { title: "Players", desktop: korte("tv-desktop", "Court board on a venue TV showing who is on each court", "Court board for the venue TV"), phone: korte("upnext-phone", "Player phone showing You’re up next", "Players follow along on their phones") },
       { title: "Organizer Hub", desktop: korte("hub-desktop", "Organizer Hub overview with session numbers", "Organizer Hub · your numbers"), phone: korte("podium-phone", "Standings podium at the end of a session", "Standings at the end") },
       { title: "Venues", desktop: korte("partner-desktop", "Partner dashboard for a venue taking bookings", "Partner dashboard for venues"), phone: korte("checkin-phone", "Player self check-in, picking their name", "Self check-in at the door") },
     ],
-    decisions: [
-      { title: "Why the look changed twice.", problem: "v1 was dark only and built fast, one screen at a time. By September the pages looked like different apps, and on a bright court the dark screens were hard to read.", choice: "One colour system in light and dark, light by default, with Explore as the visual reference for every other screen.", result: "Korte 3.0 shipped on 28 October on one set of light and dark colours — the same colours this case study uses." },
-      { title: "Tablet first for organizers.", problem: "Organizers run 10 to 40 players across 2 to 7 courts from an iPad or laptop, and on an upright iPad Live was one long phone column.", choice: "Tablet first for organizers, phone first for players: courts on one side, Up next on the other, growing to a 20-court desktop view and a TV board.", result: "On a tablet, organizers keep the courts and the next group side by side." },
-      { title: "Fairness you can see.", problem: "Organizers lost trust when the queue went wrong in front of players. Korte only works if people trust who plays next.", choice: "Show, then let the organizer fix it: Up next warns about repeat partners, and Fix pairing re-pairs inside the session’s rules.", result: "When nothing better exists, the button says so instead of making things worse." },
-    ],
-    reflection: "Putting a whole community in one app only works if each part stays simple. The interesting work sat below the surface: a queue organizers can trust, sessions that survive a dropped connection, and screens calm enough to read courtside.",
-    evidence: "Screens come from the Korte 3.0 App Screens file and use made-up names. Usage figures are Korte’s own records for 30 March to 29 June 2026.",
+    forYou: "If your community runs on scattered tools, I can design and build the one app that brings it together.",
+    note: "Screens use made-up names. User and session numbers are Korte’s own records.",
     wall: {
       desktop: ["live-desktop", "tv-desktop", "hub-desktop", "partner-desktop"],
       phone: ["upnext-phone", "explore-phone", "courts-phone", "podium-phone", "checkin-phone"],
@@ -139,39 +146,42 @@ export const projects: readonly Project[] = [
     slug: "fluxtrack",
     name: "FluxTrack",
     label: "Campus system · Capstone, MMCM",
-    list: { what: "Campus attendance system", part: "Design + build · team of 3", status: "Rollout pending", dot: "#ec1f28", hover: "#ff5a60" },
+    list: { what: "Campus attendance & room system", part: "Research, design + build · team of 3", status: "Rollout pending", dot: "#ec1f28", hover: "#ff5a60" },
     tokens: { ground: "#001c43", text: "#ffffff", giant: "#ec1f28" },
-    line: "Faculty attendance and room use — one design system across seven roles, from a faculty phone to the facilities desk.",
+    line: "Faculty attendance and live room occupancy in one system — so the school knows how its rooms are really used.",
     facts: [
-      { term: "Role", detail: "Designed and built it · team of three" },
-      { term: "Proof", detail: "1,637 automated tests passing" },
-      { term: "Status", detail: "Built · campus rollout pending" },
+      { term: "Role", detail: "Research, design + build" },
+      { term: "Team", detail: "Three people" },
+      { term: "Status", detail: "Rollout pending" },
     ],
     caption: "Facilities desk · faculty phone",
     desktop: { ...flux("util-desktop", "FluxTrack room utilization grid showing when room capacity sits idle", "Facilities · when capacity sits idle"), title: "FluxTrack — Room utilization" },
     phone: flux("faculty-phone", "FluxTrack faculty home with the next class and Scan Room QR", "Faculty · check in from a phone"),
-    question: "How do you make an attendance record people trust as official?",
-    intro: "FluxTrack is Mapúa Malayan Colleges Mindanao’s faculty attendance and facility utilization system. I designed and built it as part of a three-person capstone team: faculty check in by phone, checkers verify rooms on the floor, and deans, HR and facilities read one record from the desk.",
+    headline: "A system we researched and pitched to track faculty attendance and show room occupancy in real time, giving the school data on how its rooms are used.",
     caseFacts: [
-      { term: "Role", detail: "Designed and built it · team of three" },
-      { term: "Users", detail: "Seven roles, from phone to desk" },
+      { term: "Client", detail: "Mapúa Malayan Colleges Mindanao · capstone project" },
+      { term: "Role", detail: "Researched, designed and built it · team of three" },
+      { term: "What it does", detail: "Tracks faculty attendance, shows live room occupancy, and reports room use" },
+      { term: "Users", detail: "7 roles, from faculty on their phones to the facilities office" },
       { term: "Built with", detail: "Django, Microsoft SQL Server, htmx" },
-      { term: "Proof", detail: "1,637 automated tests passing" },
       { term: "Status", detail: "Built · campus rollout pending" },
     ],
+    challenge: "Faculty attendance was checked on paper, and the school had no live view of which rooms were in use. We researched the problem and pitched FluxTrack as the solution: attendance and room occupancy in one system, so the school has real data on how its rooms are used.",
+    did: [
+      { title: "Attendance at the door", text: "Faculty check in by scanning the room’s QR code, and checkers walk by and confirm it." },
+      { title: "Every room, live", text: "A room board shows which rooms are in session right now, and a freed room shows up the moment a class moves." },
+      { title: "Data on room use", text: "Reports and a utilization grid show when rooms sit idle, and a weekly report builds itself." },
+      { title: "One system for everyone", text: "Seven roles share one design: a phone layout for the floor and a desk layout for the office." },
+    ],
+    results: ["Attendance and live room occupancy in one system", "Room-use reports for the facilities office", "Built, with campus rollout pending"],
     tabs: [
       { title: "Faculty", desktop: flux("faculty-desktop", "Faculty home on a desktop with today’s classes", "Faculty home on a desktop"), phone: flux("faculty-phone", "Faculty home on a phone with the next class", "Faculty home on a phone") },
       { title: "Scan", desktop: flux("scan-desktop", "Scan room QR on a desktop", "Scan a room QR or type its code"), phone: flux("scan-phone", "Scan room QR on a phone", "Checking in at the door") },
       { title: "Facilities", desktop: flux("util-desktop", "Room utilization grid for facilities", "When capacity sits idle"), phone: flux("util-phone", "Room utilization on a phone", "Utilization on a phone") },
       { title: "Rooms", desktop: flux("buildings-desktop", "Rooms and buildings directory", "Rooms and buildings"), phone: flux("buildings-phone", "Rooms and buildings on a phone", "Rooms on a phone") },
     ],
-    decisions: [
-      { title: "Trust is the product.", problem: "Attendance records are used as official evidence, so an ambiguous screen is a correctness bug.", choice: "Every state is designed — default, loading, error and offline — and checkers get a five-minute undo.", result: "Each verification shows exactly what was recorded and what can still be changed." },
-      { title: "Phone first on the floor.", problem: "Faculty, checkers and guards use it on phones between rooms, sometimes offline.", choice: "A real single-column floor experience: scan the room QR or type its code, with offline replay.", result: "Checking in is one card and one button, even on a weak connection." },
-      { title: "One system, seven roles.", problem: "Deans, HR and facilities need dense desk tools, while the floor needs quick phone screens.", choice: "One shadcn-style design system in MMCM’s navy and red, shared by a phone family and a desk console.", result: "The 61 pages and 122 frames in the case study use one set of components." },
-    ],
-    reflection: "Trust comes from clarity and correctness, not decoration. The quiet screens were the hard part.",
-    evidence: "Screens come from the FluxTrack case study file, captured from the running app with demo data on a throwaway database. Campus rollout is pending; no adoption is claimed.",
+    forYou: "If your organisation needs to see what’s really happening, I can research the problem, design the system and build it.",
+    note: "Screens come from the running app with demo data. No adoption is claimed yet.",
     wall: {
       desktop: ["util-desktop", "faculty-desktop", "buildings-desktop", "scan-desktop"],
       phone: ["faculty-phone", "scan-phone", "buildings-phone", "util-phone", "terms-phone"],
@@ -180,40 +190,43 @@ export const projects: readonly Project[] = [
     glow: "rgba(236, 31, 40, .18)",
   },
   {
-    slug: "atlas-accountancy",
-    name: "Atlas Accountancy",
-    label: "Institutional project · Accountancy module, MMCM",
-    list: { what: "Finance request workflow", part: "UI/UX · Accountancy module", status: "Institutional", dot: "#5b8def", hover: "#6f9cf0" },
+    slug: "atlas-treasury",
+    name: "Atlas Treasury",
+    label: "In-house system · Mapúa · Accounting module",
+    list: { what: "Finance request system", part: "UI/UX · Accounting module", status: "In-house", dot: "#5b8def", hover: "#6f9cf0" },
     tokens: { ground: "#13161c", text: "#e8edf6", giant: "#4f86f0" },
-    line: "My first UI/UX project — reimbursements, vendor payments and cash advances, filed step by step and tracked to a decision.",
+    line: "My first UI/UX project — manual finance forms turned into a familiar, easy-to-use system.",
     facts: [
-      { term: "Role", detail: "UI/UX designer, Accountancy module" },
+      { term: "Role", detail: "UI/UX designer" },
+      { term: "Module", detail: "Accounting" },
       { term: "Size", detail: "100+ screens & states" },
-      { term: "Scope", detail: "Flows, UI, design system" },
     ],
     caption: "New request · step 3 of 5",
     desktop: { ...atlas("step3-desktop", "Atlas reimbursement request at step 3, payment terms and schedule", "New request · step 3 of 5"), title: "Atlas — New request, step 3" },
-    question: "How do you make a payment request easy to file and easy to follow?",
-    intro: "Atlas Accountancy was my first UI/UX project. It is MMCM’s accountancy module, where requesters file reimbursements, vendor payments and cash advances; as its UI/UX designer, I designed how they file each request and how they track it to a decision.",
+    headline: "Turning the Accounting Office’s manual forms and processes into a system that feels familiar from the first request.",
     caseFacts: [
-      { term: "Role", detail: "UI/UX designer, Accountancy module" },
+      { term: "Client", detail: "Mapúa Malayan Colleges Mindanao · Atlas, an in-house system" },
+      { term: "Role", detail: "UI/UX designer for the accounting module · my first UI/UX project" },
       { term: "Requests", detail: "Reimbursement, vendor payment (trade and non-trade), cash advance" },
       { term: "Size", detail: "100+ screens and states" },
-      { term: "Delivered", detail: "Request flows, component library, prototype" },
+      { term: "Delivered", detail: "Request flows, a component library, a prototype" },
     ],
+    challenge: "Reimbursements, vendor payments and cash advances ran on manual forms and processes. The new module had to replace them without asking staff to learn something new.",
+    did: [
+      { title: "Familiar first", text: "Every screen uses predictable patterns instead of anything novel, so moving from paper feels easy." },
+      { title: "One pattern for every request", text: "All four request types share the same list, stepped form, review and tracking view." },
+      { title: "Long forms, in steps", text: "A progress bar shows what’s left, and every request ends with a review you can edit before submitting." },
+      { title: "Status at a glance", text: "Badges, a timeline and comments stay with each request, so nobody has to ask where it is." },
+    ],
+    results: ["100+ screens and states", "A component library", "A clickable prototype"],
     tabs: [
       { title: "File a request", desktop: atlas("step1-desktop", "Reimbursement step 1, requester information", "Step 1 · requester information") },
       { title: "Payment terms", desktop: atlas("step3-desktop", "Reimbursement step 3, payment terms and schedule", "Step 3 · payment terms") },
       { title: "Track it", desktop: atlas("journey-desktop", "Request journey tab showing each approval step", "The journey view") },
       { title: "My requests", desktop: atlas("list-desktop", "My requests list with status for each request", "Every request in one list") },
     ],
-    decisions: [
-      { title: "One shell for four requests.", problem: "Four request types had different fields but the same life cycle.", choice: "One shell for all of them: a request list, a stepper-driven form, a review step and a journey view.", result: "Learning one request teaches all four." },
-      { title: "Steps you can see.", problem: "Long finance forms invite mistakes and abandoned requests.", choice: "A five-step stepper with mode-of-payment branching and a final review where any section can be edited.", result: "Requesters always know where they are and what is left." },
-      { title: "Track it to a decision.", problem: "Once filed, a request disappeared into email and phone calls.", choice: "A view-form window with Form, Comments and Journey tabs, and cancelling with a confirmation.", result: "Every request shows who has it and what happens next." },
-    ],
-    reflection: "As my first UI/UX project, Atlas taught me that finance tools earn trust through plain structure. The stepper and the journey made a long process feel predictable.",
-    evidence: "Screens come from the Atlas design file. Signed-in names are replaced with a demo requester. Claims cover the Accountancy module’s design only.",
+    forYou: "If your team still runs on paper forms, I can turn them into a system people find familiar from day one.",
+    note: "Screens come from the Atlas design file, with signed-in names replaced. These are design deliverables; no usage is claimed.",
     wall: {
       desktop: ["step3-desktop", "journey-desktop", "list-desktop", "step1-desktop", "login-desktop"],
       phone: [],

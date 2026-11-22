@@ -7,9 +7,8 @@ import ScreenTabs from "../components/ScreenTabs";
 import CaseHandoff from "../components/CaseHandoff";
 import "./case.css";
 
-/** The one case-study template every project uses, in the project's own colours. */
-const COUNT_WORDS: Record<number, string> = { 3: "Three", 4: "Four" };
-
+/** The one case-study template every project uses, in the project's own colours: headline, at a glance, the challenge,
+ *  what I did, results, screens, then a line for the client with a way to get in touch. */
 export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
   const p = projectBySlug(slug);
   const next = nextProject(slug);
@@ -30,8 +29,7 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
             <h1 id="case-title">{p.name}</h1>
           </div>
           <div>
-            <p className="case-question">{p.question}</p>
-            <p className="case-intro">{p.intro}</p>
+            <p className="case-headline">{p.headline}</p>
             {(p.demo || p.live) && (
               <div className="case-actions">
                 {p.demo && <a className="case-demo" href="#demo">Try the full demo <span aria-hidden="true">↓</span></a>}
@@ -39,29 +37,37 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
               </div>
             )}
           </div>
-          <dl className="case-facts">
+          <dl className="case-facts" aria-label="At a glance">
             {p.caseFacts.map(f => <div key={f.term}><dt>{f.term}</dt><dd>{f.detail}</dd></div>)}
           </dl>
         </section>
 
-        <ScreenTabs tabs={p.tabs} title={p.name} />
+        <section className="case-challenge" aria-labelledby="challenge-title">
+          <h2 className="label" id="challenge-title">The challenge</h2>
+          <p className="case-challenge__text">{p.challenge}</p>
+        </section>
 
-        <section className="case-decisions" aria-labelledby="decisions-title">
-          <h2 className="label" id="decisions-title">{`${COUNT_WORDS[p.decisions.length] ?? p.decisions.length} decisions`}</h2>
+        <section className="case-did" aria-labelledby="did-title">
+          <h2 className="label" id="did-title">What I did</h2>
           <ol>
-            {p.decisions.map((d, i) => (
+            {p.did.map((d, i) => (
               <li key={d.title}>
-                <span className="case-decisions__number" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <span className="case-did__number" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                 <h3>{d.title}</h3>
-                <dl>
-                  <div><dt>The problem</dt><dd>{d.problem}</dd></div>
-                  <div><dt>What I chose</dt><dd>{d.choice}</dd></div>
-                  <div><dt>What happened</dt><dd>{d.result}</dd></div>
-                </dl>
+                <p>{d.text}</p>
               </li>
             ))}
           </ol>
         </section>
+
+        <section className="case-results" aria-labelledby="results-title">
+          <h2 className="label" id="results-title">Results</h2>
+          <ul>
+            {p.results.map(r => <li key={r}>{r}</li>)}
+          </ul>
+        </section>
+
+        <ScreenTabs tabs={p.tabs} title={p.name} />
 
         {p.demo && (
           <section className="case-embed" id="demo" aria-labelledby="demo-title">
@@ -80,10 +86,10 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
           </section>
         )}
 
-        <section className="case-reflection" aria-labelledby="reflection-title">
-          <h2 className="label" id="reflection-title">Looking back</h2>
-          <p className="case-reflection__text">{p.reflection}</p>
-          <p className="case-evidence">{p.evidence}</p>
+        <section className="case-close" aria-labelledby="close-title">
+          <h2 className="case-close__text" id="close-title">{p.forYou}</h2>
+          <a className="case-cta" href="#contact">Let’s talk <span aria-hidden="true">→</span></a>
+          <p className="case-note">{p.note}</p>
         </section>
 
         <CaseHandoff next={next} />

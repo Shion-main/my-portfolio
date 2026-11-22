@@ -10,8 +10,7 @@
 .case-overview { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px 48px; padding: 56px var(--pad) 0; }
 .case-overview > div:first-child { grid-column: 1 / -1; }
 .case-overview h1 { margin-top: 12px; font: 800 clamp(40px, 8.5vw, 150px)/.84 var(--display); font-variation-settings: "wdth" 118; text-transform: uppercase; color: var(--giant); overflow-wrap: anywhere; }
-.case-question { font: italic 400 clamp(22px, 2vw, 30px)/1.25 var(--serif); }
-.case-intro { margin-top: 16px; max-width: 46ch; font-size: 17px; }
+.case-headline { max-width: 32ch; font: 400 clamp(22px, 2.2vw, 34px)/1.22 var(--serif); }
 .case-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .case-actions .case-demo { margin-top: 0; }
 .case-live { display: inline-flex; gap: 8px; align-items: center; padding: 11px 17px; border: 1px solid color-mix(in srgb, var(--ink) 40%, transparent); border-radius: 999px; color: var(--ink); font-weight: 600; font-size: 14px; text-decoration: none; }
@@ -47,18 +46,29 @@
 .viewer__bar { position: sticky; bottom: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 16px; background: var(--surface); }
 .viewer__bar button { padding: 10px 16px; border: 1px solid var(--rule); border-radius: 999px; background: none; cursor: pointer; font-size: 14px; }
 
-.case-decisions { padding: 110px var(--pad) 0; }
-.case-decisions ol { margin-top: 28px; }
-.case-decisions li { display: grid; grid-template-columns: 64px minmax(0, .9fr) minmax(0, 1.4fr); gap: 16px 32px; padding: 32px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); }
-.case-decisions__number { font: 800 28px/1 var(--display); color: var(--giant); }
-.case-decisions h3 { font: 400 clamp(24px, 2.4vw, 36px)/1.1 var(--serif); }
-.case-decisions dl { display: grid; gap: 14px; }
-.case-decisions dt { font: 600 11px/1.6 var(--sans); letter-spacing: .1em; text-transform: uppercase; opacity: .65; }
-.case-decisions dd { margin: 2px 0 0; }
+/* The challenge: two sentences, set large. */
+.case-challenge { padding: 110px var(--pad) 0; }
+.case-challenge__text { margin-top: 18px; max-width: 34ch; font: 300 clamp(26px, 2.8vw, 44px)/1.18 var(--serif); }
 
-.case-reflection { padding: 110px var(--pad); }
-.case-reflection__text { margin-top: 18px; max-width: 30ch; font: 300 clamp(28px, 3vw, 48px)/1.15 var(--serif); }
-.case-evidence { margin-top: 28px; max-width: 70ch; font-size: 14px; opacity: .7; }
+/* What I did: three or four moves, a short title and a sentence or two each. */
+.case-did { padding: 110px var(--pad) 0; }
+.case-did ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; margin-top: 28px; }
+.case-did li { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px 16px; align-content: start; padding: 28px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); }
+.case-did__number { grid-row: span 2; font: 800 24px/1 var(--display); color: var(--giant); }
+.case-did h3 { font: 400 clamp(22px, 2vw, 30px)/1.15 var(--serif); }
+.case-did p { max-width: 46ch; opacity: .86; }
+
+/* Results: short, plain statements, each under a line in the project's colour. */
+.case-results { padding: 110px var(--pad) 0; }
+.case-results ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 32px; margin-top: 24px; }
+.case-results li { padding: 20px 0 6px; border-top: 2px solid var(--giant); font: 400 clamp(21px, 1.9vw, 28px)/1.22 var(--serif); }
+
+/* The line for the client, a way to get in touch, and an honest note. */
+.case-close { padding: 120px var(--pad) 110px; }
+.case-close__text { max-width: 26ch; font: 300 clamp(28px, 3vw, 48px)/1.15 var(--serif); }
+.case-cta { display: inline-flex; gap: 8px; margin-top: 28px; padding: 13px 20px; border-radius: 999px; background: var(--ink); color: var(--ground); font-weight: 600; font-size: 15px; text-decoration: none; transition: transform .3s var(--ease-in-out-entry); }
+.case-cta:hover { transform: translateY(-2px); }
+.case-note { margin-top: 44px; max-width: 70ch; font-size: 14px; opacity: .7; }
 
 
 @media (max-width: 860px) {
@@ -68,8 +78,8 @@
   .case-embed__frame { height: 78vh; height: 78svh; }
   .case-overview, .tab-panel { grid-template-columns: 1fr; }
   .tab-shot--phone { width: 60%; }
-  .case-decisions li { grid-template-columns: 1fr; }
+  .case-did ol { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tablist [role="tab"] { transition: none; }
+  .tablist [role="tab"], .case-cta { transition: none; }
 }

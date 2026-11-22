@@ -16,7 +16,7 @@ Confident, crafted, community-minded. A dark stage where Joshua's own voice is q
 | `--muted` | `#8d959c` | Labels, supporting text |
 | `--rule` | `#262b30` | Rules and borders |
 
-Project chapters (ground / text / giant): Space Arabica `#1b130d` / `#f1e3cc` / `#c9934a` · Korte `#0c1626` / `#eef2ea` / `#9acb2d` · FluxTrack `#001c43` / `#ffffff` / `#ec1f28` · Atlas Accountancy `#13161c` / `#e8edf6` / `#4f86f0`. FluxTrack and Atlas both come from MMCM, so they are split into saturated navy with red and neutral graphite with blue.
+Project chapters (ground / text / giant): Space Arabica `#1b130d` / `#f1e3cc` / `#c9934a` · Korte `#0c1626` / `#eef2ea` / `#9acb2d` · FluxTrack `#001c43` / `#ffffff` / `#ec1f28` · Atlas Treasury `#13161c` / `#e8edf6` / `#4f86f0`. FluxTrack and Atlas both come from MMCM, so they are split into saturated navy with red and neutral graphite with blue.
 
 ## Typography
 
@@ -30,7 +30,7 @@ Project chapters (ground / text / giant): Space Arabica `#1b130d` / `#f1e3cc` / 
 - **Screen wall** behind the hero and list: 11 columns of real screens rotated −14°, neighbours drifting in opposite directions; pointing at a project swaps every tile to that project after its image has decoded.
 - **Project list**: four rows (name, what it is, my part, status); others dim while one is pointed at.
 - **Chapters**: one template — label, name, one-liner, three facts and a button on the left; a browser frame with an overlapping phone on the right; a giant name along the bottom.
-- **Case study**: hero frame, overview with facts, four-tab screen gallery with a larger viewer, three or four decisions, reflection, then the hand-off: the contact block whips over to the next project (no footer).
+- **Case study** (written for clients): hero frame, headline and facts at a glance, the challenge, what I did (three or four moves), results, a four-tab screen gallery with a larger viewer, then a line for the client with a “Let’s talk” link to the contact block and a short honest note; then the hand-off: the contact block whips over to the next project (no footer).
 - **Frames**: browser (radius 12, 30 px title bar) and phone (radius 26, 6 px bezel), the same everywhere.
 
 ## Motion and accessibility
