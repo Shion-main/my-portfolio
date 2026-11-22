@@ -1,12 +1,10 @@
-/* Cross-document transitions between the home chapters and the case studies. */
+/* Cross-document transitions: home chapters ↔ case studies morph; one case study → the next whips. */
 @view-transition { navigation: auto; }
 
 /* Morph: the chapter's browser frame grows into the case hero (and back); everything else crossfades. */
 ::view-transition-group(project-frame) { animation-duration: 900ms; animation-timing-function: cubic-bezier(.76, 0, .18, 1); z-index: 2; }
 :root[data-transition-kind="morph"]::view-transition-old(root),
 :root[data-transition-kind="morph"]::view-transition-new(root),
-:root[data-transition-kind="dive"]::view-transition-old(root),
-:root[data-transition-kind="dive"]::view-transition-new(root),
 :root[data-transition-kind="fade"]::view-transition-old(root),
 :root[data-transition-kind="fade"]::view-transition-new(root) { animation-duration: 600ms; }
 
@@ -17,10 +15,17 @@
 :root[data-morph-target="fluxtrack"] .worlds:not(.motion) [data-chapter="fluxtrack"] .showcase-desk .frame,
 :root[data-morph-target="atlas-accountancy"] .worlds:not(.motion) [data-chapter="atlas-accountancy"] .showcase-desk .frame { view-transition-name: project-frame; }
 
-/* Dive: on the leaving case study the hand-off's laptop frame (filling the screen at the end of the dive) is the one
-   named frame, not its own hero; on the arriving case study the hero carries the name, so the camera settles onto it. */
-:root[data-transition-kind="dive"][data-transition-side="old"] .case-hero__frame { view-transition-name: none !important; }
-:root[data-transition-kind="dive"][data-transition-side="old"] .handoff__frame { view-transition-name: project-frame; }
+/* Whip: the page change finishes the hand-off's whip pan. The scroll accelerated into the cut; here the old page keeps
+   sliding left and fades while the next case study slows in from the right, its blur clearing. Nothing is morphed
+   between the pages, and the header holds still as its own part, like a camera's frame. The two root images overlap
+   while one slides over the other, so they blend normally, not with the crossfade's plus-lighter. */
+:root[data-transition-kind="whip"] .case-hero__frame,
+:root[data-transition-kind="whip"] .handoff__frame { view-transition-name: none !important; }
+:root[data-transition-kind="whip"] .site-head { view-transition-name: site-header; }
+:root[data-transition-kind="whip"]::view-transition-old(root) { animation: whip-old 600ms cubic-bezier(.2, .7, .2, 1) both; mix-blend-mode: normal; }
+:root[data-transition-kind="whip"]::view-transition-new(root) { animation: whip-new 700ms cubic-bezier(.16, 1, .3, 1) both; mix-blend-mode: normal; }
+@keyframes whip-old { to { transform: translateX(-40vw) skewX(-8deg); filter: blur(12px); opacity: 0; } }
+@keyframes whip-new { from { transform: translateX(60vw) skewX(-6deg); filter: blur(10px); } }
 /* Back and Forward between case studies: a plain crossfade, no named frames on either page. */
 :root[data-transition-kind="fade"] .case-hero__frame,
 :root[data-transition-kind="fade"] .handoff__frame { view-transition-name: none !important; }

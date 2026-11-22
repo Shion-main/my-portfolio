@@ -1,7 +1,8 @@
 /* Runs before first paint so cross-document View Transitions can be prepared.
    Home ↔ case study: the chapter's browser frame morphs into the case hero ("morph").
-   Case study → the next case study: the hand-off's laptop frame, already filling the screen, settles into the
-   next case's hero ("dive"). Only the leaving page's hand-off frame and the arriving page's hero carry the name.
+   Case study → the next case study: the page change finishes the hand-off's whip pan ("whip"): the old page slides
+   on out to the left and the next case study arrives from the right, with the header holding still. Back and Forward
+   between case studies crossfade ("fade").
    Links, loading and history stay ordinary browser navigation. */
 (() => {
   const root = document.documentElement;
@@ -27,11 +28,11 @@
       return slugs.includes(slug) ? { page: 'case', slug } : null;
     } catch { return null; }
   };
-  // Back and Forward between case studies crossfade: the dive's frames sit far apart on the two pages there.
+  // Back and Forward between case studies crossfade: going back is not the camera carrying on.
   const kindBetween = (from, to, traverse) => {
     const a = place(from), b = place(to);
     if (!a || !b) return null;
-    if (a.page === 'case' && b.page === 'case' && a.slug !== b.slug) return traverse ? 'fade' : 'dive';
+    if (a.page === 'case' && b.page === 'case' && a.slug !== b.slug) return traverse ? 'fade' : 'whip';
     if (a.page !== b.page) return 'morph';
     return null;
   };

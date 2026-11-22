@@ -262,17 +262,26 @@ check("morph-into-case", async () => {
   await context.close();
 });
 
-check("dive-next-case", async () => {
-  // Case → next case: the hand-off's laptop frame morphs into the next case's hero ("dive"), including the loop back.
+check("whip-next-case", async () => {
+  // Case → next case: the page change finishes the whip ("whip"), including the loop back. Nothing is morphed between
+  // the two pages (the hero frame carries no name) and the header holds still as its own named part.
   for (const [from, to] of [["atlas-accountancy", "space-arabica"], ["space-arabica", "korte"]]) {
     const { page, context } = await open(`/work/${from}/?checks`);
     await context.addInitScript(RECORD);
+    await context.addInitScript(() => addEventListener("pagereveal", () => setTimeout(() => {
+      const name = sel => { const e = document.querySelector(sel); return e ? getComputedStyle(e).viewTransitionName : "missing"; };
+      window.__names = { hero: name(".case-hero__frame"), head: name(".site-head") };
+    }, 0)));
     await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
     await page.evaluate(() => window.__handoff.settle(false));
     await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
     const reveal = await navigateBy(page, ".handoff__continue");
     assert.equal(new URL(page.url()).pathname, `/work/${to}/`);
-    assert.deepEqual(reveal, { vt: true, kind: "dive" }, `${from} → ${to}: ${JSON.stringify(reveal)}`);
+    assert.deepEqual(reveal, { vt: true, kind: "whip" }, `${from} → ${to}: ${JSON.stringify(reveal)}`);
+    assert.deepEqual(await page.evaluate(() => window.__names), { hero: "none", head: "site-header" }, `${from} → ${to}: named parts during the whip`);
+    await page.waitForTimeout(1200);
+    const after = await page.evaluate(() => ({ state: !!document.querySelector("[data-transition-kind]"), hero: getComputedStyle(document.querySelector(".case-hero__frame")).viewTransitionName }));
+    assert.deepEqual(after, { state: false, hero: "project-frame" }, `${from} → ${to}: the whip left its state behind`);
     await context.close();
   }
 });
@@ -1135,7 +1144,7 @@ check("handoff-back-fades", async () => {
   await page.evaluate(() => window.__handoff.settle(false));
   await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
   const forward = await navigateBy(page, ".handoff__continue");
-  assert.deepEqual(forward, { vt: true, kind: "dive" });
+  assert.deepEqual(forward, { vt: true, kind: "whip" });
   await page.goBack({ waitUntil: "load" });
   await page.waitForFunction(() => window.__kinds?.length > 0, null, { timeout: 3000 });
   const back = await page.evaluate(() => window.__kinds[0]);
