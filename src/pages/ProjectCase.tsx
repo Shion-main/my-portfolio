@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { nextProject, projectBySlug, type ProjectSlug } from "../work/projects";
 import { asset } from "../work/asset";
-import { Contact, Header } from "../components/SiteChrome";
+import { Header } from "../components/SiteChrome";
 import { BrowserFrame } from "../components/DeviceFrames";
 import ScreenTabs from "../components/ScreenTabs";
 import CaseHandoff from "../components/CaseHandoff";
@@ -86,7 +86,6 @@ export default function ProjectCase({ slug }: { slug: ProjectSlug }) {
           <p className="case-evidence">{p.evidence}</p>
         </section>
 
-        <Contact />
         <CaseHandoff next={next} />
       </main>
     </div>

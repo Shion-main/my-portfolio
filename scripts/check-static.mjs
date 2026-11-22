@@ -88,7 +88,10 @@ for (const p of projects) {
   const page = await readFile(`dist/work/${p.slug}/index.html`, "utf8");
   assert.ok(page.includes('class="handoff"') && page.includes(`href="/work/${nextP.slug}/"`) && page.includes(nextP.name), `${p.slug}: no hand-off to ${nextP.slug}`);
   assert.ok(!page.includes("case-next") && !page.includes("site-foot"), `${p.slug}: the old next-project block or the footer is still there`);
-  assert.ok(page.indexOf('class="contact"') > 0 && page.indexOf('class="contact"') < page.indexOf('class="handoff"'), `${p.slug}: the contact block must come before the hand-off`);
+  // The contact block opens the hand-off: its first shot, before the next project.
+  const contactAt = page.indexOf('class="contact handoff__contact"');
+  assert.equal((page.match(/class="contact[" ]/g) || []).length, 1, `${p.slug}: there must be exactly one contact block`);
+  assert.ok(page.indexOf('class="handoff"') >= 0 && page.indexOf('class="handoff"') < contactAt && contactAt < page.indexOf('id="handoff-title"'), `${p.slug}: the contact block must open the hand-off, before the next project`);
 }
 
 const spaceCaseHtml = await readFile("dist/work/space-arabica/index.html", "utf8");

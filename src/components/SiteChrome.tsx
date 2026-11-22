@@ -15,9 +15,10 @@ export function Header({ solid = false }: { solid?: boolean; showEmail?: boolean
   );
 }
 
-export function Contact() {
+/** The contact block. On a case study it is the hand-off's first shot, which carries the #contact anchor itself (`anchor={false}`). */
+export function Contact({ anchor = true, className = "" }: { anchor?: boolean; className?: string }) {
   return (
-    <section className="contact" id="contact" aria-labelledby="contact-title">
+    <section className={`contact${className ? ` ${className}` : ""}`} id={anchor ? "contact" : undefined} aria-labelledby="contact-title">
       <p className="label">Contact</p>
       <h2 id="contact-title">Let’s make<br />something.</h2>
       <a className="contact-mail" href={`mailto:${EMAIL}`}>{EMAIL}</a>

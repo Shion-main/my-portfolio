@@ -3,6 +3,11 @@
 import { execSync, spawn } from "node:child_process";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { loadTs } from "./tests/load-ts.mjs";
+
+// The hand-off's timeline, in screens of its own track (the same numbers the page uses).
+const { HANDOFF, handoffTrackScreens } = await loadTs("src/motion/scroll.ts");
+const HS = handoffTrackScreens();
 
 const PORT = 4174;
 const BASE = `http://localhost:${PORT}`;
@@ -264,7 +269,7 @@ check("dive-next-case", async () => {
     await context.addInitScript(RECORD);
     await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
     await page.evaluate(() => window.__handoff.settle(false));
-    await handoffGoTo(page, .85); await handoffCaught(page);
+    await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
     const reveal = await navigateBy(page, ".handoff__continue");
     assert.equal(new URL(page.url()).pathname, `/work/${to}/`);
     assert.deepEqual(reveal, { vt: true, kind: "dive" }, `${from} → ${to}: ${JSON.stringify(reveal)}`);
@@ -916,12 +921,12 @@ check("space-arabica-demo-transitions", async () => {
 });
 
 // ---- Case hand-off: case studies carry on into the next project (2026-11-22) ----
-const handoffGoTo = (page, s) => page.evaluate(s => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + s * (h.offsetHeight / 3)); }, s);
+const handoffGoTo = (page, s) => page.evaluate(([s, hs]) => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + s * (h.offsetHeight / hs)); }, [s, HS]);
 const handoffCaught = async page => {
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   await page.waitForFunction(() => window.__handoff.caught(), null, { timeout: 4000 });
 };
-const handoffPos = page => page.evaluate(() => { const h = document.querySelector(".handoff"); return -h.getBoundingClientRect().top / (h.offsetHeight / 3); });
+const handoffPos = page => page.evaluate(hs => { const h = document.querySelector(".handoff"); return -h.getBoundingClientRect().top / (h.offsetHeight / hs); }, HS);
 async function handoffOpen(path, options) {
   const opened = await open(`${path}?checks`, options);
   await opened.page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
@@ -930,7 +935,7 @@ async function handoffOpen(path, options) {
 // From the hold, wheel like a reader until the next case opens.
 async function handoffWheelThrough(page, from = "space-arabica", to = "korte") {
   await page.keyboard.press("Shift");
-  await handoffGoTo(page, .85); await handoffCaught(page); await page.waitForTimeout(300);
+  await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page); await page.waitForTimeout(300);
   await page.mouse.move(700, 450);
   for (let i = 0; i < 40 && !page.url().includes(`/work/${to}/`); i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(60); }
   await page.waitForURL(new RegExp(`/work/${to}/$`), { timeout: 5000 });
@@ -950,7 +955,7 @@ check("handoff-visible-at-hold", async () => {
   for (const [w, h] of [[1440, 900], [390, 844], [844, 390]]) {
     const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h });
     await page.evaluate(() => window.__handoff.settle(false));
-    await handoffGoTo(page, .85); await handoffCaught(page);
+    await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
     const st = await page.evaluate(() => {
       const hd = document.getElementById("handoff-title"), r = hd.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left + Math.min(r.width / 2, 40), r.top + r.height / 2);
@@ -968,7 +973,7 @@ check("handoff-overscroll-once", async () => {
   const { page, context } = await handoffOpen("/work/space-arabica/");
   await page.keyboard.press("Shift");
   await page.evaluate(() => window.__handoff.settle(false));
-  await handoffGoTo(page, 1.9); await handoffCaught(page);
+  await handoffGoTo(page, HANDOFF.OUT_TO - .1); await handoffCaught(page);
   let navigations = 0;
   page.on("framenavigated", f => { if (f === page.mainFrame()) navigations++; });
   await page.mouse.move(700, 450);
@@ -987,13 +992,13 @@ check("handoff-back-holds", async () => {
   assert.match(page.url(), /\/work\/space-arabica\//);
   await page.waitForTimeout(2000);
   assert.match(page.url(), /\/work\/space-arabica\//, "Back opened the next case again");
+  const s = await handoffPos(page);
   const st = await page.evaluate(() => {
-    const h = document.querySelector(".handoff");
-    const t = getComputedStyle(h.querySelector(".handoff__scene")).transform;
-    return { s: -h.getBoundingClientRect().top / innerHeight, scale: t === "none" ? 1 : new DOMMatrix(t).a, head: getComputedStyle(document.querySelector(".site-head")).color };
+    const t = getComputedStyle(document.querySelector(".handoff__scene")).transform;
+    return { still: t === "none" || new DOMMatrix(t).isIdentity, left: document.querySelector(".handoff__world").getBoundingClientRect().left, head: getComputedStyle(document.querySelector(".site-head")).color };
   });
-  assert.ok(Math.abs(st.s - .85) <= .05, `Back landed at ${st.s.toFixed(3)}, not the hold`);
-  assert.ok(st.scale <= 1.05, `Back shows the dive (scale ${st.scale})`);
+  assert.ok(Math.abs(s - HANDOFF.HOLD) <= .05, `Back landed at ${s.toFixed(3)}, not the hold`);
+  assert.ok(st.still && Math.abs(st.left) <= 1, `Back shows the next project mid-whip (${JSON.stringify(st)})`);
   assert.equal(st.head, "rgb(238, 242, 234)", "the header colour does not follow Korte");
   await context.close();
 });
@@ -1013,25 +1018,36 @@ check("handoff-finish-back", async () => {
   const { page, context } = await handoffOpen("/work/space-arabica/");
   await page.keyboard.press("Shift");
   await page.evaluate(() => window.__handoff.settle(false));
-  await handoffGoTo(page, 1.5); await handoffCaught(page);
+  await handoffGoTo(page, (HANDOFF.OUT_FROM + HANDOFF.OUT_TO) / 2); await handoffCaught(page);
   await page.evaluate(() => window.__handoff.settle(true));
   await page.mouse.move(700, 450); await page.mouse.wheel(0, -100);
   await page.waitForTimeout(1500);
   const s = await handoffPos(page);
-  assert.ok(Math.abs(s - .85) <= .01, `stopping mid-dive heading back ended at ${s.toFixed(3)}, not the hold`);
+  assert.ok(Math.abs(s - HANDOFF.HOLD) <= .01, `stopping mid-whip heading back ended at ${s.toFixed(3)}, not the hold`);
   assert.match(page.url(), /\/work\/space-arabica\//);
   await context.close();
 });
 
 check("handoff-keyboard", async () => {
+  // Focus brings its own shot on screen: the email link shows the contact block, "Continue" the next project at rest.
   const { page, context } = await handoffOpen("/work/space-arabica/");
+  const focusedNow = () => page.evaluate(() => String(document.activeElement?.className));
   await page.focus(".contact-mail");
-  await page.keyboard.press("Tab");
-  await page.waitForTimeout(800);
-  const st = await page.evaluate(() => ({ focused: String(document.activeElement?.className), s: -document.querySelector(".handoff").getBoundingClientRect().top / innerHeight }));
-  assert.match(st.focused, /handoff__continue/, `Tab from the contact block focused "${st.focused}"`);
-  assert.ok(Math.abs(st.s - .85) <= .05, `focus left the hand-off at ${st.s.toFixed(3)}`);
+  await page.waitForTimeout(900);
+  let s = await handoffPos(page);
+  const mailOnScreen = await page.evaluate(() => { const r = document.querySelector(".contact-mail").getBoundingClientRect(); return r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight; });
+  assert.ok(s >= -.02 && s <= HANDOFF.IN_FROM + .02, `focusing the email left the hand-off at ${s.toFixed(3)}, not on the contact block`);
+  assert.ok(mailOnScreen, "the focused email link is off screen");
+  await page.keyboard.press("Tab"); await page.waitForTimeout(900);
+  s = await handoffPos(page);
+  assert.match(await focusedNow(), /handoff__continue/, "Tab from the email did not reach Continue");
+  assert.ok(Math.abs(s - HANDOFF.HOLD) <= .05, `focus on Continue left the hand-off at ${s.toFixed(3)}`);
+  await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(900);
+  s = await handoffPos(page);
+  assert.match(await focusedNow(), /contact-mail/, "Shift+Tab from Continue did not return to the email");
+  assert.ok(s <= HANDOFF.IN_FROM + .02, `focus back on the email left the hand-off at ${s.toFixed(3)}`);
   assert.match(page.url(), /\/work\/space-arabica\//);
+  await page.keyboard.press("Tab"); await page.waitForTimeout(900);
   await Promise.all([page.waitForURL(/\/work\/korte\/$/), page.keyboard.press("Enter")]);
   await context.close();
 });
@@ -1043,6 +1059,8 @@ check("handoff-reduced", async () => {
   await page.mouse.move(700, 450); await page.mouse.wheel(0, 400);
   await page.waitForTimeout(1500);
   assert.match(page.url(), /\/work\/space-arabica\//, "reduced motion opened the next case by itself");
+  const order = await page.evaluate(() => { const top = sel => document.querySelector(sel).getBoundingClientRect().top + scrollY; return { contact: top("#contact-title"), next: top("#handoff-title") }; });
+  assert.ok(order.contact < order.next, `with reduced motion the contact block is not above the next project (${JSON.stringify(order)})`);
   await Promise.all([page.waitForURL(/\/work\/korte\/$/), page.click(".handoff__continue")]);
   await context.close();
 });
@@ -1057,9 +1075,14 @@ check("handoff-phone", async () => {
     }
     const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h, isMobile: true, hasTouch: true });
     await page.evaluate(() => window.__handoff.settle(false));
-    await handoffGoTo(page, 1.999); await handoffCaught(page);
-    const r = await page.evaluate(() => { const f = document.querySelector(".handoff__frame img").getBoundingClientRect(); return { l: f.left, t: f.top, r: f.right, b: f.bottom }; });
-    assert.ok(r.l <= 2 && r.t <= 2 && r.r >= w - 2 && r.b >= h - 2, `${w}px: the dive does not fill the screen (${JSON.stringify(r)})`);
+    await handoffGoTo(page, HANDOFF.IN_FROM + .45 * (HANDOFF.IN_TO - HANDOFF.IN_FROM)); await handoffCaught(page);
+    const mid = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth - innerWidth, blur: Number((getComputedStyle(document.querySelector(".handoff__world")).filter.match(/blur\(([\d.]+)px\)/) || [0, 0])[1]) }));
+    assert.ok(mid.overflow <= 0, `${w}px: the whip widens the page by ${mid.overflow}px`);
+    assert.ok(mid.blur > 0 && mid.blur <= 6, `${w}px: mid-whip blur is ${mid.blur}px (phone cap 6)`);
+    await handoffGoTo(page, HANDOFF.OUT_TO - .001); await handoffCaught(page);
+    const end = await page.evaluate(() => { const r = sel => document.querySelector(sel).getBoundingClientRect(); return { info: r(".handoff__info").right, giant: r(".handoff__giant").right, desk: r(".handoff__desk").right, wl: r(".handoff__world").left, wr: r(".handoff__world").right }; });
+    assert.ok(end.info <= 0 && end.giant <= 0 && end.desk <= 0, `${w}px: the next project has not whipped off the screen (${JSON.stringify(end)})`);
+    assert.ok(end.wl <= 1 && end.wr >= w - 1, `${w}px: the next project's ground no longer fills the screen (${JSON.stringify(end)})`);
     await context.close();
   }
 });
@@ -1070,24 +1093,33 @@ check("handoff-rotate-at-hold", async () => {
   for (const slug of SLUGS) {
     const { page, context } = await handoffOpen(`/work/${slug}/`, { width: 390, height: 844, isMobile: true, hasTouch: true });
     await page.keyboard.press("Shift");
-    await handoffGoTo(page, .85); await handoffCaught(page); await page.waitForTimeout(400);
+    await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page); await page.waitForTimeout(400);
     await page.setViewportSize({ width: 844, height: 390 });
     await page.waitForTimeout(2000);
     assert.match(page.url(), new RegExp(`/work/${slug}/`), `rotating at the hold on ${slug} opened ${page.url()}`);
     const at = await handoffPos(page);
-    assert.ok(Math.abs(at - .85) <= .05, `${slug}: rotating left the hand-off at ${at.toFixed(3)}`);
+    assert.ok(Math.abs(at - HANDOFF.HOLD) <= .05, `${slug}: rotating left the hand-off at ${at.toFixed(3)}`);
     await context.close();
   }
+  // Rotating on the contact block keeps the contact block.
+  const { page, context } = await handoffOpen("/work/space-arabica/", { width: 390, height: 844, isMobile: true, hasTouch: true });
+  await page.keyboard.press("Shift");
+  await handoffGoTo(page, .2); await handoffCaught(page); await page.waitForTimeout(400);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.waitForTimeout(2000);
+  const at = await handoffPos(page);
+  assert.ok(Math.abs(at - .2) <= .05, `rotating on the contact block moved the hand-off to ${at.toFixed(3)}`);
+  await context.close();
 });
 
 check("handoff-toolbar-back", async () => {
   // Phone toolbars change innerHeight while the track (large-viewport units) stays put:
-  // a small scroll back near the end of the dive must return to the hold, not open the next case.
+  // a small scroll back near the end of the whip out must return to the hold, not open the next case.
   const { page, context } = await handoffOpen("/work/space-arabica/", { width: 390, height: 844, isMobile: true, hasTouch: true });
-  await page.evaluate(() => { document.querySelector(".handoff").style.height = `${3 * innerHeight}px`; });
+  await page.evaluate(hs => { document.querySelector(".handoff").style.height = `${hs * innerHeight}px`; }, HS);
   await page.keyboard.press("Shift");
   await page.evaluate(() => window.__handoff.settle(false));
-  await handoffGoTo(page, 1.9); await handoffCaught(page);
+  await handoffGoTo(page, HANDOFF.OUT_TO - .1); await handoffCaught(page);
   await page.evaluate(() => window.__handoff.settle(true));
   await page.setViewportSize({ width: 390, height: 754 });
   await page.mouse.move(195, 400); await page.mouse.wheel(0, -40);
@@ -1101,7 +1133,7 @@ check("handoff-back-fades", async () => {
   const { page, context } = await handoffOpen("/work/space-arabica/");
   await context.addInitScript(RECORD);
   await page.evaluate(() => window.__handoff.settle(false));
-  await handoffGoTo(page, .85); await handoffCaught(page);
+  await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
   const forward = await navigateBy(page, ".handoff__continue");
   assert.deepEqual(forward, { vt: true, kind: "dive" });
   await page.goBack({ waitUntil: "load" });
@@ -1117,13 +1149,13 @@ check("handoff-sized-before-app", async () => {
   await ctx.route(/\/assets\/.*\.js$/, route => route.abort());
   const page = await ctx.newPage();
   await page.goto(BASE + "/work/space-arabica/", { waitUntil: "load" });
-  const st = await page.evaluate(() => ({ track: document.querySelector(".handoff").offsetHeight, three: 3 * innerHeight }));
-  assert.ok(Math.abs(st.track - st.three) <= 2, `before the app runs the hand-off is ${st.track}px, not ${st.three}px`);
+  const st = await page.evaluate(hs => ({ track: document.querySelector(".handoff").offsetHeight, full: hs * innerHeight }), HS);
+  assert.ok(Math.abs(st.track - st.full) <= 2, `before the app runs the hand-off is ${st.track}px, not ${st.full}px`);
   await ctx.close();
 });
 
-check("handoff-restored-mid-arrival", async () => {
-  // A page already sitting just inside the hand-off when the app starts (a restore) finishes the arrival instead of showing an empty stage.
+check("handoff-restored-mid-whip", async () => {
+  // A page already sitting inside the whip when the app starts (a restore) finishes it instead of freezing mid-move.
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   let release;
   const gate = new Promise(r => { release = r; });
@@ -1132,13 +1164,13 @@ check("handoff-restored-mid-arrival", async () => {
   // The app's module script is held back, which also holds DOMContentLoaded: wait for the prerendered section itself.
   await page.goto(BASE + "/work/space-arabica/?checks", { waitUntil: "commit" });
   await page.waitForSelector(".handoff", { state: "attached", timeout: 10000 });
-  await page.evaluate(() => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + .02 * (h.offsetHeight / 3)); });
+  await page.evaluate(([s, hs]) => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + s * (h.offsetHeight / hs)); }, [HANDOFF.IN_FROM + .1, HS]);
   await page.waitForTimeout(300);
   release();
   await page.waitForFunction(() => window.__handoff, null, { timeout: 8000 });
   await page.waitForTimeout(1800);
-  const world = await page.evaluate(() => getComputedStyle(document.querySelector(".handoff__world")).opacity);
-  assert.equal(world, "1", `a restore just inside the hand-off was left on an empty stage (world opacity ${world})`);
+  const st = await page.evaluate(() => ({ world: document.querySelector(".handoff__world").getBoundingClientRect().left, contact: document.querySelector(".handoff__contact").getBoundingClientRect().right }));
+  assert.ok(Math.abs(st.world) <= 1 && st.contact <= 0, `a restore inside the whip was not finished (${JSON.stringify(st)})`);
   assert.match(page.url(), /\/work\/space-arabica\//);
   await ctx.close();
 });
@@ -1150,7 +1182,92 @@ check("handoff-end-key-holds", async () => {
   await page.waitForTimeout(2000);
   assert.match(page.url(), /\/work\/space-arabica\//, "End jumped straight into the next case study");
   const at = await handoffPos(page);
-  assert.ok(Math.abs(at - .85) <= .05, `End left the page at ${at.toFixed(3)}, not resting on the next project`);
+  assert.ok(Math.abs(at - HANDOFF.HOLD) <= .05, `End left the page at ${at.toFixed(3)}, not resting on the next project`);
+  await context.close();
+});
+
+// ---- Whip-pan hand-off (2026-11-22) ----
+const whipLook = page => page.evaluate(() => {
+  const q = sel => document.querySelector(sel);
+  const rect = sel => { const r = q(sel).getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; };
+  const x = sel => { const t = getComputedStyle(q(sel)).transform; return t === "none" ? 0 : new DOMMatrix(t).m41; };
+  return {
+    w: innerWidth, h: innerHeight,
+    contact: rect(".handoff__contact"), title: rect("#contact-title"), world: rect(".handoff__world"),
+    info: rect(".handoff__info"), giant: rect(".handoff__giant"), desk: rect(".handoff__desk"),
+    giantX: x(".handoff__giant"), deskX: x(".handoff__desk"),
+    bar: q(".handoff__bar--top").getBoundingClientRect().height,
+    streaks: Number(getComputedStyle(q(".handoff__streaks")).opacity),
+    worldFilter: getComputedStyle(q(".handoff__world")).filter, sceneFilter: getComputedStyle(q(".handoff__scene")).filter,
+    head: document.documentElement.style.getPropertyValue("--head"),
+  };
+});
+
+check("handoff-whip-frames", async () => {
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.evaluate(() => window.__handoff.settle(false));
+  const at = async s => { await handoffGoTo(page, s); await handoffCaught(page); return whipLook(page); };
+
+  let v = await at(.2);
+  assert.ok(v.title.t >= 0 && v.title.b <= v.h && v.title.l >= 0 && v.title.r <= v.w, `the contact heading is not on screen at rest (${JSON.stringify(v.title)})`);
+  assert.ok(v.world.l >= v.w - 1, `the next project shows before the whip (left ${v.world.l})`);
+  assert.equal(v.head, "", "the header changed colour on the contact block");
+
+  v = await at(HANDOFF.IN_FROM + .45 * (HANDOFF.IN_TO - HANDOFF.IN_FROM));
+  assert.ok(v.contact.l < 0, `mid-whip the contact block has not moved left (${v.contact.l})`);
+  assert.ok(v.world.l > 1 && v.world.l < v.w - 1, `mid-whip the next project is not coming in (left ${v.world.l})`);
+  assert.ok(v.bar > 40, `no cinema bars mid-whip (${v.bar}px)`);
+  assert.ok(v.streaks > .5, `no streaks mid-whip (${v.streaks})`);
+  assert.ok(v.giantX < 0 && v.deskX > 0, `no parallax mid-whip (name ${v.giantX}, laptop ${v.deskX})`);
+  assert.match(v.worldFilter, /blur/, "no motion blur mid-whip");
+
+  v = await at(HANDOFF.HOLD);
+  assert.ok(v.contact.r <= 0, `the contact block still shows at the hold (right ${v.contact.r})`);
+  assert.ok(Math.abs(v.world.l) <= 1, `the next project is not at rest at the hold (left ${v.world.l})`);
+  assert.equal(v.bar, 0, "cinema bars at the hold");
+  assert.equal(v.worldFilter, "none", "blur at the hold");
+  assert.equal(v.streaks, 0, "streaks at the hold");
+  assert.equal(v.head, "#eef2ea", "the header does not take Korte's colour at the hold");
+
+  v = await at((HANDOFF.OUT_FROM + HANDOFF.OUT_TO) / 2);
+  assert.ok(v.giantX < v.deskX, `leaving, the name does not lead the laptop (${v.giantX} vs ${v.deskX})`);
+  assert.ok(v.bar > 0, "no cinema bars on the way out");
+
+  v = await at(HANDOFF.OUT_TO - .003);
+  assert.ok(v.info.r <= 0 && v.giant.r <= 0 && v.desk.r <= 0, `the next project has not whipped off the screen (${JSON.stringify([v.info.r, v.giant.r, v.desk.r])})`);
+  assert.ok(v.bar >= .08 * v.h, `the bars are not closed in at the cut (${v.bar}px)`);
+  assert.match(v.sceneFilter, /blur/, "no motion blur at the cut");
+  assert.match(page.url(), /\/work\/space-arabica\//);
+  await context.close();
+});
+
+check("handoff-finish-whip-in", async () => {
+  // Stopping mid-whip finishes it the way the reader was heading: back to the contact block, or on to the hold.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.mouse.move(700, 450);
+  for (const [delta, want, name] of [[-100, 0, "the contact block"], [100, HANDOFF.HOLD, "the hold"]]) {
+    await page.evaluate(() => window.__handoff.settle(false));
+    await handoffGoTo(page, HANDOFF.IN_FROM + .5); await handoffCaught(page); await page.waitForTimeout(300);
+    await page.evaluate(() => window.__handoff.settle(true));
+    await page.mouse.wheel(0, delta);
+    await page.waitForTimeout(1500);
+    const s = await handoffPos(page);
+    assert.ok(Math.abs(s - want) <= .01, `stopping mid-whip heading ${delta < 0 ? "back" : "on"} ended at ${s.toFixed(3)}, not ${name}`);
+  }
+  assert.match(page.url(), /\/work\/space-arabica\//);
+  await context.close();
+});
+
+check("handoff-contact-anchor", async () => {
+  // #contact on a case study lands on the contact block at rest.
+  const { page, context } = await open("/work/space-arabica/?checks#contact");
+  await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
+  await page.waitForTimeout(1000);
+  const s = await handoffPos(page);
+  const seen = await page.evaluate(() => { const r = document.getElementById("contact-title").getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth; });
+  assert.ok(s >= -.05 && s <= HANDOFF.IN_FROM + .02, `#contact landed at ${s.toFixed(3)}, not on the contact block`);
+  assert.ok(seen, "#contact did not show the contact heading");
+  assert.match(page.url(), /\/work\/space-arabica\//);
   await context.close();
 });
 
