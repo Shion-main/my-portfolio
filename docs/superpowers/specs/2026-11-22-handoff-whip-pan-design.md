@@ -40,9 +40,9 @@ The "Continue to …" link at the hold plays the same landing on its own: the ne
 - **Opening by itself:** once per page view, only after the reader has scrolled since the page loaded, and only when heading forward. A page that loads or is restored past the hold rests at the hold.
 - **Back** from the next case crossfades (as now) and rests at the hold.
 - **End key** goes to the hold. A width change keeps the reader's place.
-- **The Contact link** in the header (and `#contact`) lands on the contact block at rest. Focus on the email link keeps the contact in view; focus on the "Continue to …" link brings the reader to the hold.
+- **`#contact`** on a case study lands on the contact block at rest. (The header's Contact link goes to the home page's contact block, as now.) Focus on the email link brings the contact block into view; focus on the "Continue to …" link brings the reader to the hold.
 - **Reduced motion and no JavaScript:** no whip, glide or automatic opening. The page ends with the contact block, then the next project at rest with its link, as today. The page transition between case studies is skipped.
-- **Phones and landscape phones:** the same whip. Distances are in screen widths, so it scales. The contact block, without its large top and bottom padding, is centred in the stage and fits a landscape phone.
+- **Phones and landscape phones:** the same whip. Distances are in screen widths, so it scales. In the stage, the contact block keeps its look, but its top padding shrinks on short screens (at most 16% of the screen height), so it fits a landscape phone.
 
 ## Constraints
 
