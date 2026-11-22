@@ -20,11 +20,13 @@
 .handoff__giant { position: absolute; left: 0; right: 0; bottom: -.07em; z-index: 1; text-align: center; white-space: nowrap; font-family: var(--display); font-size: 12vw; line-height: .8; text-transform: uppercase; color: var(--giant); font-variation-settings: "wdth" var(--wd, 100), "wght" var(--wt, 800); pointer-events: none; }
 .handoff__giant span { display: inline-block; }
 
-/* Pinned once hydrated: 300vh is the dive's end plus the pinned screen (handoffTrackScreens in scroll.ts).
-   The stage starts as dark as the contact block above it; the next project emerges from it. */
-.handoff.motion { height: 300vh; background: #070809; }
-/* Pinned, the stage is exactly one screen, even on a landscape phone shorter than the static section's 560px. */
-.handoff.motion .handoff__stage { position: sticky; top: 0; min-height: 0; }
+/* Pinned: 300vh is the dive's end plus the pinned screen (handoffTrackScreens in scroll.ts). Applied before first
+   paint through html.can-move (set by the inline page-transition script), so the page is its full length before the
+   app runs and a restored scroll position is never clamped. The stage starts as dark as the contact block above it;
+   once hydrated (.motion) the next project emerges from it. Pinned, the stage is exactly one screen, even on a
+   landscape phone shorter than the static section's 560px. */
+.can-move .handoff, .handoff.motion { height: 300vh; background: #070809; }
+.can-move .handoff__stage, .handoff.motion .handoff__stage { position: sticky; top: 0; min-height: 0; }
 .handoff.motion .handoff__world { opacity: 0; }
 
 @media (max-width: 860px) {

@@ -9,6 +9,9 @@
   const native = 'onpageswap' in window && 'onpagereveal' in window;
   const arrivalKey = 'portfolio-arrival';
   const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-accountancy'];
+  // Before first paint: pages that will move get their full layout now (the case hand-off's 300vh track),
+  // so a restored scroll position is never clamped to a shorter page than the app will build.
+  if (!reduced.matches) root.classList.add('can-move');
 
   // Returns { page: 'home' | 'case', slug } for same-origin portfolio URLs.
   const place = (value) => {
@@ -24,10 +27,11 @@
       return slugs.includes(slug) ? { page: 'case', slug } : null;
     } catch { return null; }
   };
-  const kindBetween = (from, to) => {
+  // Back and Forward between case studies crossfade: the dive's frames sit far apart on the two pages there.
+  const kindBetween = (from, to, traverse) => {
     const a = place(from), b = place(to);
     if (!a || !b) return null;
-    if (a.page === 'case' && b.page === 'case' && a.slug !== b.slug) return 'dive';
+    if (a.page === 'case' && b.page === 'case' && a.slug !== b.slug) return traverse ? 'fade' : 'dive';
     if (a.page !== b.page) return 'morph';
     return null;
   };
@@ -51,7 +55,7 @@
   window.addEventListener('pageswap', (event) => {
     if (!event.viewTransition) return;
     const to = event.activation && event.activation.entry && event.activation.entry.url;
-    const kind = kindBetween(location.href, to);
+    const kind = kindBetween(location.href, to, event.activation && event.activation.navigationType === 'traverse');
     if (!kind || reduced.matches) { event.viewTransition.skipTransition(); return; }
     begin(event.viewTransition, kind, to, 'old');
   });
@@ -59,7 +63,7 @@
     reset();
     if (!event.viewTransition) return;
     const from = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
-    const kind = kindBetween(from, location.href);
+    const kind = kindBetween(from, location.href, navigation.activation.navigationType === 'traverse');
     if (!kind || reduced.matches) { event.viewTransition.skipTransition(); return; }
     begin(event.viewTransition, kind, location.href, 'new');
   });

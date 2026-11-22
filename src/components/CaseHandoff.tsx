@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { projects, type Project } from "../work/projects";
 import { asset } from "../work/asset";
 import { BrowserFrame } from "./DeviceFrames";
-import { HANDOFF, SETTLE_MS, clamp, dolly, easeIn3, easeInOut3, fitFontSize, glide, handoffPhase, handoffSettle, landing, leaveWords, lerp, pushIn, range } from "../motion/scroll";
+import { HANDOFF, SETTLE_MS, clamp, dolly, easeIn3, easeInOut3, fitFontSize, glide, handoffPhase, handoffSettle, handoffTrackScreens, landing, leaveWords, lerp, pushIn, range } from "../motion/scroll";
 import "./handoff.css";
 
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -36,13 +36,18 @@ export default function CaseHandoff({ next }: { next: Project }) {
     // Opening the next case needs a reader: some input since load (or since a restore), and only once per page view.
     let moved = false;
     let opened = false;
+    // The way the reader last scrolled; the next case opens only when they are heading forward into it.
+    let dir: 1 | -1 = 1;
 
     if (import.meta.env.DEV || location.search.includes("checks")) {
       (window as unknown as { __handoff: unknown }).__handoff = { drawn: () => cur, caught: () => cur === target && !frame, settle: (on: boolean) => { opts.settle = on; } };
     }
 
-    const position = () => -el.getBoundingClientRect().top / innerHeight;
-    const topFor = (s: number) => el.getBoundingClientRect().top + scrollY + s * innerHeight;
+    // Screens are counted in the track's own unit (its CSS height is three of them, in large-viewport units),
+    // not innerHeight: a phone toolbar sliding in or out changes innerHeight and must not move the reader.
+    const unit = () => el.offsetHeight / handoffTrackScreens();
+    const position = () => -el.getBoundingClientRect().top / unit();
+    const topFor = (s: number) => el.getBoundingClientRect().top + scrollY + s * unit();
     // The laptop drifts while resting; it is frozen where the dive starts, so the dolly aims at a still screen.
     const DIVE_DRIFT = clamp(HANDOFF.DIVE_FROM - HANDOFF.HOLD, -1.2, 1.2);
     const diveDeskT = `translateY(${(-DIVE_DRIFT * 26).toFixed(1)}px)`;
@@ -120,7 +125,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
         if (showing) page.setProperty("--head", next.tokens.text);
         else page.removeProperty("--head");
       }
-      if (phase === "done" && moved && !opened) {
+      if (phase === "done" && moved && dir > 0 && !opened) {
         opened = true;
         location.assign(url);
       }
@@ -134,7 +139,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
 
     // Finish a move the reader stopped inside, the way they were heading. Never under a finger or a held button;
     // any input stops a finish in flight.
-    let finishTimer = 0, finishing = 0, touching = false, pressing = false, lastY = scrollY, dir: 1 | -1 = 1;
+    let finishTimer = 0, finishing = 0, touching = false, pressing = false, lastY = scrollY;
     const stopFinishing = () => { cancelAnimationFrame(finishing); finishing = 0; };
     const finish = () => {
       finishTimer = 0;
@@ -173,6 +178,24 @@ export default function CaseHandoff({ next }: { next: Project }) {
       restAtHold();
       queue();
     };
+    // End goes to the end of this page — the next project at rest — instead of jumping straight into the next case.
+    const endKey = (event: KeyboardEvent) => {
+      if (event.key !== "End" || event.altKey || event.defaultPrevented) return;
+      const target = event.target as HTMLElement | null;
+      if (target && (target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName))) return;
+      event.preventDefault();
+      moved = true;
+      toHold();
+    };
+    let lastWidth = innerWidth;
+    const resized = () => {
+      const keep = target;
+      const widthChanged = innerWidth !== lastWidth;
+      lastWidth = innerWidth;
+      fit();
+      if (widthChanged && keep >= HANDOFF.FROM && keep <= HANDOFF.DIVE_TO) window.scrollTo(0, topFor(Math.min(keep, HANDOFF.HOLD)));
+      waitToFinish();
+    };
     const fit = () => {
       rect = null;
       giant.style.fontSize = "100px";
@@ -185,9 +208,12 @@ export default function CaseHandoff({ next }: { next: Project }) {
 
     fit();
     restAtHold();
+    // A position the browser restored mid-move (no scroll event follows) finishes too, so the stage is never left empty.
+    waitToFinish();
     document.fonts?.ready.then(fit);
     window.addEventListener("scroll", scrolled, { passive: true });
-    window.addEventListener("resize", fit);
+    window.addEventListener("resize", resized);
+    window.addEventListener("keydown", endKey);
     window.addEventListener("pageshow", restored);
     for (const type of ["wheel", "keydown"]) window.addEventListener(type, input, { passive: true });
     window.addEventListener("touchstart", touchOn, { passive: true });
@@ -202,7 +228,8 @@ export default function CaseHandoff({ next }: { next: Project }) {
       stopFinishing();
       page.removeProperty("--head");
       window.removeEventListener("scroll", scrolled);
-      window.removeEventListener("resize", fit);
+      window.removeEventListener("resize", resized);
+      window.removeEventListener("keydown", endKey);
       window.removeEventListener("pageshow", restored);
       for (const type of ["wheel", "keydown"]) window.removeEventListener(type, input);
       window.removeEventListener("touchstart", touchOn);

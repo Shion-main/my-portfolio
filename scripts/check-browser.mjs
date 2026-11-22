@@ -916,12 +916,12 @@ check("space-arabica-demo-transitions", async () => {
 });
 
 // ---- Case hand-off: case studies carry on into the next project (2026-11-22) ----
-const handoffGoTo = (page, s) => page.evaluate(s => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + s * innerHeight); }, s);
+const handoffGoTo = (page, s) => page.evaluate(s => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + s * (h.offsetHeight / 3)); }, s);
 const handoffCaught = async page => {
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   await page.waitForFunction(() => window.__handoff.caught(), null, { timeout: 4000 });
 };
-const handoffPos = page => page.evaluate(() => -document.querySelector(".handoff").getBoundingClientRect().top / innerHeight);
+const handoffPos = page => page.evaluate(() => { const h = document.querySelector(".handoff"); return -h.getBoundingClientRect().top / (h.offsetHeight / 3); });
 async function handoffOpen(path, options) {
   const opened = await open(`${path}?checks`, options);
   await opened.page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
@@ -1062,6 +1062,96 @@ check("handoff-phone", async () => {
     assert.ok(r.l <= 2 && r.t <= 2 && r.r >= w - 2 && r.b >= h - 2, `${w}px: the dive does not fill the screen (${JSON.stringify(r)})`);
     await context.close();
   }
+});
+
+// ---- Case hand-off review fixes (2026-11-22) ----
+check("handoff-rotate-at-hold", async () => {
+  // Rotating a phone at the hold keeps the reader there; it never opens the next case.
+  for (const slug of SLUGS) {
+    const { page, context } = await handoffOpen(`/work/${slug}/`, { width: 390, height: 844, isMobile: true, hasTouch: true });
+    await page.keyboard.press("Shift");
+    await handoffGoTo(page, .85); await handoffCaught(page); await page.waitForTimeout(400);
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.waitForTimeout(2000);
+    assert.match(page.url(), new RegExp(`/work/${slug}/`), `rotating at the hold on ${slug} opened ${page.url()}`);
+    const at = await handoffPos(page);
+    assert.ok(Math.abs(at - .85) <= .05, `${slug}: rotating left the hand-off at ${at.toFixed(3)}`);
+    await context.close();
+  }
+});
+
+check("handoff-toolbar-back", async () => {
+  // Phone toolbars change innerHeight while the track (large-viewport units) stays put:
+  // a small scroll back near the end of the dive must return to the hold, not open the next case.
+  const { page, context } = await handoffOpen("/work/space-arabica/", { width: 390, height: 844, isMobile: true, hasTouch: true });
+  await page.evaluate(() => { document.querySelector(".handoff").style.height = `${3 * innerHeight}px`; });
+  await page.keyboard.press("Shift");
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, 1.9); await handoffCaught(page);
+  await page.evaluate(() => window.__handoff.settle(true));
+  await page.setViewportSize({ width: 390, height: 754 });
+  await page.mouse.move(195, 400); await page.mouse.wheel(0, -40);
+  await page.waitForTimeout(2000);
+  assert.match(page.url(), /\/work\/space-arabica\//, "a small scroll back while the toolbar returned opened the next case");
+  await context.close();
+});
+
+check("handoff-back-fades", async () => {
+  // Back between case studies crossfades; no frame flies across the screen from where it sat on the other page.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await context.addInitScript(RECORD);
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, .85); await handoffCaught(page);
+  const forward = await navigateBy(page, ".handoff__continue");
+  assert.deepEqual(forward, { vt: true, kind: "dive" });
+  await page.goBack({ waitUntil: "load" });
+  await page.waitForFunction(() => window.__kinds?.length > 0, null, { timeout: 3000 });
+  const back = await page.evaluate(() => window.__kinds[0]);
+  assert.deepEqual(back, { vt: true, kind: "fade" }, `Back between case studies: ${JSON.stringify(back)}`);
+  await context.close();
+});
+
+check("handoff-sized-before-app", async () => {
+  // The hand-off has its full track before the app runs, so a restored scroll position is never clamped short.
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.route(/\/assets\/.*\.js$/, route => route.abort());
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/work/space-arabica/", { waitUntil: "load" });
+  const st = await page.evaluate(() => ({ track: document.querySelector(".handoff").offsetHeight, three: 3 * innerHeight }));
+  assert.ok(Math.abs(st.track - st.three) <= 2, `before the app runs the hand-off is ${st.track}px, not ${st.three}px`);
+  await ctx.close();
+});
+
+check("handoff-restored-mid-arrival", async () => {
+  // A page already sitting just inside the hand-off when the app starts (a restore) finishes the arrival instead of showing an empty stage.
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  let release;
+  const gate = new Promise(r => { release = r; });
+  await ctx.route(/\/assets\/.*\.js$/, async route => { await gate; await route.continue(); });
+  const page = await ctx.newPage();
+  // The app's module script is held back, which also holds DOMContentLoaded: wait for the prerendered section itself.
+  await page.goto(BASE + "/work/space-arabica/?checks", { waitUntil: "commit" });
+  await page.waitForSelector(".handoff", { state: "attached", timeout: 10000 });
+  await page.evaluate(() => { const h = document.querySelector(".handoff"); scrollTo(0, h.getBoundingClientRect().top + scrollY + .02 * (h.offsetHeight / 3)); });
+  await page.waitForTimeout(300);
+  release();
+  await page.waitForFunction(() => window.__handoff, null, { timeout: 8000 });
+  await page.waitForTimeout(1800);
+  const world = await page.evaluate(() => getComputedStyle(document.querySelector(".handoff__world")).opacity);
+  assert.equal(world, "1", `a restore just inside the hand-off was left on an empty stage (world opacity ${world})`);
+  assert.match(page.url(), /\/work\/space-arabica\//);
+  await ctx.close();
+});
+
+check("handoff-end-key-holds", async () => {
+  // End takes the reader to the end of this page — the next project at rest — not straight into the next case.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.keyboard.press("End");
+  await page.waitForTimeout(2000);
+  assert.match(page.url(), /\/work\/space-arabica\//, "End jumped straight into the next case study");
+  const at = await handoffPos(page);
+  assert.ok(Math.abs(at - .85) <= .05, `End left the page at ${at.toFixed(3)}, not resting on the next project`);
+  await context.close();
 });
 
 let failed = 0;

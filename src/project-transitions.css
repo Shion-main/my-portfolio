@@ -6,7 +6,9 @@
 :root[data-transition-kind="morph"]::view-transition-old(root),
 :root[data-transition-kind="morph"]::view-transition-new(root),
 :root[data-transition-kind="dive"]::view-transition-old(root),
-:root[data-transition-kind="dive"]::view-transition-new(root) { animation-duration: 600ms; }
+:root[data-transition-kind="dive"]::view-transition-new(root),
+:root[data-transition-kind="fade"]::view-transition-old(root),
+:root[data-transition-kind="fade"]::view-transition-new(root) { animation-duration: 600ms; }
 
 /* Arriving home before React has named the active chapter. Only before hydration: once .motion is on,
    React names the active chapter's frame, so the two never both name one. */
@@ -19,6 +21,9 @@
    named frame, not its own hero; on the arriving case study the hero carries the name, so the camera settles onto it. */
 :root[data-transition-kind="dive"][data-transition-side="old"] .case-hero__frame { view-transition-name: none !important; }
 :root[data-transition-kind="dive"][data-transition-side="old"] .handoff__frame { view-transition-name: project-frame; }
+/* Back and Forward between case studies: a plain crossfade, no named frames on either page. */
+:root[data-transition-kind="fade"] .case-hero__frame,
+:root[data-transition-kind="fade"] .handoff__frame { view-transition-name: none !important; }
 
 /* Fallback arrival fade for browsers without cross-document transitions. */
 :root[data-project-arrival] body { animation: page-arrive .45s cubic-bezier(.2, .7, .1, 1) both; }
