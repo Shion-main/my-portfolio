@@ -35,12 +35,16 @@ export default function CaseHandoff({ next }: { next: Project }) {
     let target = 0;
     let headOn = false;
     let primed = false;
+    let prepared: HTMLElement | null = null;
     let nearOn = false;
     // Opening the next case needs a reader: some input since load (or since a restore), and only once per page view.
     let moved = false;
     let opened = false;
     // The way the reader last scrolled; the next case opens only when they are heading forward into it.
     let dir: 1 | -1 = 1;
+    // Set only by the reader's own forward scroll reaching the end of the pull. A layout shift that moves the position
+    // (a phone toolbar resizing screen-height content above) fires no forward scroll, so it never sets this.
+    let reachedEnd = false;
 
     if (import.meta.env.DEV || location.search.includes("checks")) {
       (window as unknown as { __handoff: unknown }).__handoff = { drawn: () => cur, caught: () => cur === target && !frame, settle: (on: boolean) => { opts.settle = on; } };
@@ -60,12 +64,25 @@ export default function CaseHandoff({ next }: { next: Project }) {
       cur = Number.isNaN(cur) ? target : glide(cur, target, dt, false);
       // The next project's screenshot is lazy: load and decode it as the reader nears the hand-off, so it is never
       // fetched and decoded in the middle of the whip.
-      if (!primed && cur > -1.5) { primed = true; screen.loading = "eager"; screen.decode?.().catch(() => {}); }
+      // Near the hand-off: prepare the next case study too, so the pan into it starts at once. Chromium prerenders it
+      // (speculation rules); other browsers prefetch its page.
+      if (!primed && cur > -1.5) {
+        primed = true;
+        screen.loading = "eager";
+        screen.decode?.().catch(() => {});
+        prepared = HTMLScriptElement.supports?.("speculationrules")
+          ? Object.assign(document.createElement("script"), { type: "speculationrules", textContent: JSON.stringify({ prerender: [{ source: "list", urls: [continueLink.href] }] }) })
+          : Object.assign(document.createElement("link"), { rel: "prefetch", href: continueLink.href });
+        document.head.append(prepared);
+      }
       // Near the hand-off its moving shots get their own layers (handoff.css); far from it they don't hold memory.
       const near = cur > -1.5;
       if (near !== nearOn) { nearOn = near; el.classList.toggle("handoff--near", near); }
       const { phase, t } = handoffPhase(cur);
-      const cap = innerWidth > 860 ? 10 : 6;
+      // Phones get the move without the costly effects (as the home page does): no blur, no per-frame font-width
+      // changes, no streaks (hidden in handoff.css). Transforms alone stay smooth on a phone's GPU.
+      const phone = innerWidth <= 860;
+      const cap = phone ? 0 : 10;
       const blurOf = (b: number) => (b * cap > 0.05 ? `blur(${(b * cap).toFixed(1)}px)` : "none");
       const leaving = phase === "out" || phase === "done";
       // The laptop drifts while the next project rests; it is frozen where the second whip starts.
@@ -84,7 +101,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
         contactT = `translateX(${w.contactX.toFixed(2)}vw) ${skew}`;
         worldT = `translateX(${w.worldX.toFixed(2)}vw) ${skew}`;
         contactF = worldF = blurOf(w.blur);
-        giantT = `translateX(${w.giantX.toFixed(2)}vw)`; giantW = w.giantW;
+        giantT = `translateX(${w.giantX.toFixed(2)}vw)`; giantW = phone ? next.giantFit : w.giantW;
         deskT = `translateX(${w.deskX.toFixed(2)}vw) ${driftY}`;
         infoO = w.infoO; infoT = `translateX(${w.infoX.toFixed(1)}px)`;
         streaks = w.streaks; streakX = w.streakX; barH = w.bars;
@@ -92,14 +109,11 @@ export default function CaseHandoff({ next }: { next: Project }) {
       } else if (phase === "hold") {
         contactT = "translateX(-105vw)";
       } else {
-        // The second whip: the next project accelerates off left; the page change finishes the move.
+        // The pull: the next project leans away; once the reader commits, one pan carries the page across.
         const l = whipLeave(phase === "done" ? 1 : t);
         contactT = "translateX(-105vw)";
-        sceneT = `skewX(${l.skew.toFixed(2)}deg)`; sceneF = blurOf(l.blur);
-        infoO = l.infoO; infoT = `translateX(${l.infoX.toFixed(2)}vw)`;
+        sceneT = `translateX(${l.sceneX.toFixed(2)}vw)`; sceneF = blurOf(l.blur);
         giantT = `translateX(${l.giantX.toFixed(2)}vw)`;
-        deskT = `translateX(${l.deskX.toFixed(2)}vw) ${driftY}`;
-        streaks = l.streaks; streakX = l.streakX; barH = l.bars; live = false;
       }
 
       // Always written: the stylesheet parks the world off to the right until the app draws.
@@ -124,7 +138,10 @@ export default function CaseHandoff({ next }: { next: Project }) {
         if (head) page.setProperty("--head", next.tokens.text);
         else page.removeProperty("--head");
       }
-      if (phase === "done" && moved && dir > 0 && !opened) {
+      // Open as soon as the reader scrolls to the end of the pull, not when the drawn lean has glided all the way
+      // there: that last stretch of the glide is slow and read as a pause before the pan.
+      const atEnd = phase === "done" || reachedEnd;
+      if (atEnd && moved && dir > 0 && !opened) {
         opened = true;
         // Through the link itself: the same navigation as a click on Continue, so browsers without view transitions
         // still get the arrival fade instead of a cut from the whip's blurred end frame.
@@ -161,6 +178,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
     const scrolled = () => {
       const delta = scrollY - lastY;
       if (delta) dir = delta > 0 ? 1 : -1;
+      reachedEnd = delta > 0 && position() >= HANDOFF.OUT_TO - 0.002;
       lastY = scrollY;
       restAtHold();
       queue();
@@ -187,7 +205,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
     };
     const restored = (event: PageTransitionEvent) => {
       if (!event.persisted) return;
-      moved = false; opened = false; cur = Number.NaN;
+      moved = false; opened = false; reachedEnd = false; cur = Number.NaN;
       restAtHold();
       queue();
     };
@@ -241,6 +259,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
       stopFinishing();
       page.removeProperty("--head");
       el.classList.remove("handoff--near");
+      prepared?.remove();
       window.removeEventListener("scroll", scrolled);
       window.removeEventListener("resize", resized);
       window.removeEventListener("keydown", endKey);

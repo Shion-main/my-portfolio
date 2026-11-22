@@ -189,7 +189,8 @@ check("header-contrast", async () => {
   const tokens = { "space-arabica": "rgb(241, 227, 204)", korte: "rgb(238, 242, 234)", fluxtrack: "rgb(255, 255, 255)", "atlas-treasury": "rgb(232, 237, 246)" };
   for (const slug of SLUGS) {
     await page.evaluate(s => { location.hash = `work-${s}`; }, slug);
-    await page.waitForTimeout(600);
+    // A cold page's first jump can take about a second (measured 0.4-1.0 s); wait for the colour, not a fixed pause.
+    await page.waitForFunction(c => getComputedStyle(document.querySelector(".site-head__name")).color === c, tokens[slug], { timeout: 2500 }).catch(() => {});
     assert.equal(await page.$eval(".site-head__name", el => getComputedStyle(el).color), tokens[slug], `header colour inside ${slug}`);
   }
   await context.close();
@@ -273,7 +274,9 @@ check("whip-next-case", async () => {
       window.__names = { hero: name(".case-hero__frame"), head: name(".site-head") };
     }, 0)));
     await context.addInitScript(() => addEventListener("pagereveal", e => e.viewTransition?.ready.then(() => {
-      window.__rootAnimations = document.getAnimations().filter(a => /^::view-transition-(old|new)\(root\)$/.test(a.effect?.pseudoElement || "")).map(a => a.animationName).sort();
+      const root = document.getAnimations().filter(a => /^::view-transition-(old|new)\(root\)$/.test(a.effect?.pseudoElement || ""));
+      window.__rootAnimations = root.map(a => a.animationName).sort();
+      window.__rootTiming = [...new Set(root.map(a => { const t = a.effect.getComputedTiming(); return `${t.duration}ms ${getComputedStyle(document.documentElement, a.effect.pseudoElement).animationTimingFunction}`; }))];
     }, () => {})));
     await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
     await page.evaluate(() => window.__handoff.settle(false));
@@ -287,6 +290,8 @@ check("whip-next-case", async () => {
     // the other. (The explicit mix-blend-mode: normal is pinned in css.test.mjs.)
     await page.waitForFunction(() => window.__rootAnimations, null, { timeout: 3000 });
     assert.deepEqual(await page.evaluate(() => window.__rootAnimations), ["whip-new", "whip-old"], `${from} → ${to}: the landing does not run the whip`);
+    const timing = await page.evaluate(() => window.__rootTiming);
+    assert.equal(timing.length, 1, `${from} → ${to}: the two pages do not pan together (${timing.join(" / ")})`);
     await page.waitForTimeout(1200);
     const after = await page.evaluate(() => ({ state: !!document.querySelector("[data-transition-kind]"), hero: getComputedStyle(document.querySelector(".case-hero__frame")).viewTransitionName }));
     assert.deepEqual(after, { state: false, hero: "project-frame" }, `${from} → ${to}: the whip left its state behind`);
@@ -1142,12 +1147,28 @@ check("handoff-phone", async () => {
     const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h, isMobile: true, hasTouch: true });
     await page.evaluate(() => window.__handoff.settle(false));
     await handoffGoTo(page, HANDOFF.IN_FROM + .45 * (HANDOFF.IN_TO - HANDOFF.IN_FROM)); await handoffCaught(page);
-    const mid = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth - innerWidth, blur: Number((getComputedStyle(document.querySelector(".handoff__world")).filter.match(/blur\(([\d.]+)px\)/) || [0, 0])[1]) }));
+    const mid = await page.evaluate(() => {
+      const st = sel => getComputedStyle(document.querySelector(sel));
+      return {
+        overflow: document.documentElement.scrollWidth - innerWidth,
+        filters: [".handoff__world", ".handoff__contact", ".handoff__scene"].map(sel => st(sel).filter),
+        streaks: st(".handoff__streaks").display,
+        width: document.querySelector(".handoff__giant").style.getPropertyValue("--wd"),
+        header: st(".site-head").backdropFilter,
+        layers: st(".handoff__world").willChange,
+      };
+    });
     assert.ok(mid.overflow <= 0, `${w}px: the whip widens the page by ${mid.overflow}px`);
-    assert.ok(mid.blur > 0 && mid.blur <= 6, `${w}px: mid-whip blur is ${mid.blur}px (phone cap 6)`);
+    assert.deepEqual(mid.filters, ["none", "none", "none"], `${w}px: the whip blurs on a phone (${mid.filters.join(" / ")})`);
+    assert.equal(mid.streaks, "none", `${w}px: the streak layer is drawn on a phone`);
+    assert.equal(mid.header, "none", `${w}px: the header re-blurs the moving page behind it on a phone`);
+    assert.doesNotMatch(mid.layers, /filter/, `${w}px: the shots are promoted for filters on a phone (${mid.layers})`);
+    await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
+    const rest = await page.evaluate(() => document.querySelector(".handoff__giant").style.getPropertyValue("--wd"));
+    assert.equal(mid.width, rest, `${w}px: the giant name's width animates during the whip on a phone (${mid.width} vs ${rest})`);
     await handoffGoTo(page, HANDOFF.OUT_TO - .001); await handoffCaught(page);
-    const end = await page.evaluate(() => { const r = sel => document.querySelector(sel).getBoundingClientRect(); return { info: r(".handoff__info").right, giant: r(".handoff__giant").right, desk: r(".handoff__desk").right, wl: r(".handoff__world").left, wr: r(".handoff__world").right }; });
-    assert.ok(end.info <= 0 && end.giant <= 0 && end.desk <= 0, `${w}px: the next project has not whipped off the screen (${JSON.stringify(end)})`);
+    const end = await page.evaluate(() => { const r = sel => document.querySelector(sel).getBoundingClientRect(); return { info: r(".handoff__info").right, desk: r(".handoff__desk").right, wl: r(".handoff__world").left, wr: r(".handoff__world").right }; });
+    assert.ok(end.info > 0 && end.desk > 0, `${w}px: the next project left the screen before the pan (${JSON.stringify(end)})`);
     assert.ok(end.wl <= 1 && end.wr >= w - 1, `${w}px: the next project's ground no longer fills the screen (${JSON.stringify(end)})`);
     await context.close();
   }
@@ -1328,13 +1349,16 @@ check("handoff-whip-frames", async () => {
   assert.equal(v.head, "#eef2ea", "the header does not take Korte's colour at the hold");
 
   v = await at((HANDOFF.OUT_FROM + HANDOFF.OUT_TO) / 2);
-  assert.ok(v.giantX < v.deskX, `leaving, the name does not lead the laptop (${v.giantX} vs ${v.deskX})`);
-  assert.ok(v.bar > 0, "no cinema bars on the way out");
+  assert.ok(v.giantX < v.deskX, `leaning, the name does not lead the laptop (${v.giantX} vs ${v.deskX})`);
+  assert.equal(v.bar, 0, "cinema bars on the way out");
 
+  // Just before the page pans across: the next project leans left but is still there to read, never an empty screen.
   v = await at(HANDOFF.OUT_TO - .003);
-  assert.ok(v.info.r <= 0 && v.giant.r <= 0 && v.desk.r <= 0, `the next project has not whipped off the screen (${JSON.stringify([v.info.r, v.giant.r, v.desk.r])})`);
-  assert.ok(v.bar >= .08 * v.h, `the bars are not closed in at the cut (${v.bar}px)`);
-  assert.match(v.sceneFilter, /blur/, "no motion blur at the cut");
+  const sceneX = await page.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector(".handoff__scene")).transform).m41);
+  assert.ok(sceneX < -.04 * v.w && sceneX > -.12 * v.w, `the lean before the pan is ${sceneX}px`);
+  assert.ok(v.desk.l < v.w && v.desk.r > .5 * v.w && v.info.r > 0, `the next project left the screen before the pan (${JSON.stringify([v.info.r, v.desk.l, v.desk.r])})`);
+  assert.equal(v.bar, 0, "cinema bars before the pan");
+  assert.equal(v.streaks, 0, "streaks before the pan");
   assert.match(page.url(), /\/work\/space-arabica\//);
   await context.close();
 });
@@ -1484,6 +1508,68 @@ check("case-template", async () => {
     assert.match(page.url(), new RegExp(`/work/${slug}/`), `${slug}: "Let’s talk" left the case study`);
     await context.close();
   }
+});
+
+// ---- One pan into the next case study (2026-11-22) ----
+check("handoff-prefetch-next", async () => {
+  // The next case study is prepared as the reader nears the hand-off, so the pan starts without a wait: prerendered
+  // where the browser supports speculation rules (Chromium), otherwise prefetched.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  const prepared = () => page.evaluate(() => {
+    const rules = [...document.querySelectorAll('script[type="speculationrules"]')].map(s => JSON.parse(s.textContent));
+    return { prerender: rules.some(r => r.prerender?.some(p => p.urls?.some(u => u.endsWith("/work/korte/")))), prefetch: !!document.querySelector('link[rel="prefetch"][href$="/work/korte/"]') };
+  });
+  assert.deepEqual(await prepared(), { prerender: false, prefetch: false }, "the next case study is prepared before the reader came near");
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, -.5); await handoffCaught(page);
+  assert.deepEqual(await prepared(), { prerender: true, prefetch: false }, "the next case study is not prerendered near the hand-off");
+  await context.close();
+});
+
+check("whip-next-case-phone", async () => {
+  // On a phone the pan between case studies is transforms only: no blur on the two full-screen page images.
+  // Headless Chromium now and then navigates a phone-emulated page with no cross-document transition at all (about 1 in
+  // 6 here, with or without the prerender, by tap or by click; the demo check shows the same). The page still opens,
+  // just without the pan. One retry covers that; anything the pan does wrong (blur, wrong animations) fails every run.
+  let why = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { page, context } = await open("/work/atlas-treasury/?checks", { width: 390, height: 844, isMobile: true, hasTouch: true });
+    await context.addInitScript(() => addEventListener("pagereveal", e => { window.__reveal = e.viewTransition ? "vt" : "no transition"; }));
+    await context.addInitScript(() => addEventListener("pagereveal", e => e.viewTransition?.ready.then(() => {
+      const root = document.getAnimations().filter(a => /^::view-transition-(old|new)\(root\)$/.test(a.effect?.pseudoElement || ""));
+      window.__props = [...new Set(root.flatMap(a => a.effect.getKeyframes().flatMap(k => Object.keys(k))))].filter(k => !["offset", "easing", "composite", "computedOffset"].includes(k)).sort();
+      window.__names = root.map(a => a.animationName).sort();
+    }, err => { window.__props = [`skipped: ${err?.name} ${err?.message}`]; window.__names = []; })));
+    await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
+    await page.evaluate(() => window.__handoff.settle(false));
+    await handoffGoTo(page, HANDOFF.HOLD); await handoffCaught(page);
+    await Promise.all([page.waitForURL(/\/work\/space-arabica\//, { timeout: 8000 }), page.tap(".handoff__continue")]);
+    const got = await page.waitForFunction(() => window.__props, null, { timeout: 4000 }).then(() => true, () => false);
+    if (!got) {
+      why = await page.evaluate(() => ({ reveal: window.__reveal ?? "recorder not loaded", kind: document.documentElement.dataset.transitionKind ?? null }));
+      await context.close();
+      if (why.reveal === "no transition") continue;
+      assert.fail(`the pan never became ready on a phone: ${JSON.stringify(why)}`);
+    }
+    assert.deepEqual(await page.evaluate(() => window.__names), ["whip-new", "whip-old"], "the pan does not run on a phone");
+    assert.deepEqual(await page.evaluate(() => window.__props), ["transform"], "the pan animates more than transform on a phone");
+    await context.close();
+    return;
+  }
+  assert.fail(`the pan never ran on a phone, twice: ${JSON.stringify(why)}`);
+});
+
+check("handoff-opens-at-the-end", async () => {
+  // Reaching the end of the pull opens the next case at once; it does not wait for the drawn lean to finish gliding.
+  const { page, context } = await handoffOpen("/work/space-arabica/");
+  await page.evaluate(() => window.__handoff.settle(false));
+  await handoffGoTo(page, HANDOFF.OUT_TO - .08); await handoffCaught(page); await page.waitForTimeout(300);
+  await page.mouse.move(700, 450);
+  const t0 = Date.now();
+  await Promise.all([page.waitForURL(/\/work\/korte\//, { timeout: 5000 }), page.mouse.wheel(0, 400)]);
+  const ms = Date.now() - t0;
+  assert.ok(ms < 350, `the next case opened ${ms} ms after the reader reached the end`);
+  await context.close();
 });
 
 let failed = 0;

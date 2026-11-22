@@ -107,8 +107,8 @@ export const projects: readonly Project[] = [
       { term: "Users", detail: "1,800+" },
       { term: "Sessions", detail: "700+ completed" },
     ],
-    caption: "Live courts on a laptop · the podium on a phone",
-    desktop: { ...korte("live-desktop", "Korte live session on a laptop: courts in play with scores to enter, and Up next below", "Live courts on a laptop"), title: "Korte — Live courts" },
+    caption: "Explore on a laptop · the podium on a phone",
+    desktop: { ...korte("explore-desktop", "Korte Explore page on a laptop: create a meet, run open play, run a DUPR open play or book a court, with upcoming meets below", "Explore on a laptop"), title: "Korte — Explore" },
     phone: korte("podium-phone", "Korte final results on a phone: the podium for the top three players, with their Korte Points", "Final results · the podium"),
     headline: "One app for the whole pickleball community, with 1,800+ users and 700+ sessions completed, and counting.",
     caseFacts: [
@@ -134,9 +134,9 @@ export const projects: readonly Project[] = [
       { title: "Venues", desktop: korte("partner-desktop", "Partner dashboard for a venue taking bookings", "Partner dashboard for venues"), phone: korte("checkin-phone", "Player self check-in, picking their name", "Self check-in at the door") },
     ],
     forYou: "If your community runs on scattered tools, I can design and build the one app that brings it together.",
-    note: "Screens use made-up names. User and session numbers are Korte’s own records.",
+    note: "App screens use made-up names; the Explore screen is the public page at korteph.app/explore. User and session numbers are Korte’s own records.",
     wall: {
-      desktop: ["live-desktop", "tv-desktop", "hub-desktop", "partner-desktop"],
+      desktop: ["explore-desktop", "live-desktop", "tv-desktop", "hub-desktop", "partner-desktop"],
       phone: ["upnext-phone", "explore-phone", "courts-phone", "podium-phone", "checkin-phone"],
     },
     giantFit: 140,

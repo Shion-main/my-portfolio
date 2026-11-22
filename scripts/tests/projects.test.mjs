@@ -60,6 +60,10 @@ test("credits are worded as Joshua confirmed", () => {
   assert.match(text(korte), /Players, organizers and venues/);
   assert.doesNotMatch(text(korte), /112 organizers|373 meets/);
   assert.equal(korte.phone.src, "media/work/korte/podium-phone.webp");
+  // Korte's main desktop screen is Explore, the public page at korteph.app/explore (Joshua, 2026-11-22).
+  assert.equal(korte.desktop.src, "media/work/korte/explore-desktop.webp");
+  assert.equal(korte.desktop.title, "Korte — Explore");
+  assert.match(korte.note, /korteph\.app\/explore/);
   for (const p of projects) assert.doesNotMatch(text(p), /concept|Aisha|Dones/i, p.slug);
 });
 

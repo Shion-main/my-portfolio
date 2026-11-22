@@ -117,15 +117,16 @@ test("case hand-off timeline", () => {
   assert.equal(handoffPhase(.2).phase, "contact");
   const w = handoffPhase(.85); assert.equal(w.phase, "in"); near(w.t, .5);
   assert.deepEqual(handoffPhase(1.55), { phase: "hold", t: 1 });
-  const o = handoffPhase(2.175); assert.equal(o.phase, "out"); near(o.t, .5);
-  assert.equal(handoffPhase(2.599).phase, "done");
-  near(handoffTrackScreens(), 3.6);
+  // Past the hold is a short pull (0.4 screens): the next project leans away, then the page pans across.
+  const o = handoffPhase(1.95); assert.equal(o.phase, "out"); near(o.t, .5);
+  assert.equal(handoffPhase(2.149).phase, "done");
+  near(handoffTrackScreens(), 3.15);
 });
 
 test("case hand-off finishing", () => {
   near(handoffSettle(.8, 1), 1.55); near(handoffSettle(.8, -1), 0);
-  near(handoffSettle(2, 1), 2.6); near(handoffSettle(2.5, -1), 1.55);
-  for (const s of [-.5, .2, .35, 1.55, 1.75, 2.598]) assert.equal(handoffSettle(s, 1), null, String(s));
+  near(handoffSettle(2, 1), 2.15); near(handoffSettle(2, -1), 1.55);
+  for (const s of [-.5, .2, .35, 1.55, 1.75, 2.148]) assert.equal(handoffSettle(s, 1), null, String(s));
 });
 
 test("whip in: the contact block out, the next project in, fastest in the middle", () => {
@@ -138,10 +139,11 @@ test("whip in: the contact block out, the next project in, fastest in the middle
   assert.ok(h.giantX < 0 && h.deskX > 0, "the name runs ahead and the laptop lags behind");
 });
 
-test("whip out: the name leaves first, the laptop last, building to a blur", () => {
+test("the pull: the next project leans away before one pan carries the page across", () => {
+  // Small and readable: no streaks, bars or empty screen; the page transition does the travelling.
   const a = whipLeave(0), m = whipLeave(.5), b = whipLeave(1);
-  for (const k of ["giantX", "deskX", "infoX", "skew", "blur", "streaks", "bars"]) near(a[k], 0);
-  near(a.infoO, 1);
-  assert.ok(m.giantX < m.deskX, "the name leads");
-  near(b.infoO, 0); near(b.giantX, -140); near(b.deskX, -125); near(b.skew, -8); near(b.blur, 1); near(b.bars, 9);
+  for (const k of ["sceneX", "giantX", "blur"]) near(a[k], 0);
+  assert.ok(m.sceneX < 0 && m.giantX < 0, "it leans left");
+  near(b.sceneX, -8); near(b.giantX, -6); near(b.blur, .3);
+  assert.deepEqual(Object.keys(b).sort(), ["blur", "giantX", "sceneX"]);
 });

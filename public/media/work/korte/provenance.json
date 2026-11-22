@@ -1,5 +1,17 @@
 [
   {
+    "file": "explore-desktop.webp",
+    "source": "web:https://korteph.app/explore",
+    "captured": "2026-11-22",
+    "data": "The public Explore page, captured logged out; public meet listings only, no player names."
+  },
+  {
+    "file": "wall/explore-desktop.webp",
+    "source": "web:https://korteph.app/explore",
+    "captured": "2026-11-22",
+    "data": "The public Explore page, captured logged out; public meet listings only, no player names."
+  },
+  {
     "file": "live-desktop.webp",
     "source": "figma:vVaqB6A9lmYpWGUKhbFZy5#33:3599",
     "captured": "2026-11-22",

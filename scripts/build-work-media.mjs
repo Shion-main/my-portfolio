@@ -7,6 +7,9 @@ import sharp from "sharp";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+// Careful: the default folder holds the 2026-11-21 captures. Korte's screens were refreshed from Figma on 2026-11-22 from
+// another folder, so rebuilding Korte from the default folder would roll them back. Add a single new screen by hand
+// (render it, then add its provenance entries) or point WORK_MEDIA_SOURCE at a folder with every current source.
 const SOURCE = process.env.WORK_MEDIA_SOURCE ?? "docs/designs/redesign-2026-11-21/assets/v2";
 const OUT = "public/media/work";
 const CAPTURED = process.env.WORK_MEDIA_CAPTURED ?? "2026-11-21";
@@ -23,8 +26,10 @@ const figma = (file, node) => `figma:${file}#${node}`;
 const K = id => figma("vVaqB6A9lmYpWGUKhbFZy5", id);
 const F = id => figma("Tp2icRcQ3dTqFrsQSeGnIS", id);
 const A = id => figma("yn261MuzNcCFYyQyA5J3m3", id);
+const web = url => `web:${url}`;
 
 // kind: desktop = 16:10 frame; phone = 390 × 844 frame; tall = phone-shaped crop of a wider source at x.
+// An optional sixth value replaces the project's data note for that one screen.
 const MEDIA = {
   "space-arabica": [
     ["home-desktop", "space-desktop", "desktop", local("index.html")],
@@ -40,6 +45,9 @@ const MEDIA = {
     ["visit-phone", "space-visit-phone", "phone", local("contact.html")],
   ],
   korte: [
+    // Explore exists only as a phone frame in Figma; the desktop page is the public korteph.app/explore, captured logged out
+    // at 1440 × 900 (2×) with the consent banner hidden, not answered.
+    ["explore-desktop", "korte-explore-desktop", "desktop", web("https://korteph.app/explore"), 0, "The public Explore page, captured logged out; public meet listings only, no player names."],
     ["live-desktop", "korte-desktop", "desktop", K("33:3599")],
     ["tv-desktop", "korte-tv", "desktop", K("34:4100")],
     ["hub-desktop", "korte-hub-desktop", "desktop", K("69:15315")],
@@ -114,14 +122,14 @@ for (const [slug, entries] of Object.entries(MEDIA)) {
   await rm(dir, { recursive: true, force: true });
   await mkdir(join(dir, "wall"), { recursive: true });
   const provenance = [];
-  for (const [name, file, kind, source, x = 0] of entries) {
+  for (const [name, file, kind, source, x = 0, data] of entries) {
     const meta = await sharp(join(SOURCE, `${file}.png`)).metadata();
     const desktop = kind === "desktop";
     // Phone frames keep their captured resolution: 2× captures stay 780 wide, Figma frames stay 390.
     const [w, h] = desktop ? [1440, 900] : meta.width >= 780 && kind === "phone" ? [780, 1688] : [390, 844];
     await writeFile(join(dir, `${name}.webp`), await render(file, kind, x, w, h, 82));
     await writeFile(join(dir, "wall", `${name}.webp`), await render(file, kind, x, desktop ? 640 : 300, desktop ? 400 : 649, 72));
-    const note = { source, captured: CAPTURED, data: DATA[slug] };
+    const note = { source, captured: CAPTURED, data: data ?? DATA[slug] };
     provenance.push({ file: `${name}.webp`, ...note }, { file: `wall/${name}.webp`, ...note });
   }
   await writeFile(join(dir, "provenance.json"), JSON.stringify(provenance, null, 2) + "\n");

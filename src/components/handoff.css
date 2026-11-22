@@ -24,11 +24,11 @@
 .handoff__giant { position: absolute; left: 0; right: 0; bottom: -.07em; z-index: 1; text-align: center; white-space: nowrap; font-family: var(--display); font-size: 12vw; line-height: .8; text-transform: uppercase; color: var(--giant); font-variation-settings: "wdth" var(--wd, 100), "wght" var(--wt, 800); pointer-events: none; }
 .handoff__giant span { display: inline-block; }
 
-/* Pinned: 360vh is the second whip's end plus the pinned screen (handoffTrackScreens in scroll.ts). Applied before
+/* Pinned: 315vh is the pull's end plus the pinned screen (handoffTrackScreens in scroll.ts). Applied before
    first paint through html.can-move (set by the inline page-transition script), so the page is its full length before
    the app runs and a restored scroll position is never clamped. The stage is exactly one screen, clipped (not a scroll
    container, so focusing a link in a shot that is off to one side never scrolls it sideways). */
-.can-move .handoff, .handoff.motion { height: 360vh; background: #070809; }
+.can-move .handoff, .handoff.motion { height: 315vh; background: #070809; }
 .can-move .handoff__stage, .handoff.motion .handoff__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; overflow: clip; }
 .can-move .handoff__contact, .handoff.motion .handoff__contact,
 .can-move .handoff__world, .handoff.motion .handoff__world { position: absolute; inset: 0; min-height: 0; }
@@ -54,6 +54,9 @@
 .handoff__bar--bottom { bottom: 0; transform-origin: bottom; }
 
 @media (max-width: 860px) {
+  /* Phones: transforms only. No streak layer (three screens wide, masked) and layers promoted for transform alone. */
+  .can-move .handoff__streaks, .handoff.motion .handoff__streaks { display: none; }
+  .handoff--near .handoff__contact, .handoff--near .handoff__world, .handoff--near .handoff__scene { will-change: transform; }
   .handoff__info { top: 76px; left: 20px; right: 20px; width: auto; translate: none; }
   .handoff__line { margin-top: 10px; font-size: 16px; }
   .handoff__continue { margin-top: 14px; padding: 11px 16px; }

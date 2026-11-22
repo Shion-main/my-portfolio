@@ -133,16 +133,17 @@ export const restDrift = (s: number, i: number) => clamp(s - restCenter(i), -1.2
 
 // ---- Case hand-off: the end of a case study carries on into the next project, as a whip pan ----
 // Positions are screens of scroll from the moment the hand-off stage pins. The contact block rests, the camera whips
-// sideways to the next project, it holds, then a second whip carries on into the next case (the page change finishes it).
-export const HANDOFF = { IN_FROM: 0.35, IN_TO: 1.35, HOLD: 1.55, OUT_FROM: 1.75, OUT_TO: 2.6 } as const;
+// sideways to the next project, it holds, then a short pull (the next project leans away) commits to one pan across to
+// the next case study, which the page transition plays.
+export const HANDOFF = { IN_FROM: 0.35, IN_TO: 1.35, HOLD: 1.55, OUT_FROM: 1.75, OUT_TO: 2.15 } as const;
 
-/** Track height in viewport heights: the second whip's end plus the pinned screen. */
+/** Track height in viewport heights: the pull's end plus the pinned screen. */
 export const handoffTrackScreens = () => HANDOFF.OUT_TO + 1;
 
 export type HandoffPhase = { phase: "contact" | "in" | "hold" | "out" | "done"; t: number };
 
 /** Where the reader is in the hand-off: on the contact block, whipping in, holding on the next project,
- *  whipping out, or done (open the next case). */
+ *  pulling away from it, or done (pan to the next case). */
 export function handoffPhase(s: number): HandoffPhase {
   if (s < HANDOFF.IN_FROM) return { phase: "contact", t: 0 };
   if (s < HANDOFF.IN_TO) return { phase: "in", t: (s - HANDOFF.IN_FROM) / (HANDOFF.IN_TO - HANDOFF.IN_FROM) };
@@ -151,8 +152,8 @@ export function handoffPhase(s: number): HandoffPhase {
   return { phase: "done", t: 1 };
 }
 
-/** Where to finish a whip the reader stopped inside, the way they were heading: the whip in ends at the hold or back
- *  on the contact block; the whip out completes (opening the next case) or returns to the hold. */
+/** Where to finish a move the reader stopped inside, the way they were heading: the whip in ends at the hold or back
+ *  on the contact block; the pull completes (panning to the next case) or returns to the hold. */
 export function handoffSettle(s: number, dir: 1 | -1): number | null {
   const spans: [number, number, number, number][] = [
     [HANDOFF.IN_FROM, HANDOFF.IN_TO, HANDOFF.HOLD, 0],
@@ -180,15 +181,12 @@ export function whipEnter(t: number, fit: number) {
   };
 }
 
-/** The second whip's first half, u 0 → 1: the next project accelerates off to the left (words, then the name, then the
- *  laptop) while blur, streaks and bars build. It ends mid-move; the page transition finishes the whip. Units as whipEnter. */
+/** The pull past the hold, u 0 → 1: the next project leans away to the left (its name a little ahead), gathering a
+ *  touch of blur, until the reader commits and the page transition pans the whole page across to the next case study.
+ *  Small on purpose: the screen is never empty, and the pan does the travelling. Shifts in vw; blur a fraction of the cap. */
 export function whipLeave(u: number) {
-  return {
-    infoO: 1 - range(u, 0, 0.3), infoX: z(-120 * easeIn3(range(u, 0, 0.7))),
-    giantX: z(-140 * easeIn3(range(u, 0, 0.85))), deskX: z(-125 * easeIn3(range(u, 0.1, 1))),
-    skew: z(-8 * range(u, 0.1, 1)), blur: range(u, 0.2, 1),
-    streaks: 0.9 * range(u, 0.15, 0.9), streakX: z(-60 * easeIn3(u)), bars: 9 * range(u, 0.1, 1),
-  };
+  const e = easeIn3(u);
+  return { sceneX: z(-8 * e), giantX: z(-6 * e), blur: 0.3 * e };
 }
 
 export const WALL_PATTERN = ["d", "p", "d", "d", "p", "d", "p", "d", "d", "p", "d"] as const;

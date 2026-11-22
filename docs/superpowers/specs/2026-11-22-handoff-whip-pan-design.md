@@ -60,3 +60,22 @@ The "Continue to …" link at the hold plays the same landing on its own: the ne
 ## Left to the builder
 
 The exact curves (prototype B is the reference: ease-in-out-quart for the move, peak blur and skew at the midpoint), the streak artwork, the bar colour (black), how the contact block becomes a layer without changing its look as it scrolls in, and how the checks read the whip's position.
+
+## Revision (2026-11-22): one pan, and phones on transforms only
+
+Joshua saw two transitions between case studies, and the second one looked off. Recorded frame by frame, the move was:
+the in-page whip out (about 0.9 s), then almost half a second of empty, blurred screen while the next page loaded, then
+a second, skewed whip that showed seams at its slanted edges. On his phone the transitions also ran at about 16 frames
+a second.
+
+- **The pull replaces the whip out.** Past the hold, 0.4 screens of scroll (1.75 → 2.15; the track is now 3.15
+  screens) lean the next project about 8vw to the left, its name a little ahead, with a touch of blur. Stopping inside
+  finishes it as before: forward commits, back returns to the hold. The screen is never empty.
+- **One pan replaces the second whip.** On commit (or a click on “Continue”), the page transition pans both pages
+  together, edge to edge, on one curve (760 ms, cubic-bezier(.7, 0, .2, 1)): the old page out to the left, the next
+  case study in from the right, blur peaking mid-pan. No skew. The header holds still.
+- **No wait before the pan.** Once the reader is within 1.5 screens of the hand-off, the next case study is prerendered (Chromium, speculation rules; other browsers prefetch it). It opens as soon as the reader's own forward scroll reaches the end of the pull, not when the drawn lean has glided there (that slow last stretch read as a pause); a layout shift that moves the position, such as a phone toolbar resizing screen-height content, never opens it. Measured: about 0.65 s from reaching the end to opening before, under 0.35 s after.
+- **Phones (860px wide or less): transforms only.** No blur on the shots or in the pan, no streak layer, no
+  per-frame change to the giant name's font width, layers promoted for transform only, and a solid header instead of
+  a frosted one (the frosted header re-blurred the moving page beneath it every frame). This follows the home page,
+  where phones already get the push-through without blur.

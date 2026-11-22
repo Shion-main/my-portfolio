@@ -1,7 +1,7 @@
 /* Runs before first paint so cross-document View Transitions can be prepared.
    Home ↔ case study: the chapter's browser frame morphs into the case hero ("morph").
-   Case study → the next case study: the page change finishes the hand-off's whip pan ("whip"): the old page slides
-   on out to the left and the next case study arrives from the right, with the header holding still. Back and Forward
+   Case study → the next case study: one whip pan ("whip"): the two pages travel together, edge to edge, the old one
+   out to the left and the next case study in from the right, with the header holding still. Back and Forward
    between case studies crossfade ("fade").
    Links, loading and history stay ordinary browser navigation. */
 (() => {
@@ -10,7 +10,7 @@
   const native = 'onpageswap' in window && 'onpagereveal' in window;
   const arrivalKey = 'portfolio-arrival';
   const slugs = ['space-arabica', 'korte', 'fluxtrack', 'atlas-treasury'];
-  // Before first paint: pages that will move get their full layout now (the case hand-off's 360vh track),
+  // Before first paint: pages that will move get their full layout now (the case hand-off's 315vh track),
   // so a restored scroll position is never clamped to a shorter page than the app will build.
   if (!reduced.matches) root.classList.add('can-move');
   // If the app's own code fails to load, nothing would ever move that layout: fall back to the plain one, so the end
