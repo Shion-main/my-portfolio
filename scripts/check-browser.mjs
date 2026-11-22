@@ -1322,6 +1322,41 @@ check("handoff-contact-anchor", async () => {
   await context.close();
 });
 
+// ---- Whip-pan review fixes (2026-11-22) ----
+check("handoff-pointer-focus", async () => {
+  // A click or tap on the email while the contact block is still scrolling in reaches the link, and the page stays put:
+  // only keyboard focus brings a shot on screen.
+  for (const [w, h, touch] of [[1440, 900, false], [390, 844, true]]) {
+    const { page, context } = await handoffOpen("/work/space-arabica/", { width: w, height: h, ...(touch ? { isMobile: true, hasTouch: true } : {}) });
+    await page.evaluate(() => { window.__mailClicks = 0; document.querySelector(".contact-mail").addEventListener("click", e => { e.preventDefault(); window.__mailClicks++; }); });
+    await handoffGoTo(page, -.3); await handoffCaught(page); await page.waitForTimeout(400);
+    if (touch) await page.tap(".contact-mail"); else await page.click(".contact-mail");
+    await page.waitForTimeout(900);
+    const s = await handoffPos(page);
+    assert.equal(await page.evaluate(() => window.__mailClicks), 1, `${w}px: the ${touch ? "tap" : "click"} did not reach the email link`);
+    assert.ok(Math.abs(s + .3) <= .02, `${w}px: the ${touch ? "tap" : "click"} moved the page to ${s.toFixed(3)}`);
+    await context.close();
+  }
+});
+
+check("handoff-open-fallback-arrival", async () => {
+  // Browsers without cross-document view transitions: opening the next case by itself gets the same arrival fade as
+  // a click on "Continue", not a hard cut from the whip's blurred end frame.
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await context.addInitScript(() => {
+    for (const name of ["onpageswap", "onpagereveal"]) { delete window[name]; delete Window.prototype[name]; }
+    window.__native = "onpageswap" in window;
+    document.addEventListener("DOMContentLoaded", () => { window.__arrival = document.documentElement.dataset.projectArrival || null; }, { once: true });
+  });
+  const page = await context.newPage();
+  await page.goto(BASE + "/work/space-arabica/?checks", { waitUntil: "networkidle" });
+  await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
+  assert.equal(await page.evaluate(() => window.__native), false, "could not switch off native view transitions for this check");
+  await handoffWheelThrough(page);
+  assert.equal(await page.evaluate(() => window.__arrival), "true", "opening by itself skipped the fallback arrival fade");
+  await context.close();
+});
+
 let failed = 0;
 for (const c of checks) {
   if (only.length && !only.includes(c.name)) continue;

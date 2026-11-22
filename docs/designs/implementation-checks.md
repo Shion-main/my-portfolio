@@ -15,7 +15,7 @@ Current build: the dark “Index & Worlds” redesign (design: `docs/superpowers
 
 ## Results (2026-11-22, whip-pan hand-off, branch redesign/index-worlds)
 
-- `npm test`: 38 passed; `npm run typecheck`, `npm run lint`: clean; `node scripts/check-static.mjs`: passed; `npm run check:browser`: 67 of 67 passed (Chromium 153), including four new hand-off checks (whip frames, finishing the whip in, `#contact`, the whip's frame budget).
+- `npm test`: 38 passed; `npm run typecheck`, `npm run lint`: clean; `node scripts/check-static.mjs`: passed; `npm run check:browser`: 69 of 69 passed (Chromium 153), including six new hand-off checks (whip frames, finishing the whip in, `#contact`, the whip's frame budget, and from the final review: a click or tap on the email while the contact block scrolls in stays put and reaches the link; opening by itself gets the fallback arrival fade without native view transitions).
 - Frame budget for the whip on the machine's GPU (AMD Radeon, ANGLE D3D11): warm p95 16.8 ms with no frame over 20 ms; the cold first whip drops 7–9 frames (ceiling 14), the same range as the home page's cold first arrival. Two things brought it there from 11–19: the next project's lazy screenshot is now loaded and decoded as the reader nears the hand-off instead of mid-whip, and the moving shots get their own layers up front (`will-change`).
 - Frames reviewed at s = 0.2, 0.6, 0.8, 1.1, 1.55, 2.0, 2.3 and 2.59 at 1440×900, 390×844 and 844×390. The page change's own whip runs in Chrome but is not captured headless.
 

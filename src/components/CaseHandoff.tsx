@@ -26,7 +26,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
     const info = pick(".handoff__info"), desk = pick(".handoff__desk"), giant = pick(".handoff__giant");
     const streaksEl = pick(".handoff__streaks"), bars = [pick(".handoff__bar--top"), pick(".handoff__bar--bottom")];
     const screen = pick<HTMLImageElement>(".handoff__frame img");
-    const url = pick<HTMLAnchorElement>(".handoff__continue").href;
+    const continueLink = pick<HTMLAnchorElement>(".handoff__continue");
     const page = document.documentElement.style;
     const opts = { settle: true };
     let frame = 0;
@@ -121,7 +121,9 @@ export default function CaseHandoff({ next }: { next: Project }) {
       }
       if (phase === "done" && moved && dir > 0 && !opened) {
         opened = true;
-        location.assign(url);
+        // Through the link itself: the same navigation as a click on Continue, so browsers without view transitions
+        // still get the arrival fade instead of a cut from the whip's blurred end frame.
+        continueLink.click();
       }
       if (cur !== target) frame = requestAnimationFrame(draw);
     };
@@ -159,14 +161,17 @@ export default function CaseHandoff({ next }: { next: Project }) {
       queue();
       waitToFinish();
     };
-    const input = () => { moved = true; stopFinishing(); };
-    const touchOn = () => { moved = true; touching = true; stopFinishing(); };
+    // Whether the last input was a pointer: a click or tap focuses its link too, and that focus must not move the page.
+    let pointerFocus = false;
+    const input = (event: Event) => { moved = true; stopFinishing(); if (event.type === "keydown") pointerFocus = false; };
+    const touchOn = () => { moved = true; touching = true; pointerFocus = true; stopFinishing(); };
     const touchOff = (event: TouchEvent) => { if (event.touches.length === 0) { touching = false; waitToFinish(); } };
-    const pressOn = () => { moved = true; pressing = true; stopFinishing(); };
+    const pressOn = () => { moved = true; pressing = true; pointerFocus = true; stopFinishing(); };
     const pressOff = () => { if (!pressing) return; pressing = false; waitToFinish(); };
     // Keyboard focus brings its own shot on screen: the email link the contact block, anything else the next project
-    // at rest, so the focused link is visible and nothing opens.
+    // at rest, so the focused link is visible and nothing opens. Focus from a click or tap stays where the reader is.
     const follow = (event: FocusEvent) => {
+      if (pointerFocus) return;
       const target = event.target as HTMLElement | null;
       if (target?.closest(".handoff__contact")) {
         const s = position();
