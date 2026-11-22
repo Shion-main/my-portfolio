@@ -47,6 +47,15 @@ test("credits are worded as Joshua confirmed", () => {
   assert.doesNotMatch(text(projectBySlug("fluxtrack")), /\b(sole|solo)\b/i);
 });
 
+test("Atlas is Joshua's first UI/UX work, said on its chapter and in its case study", () => {
+  // Confirmed by Joshua 2026-11-22: the Atlas Accountancy module was his first ever UI/UX work.
+  const atlas = projectBySlug("atlas-accountancy");
+  assert.match(atlas.line, /^My first UI\/UX project/);
+  assert.match(atlas.intro, /^Atlas Accountancy was my first UI\/UX project\./);
+  assert.match(atlas.reflection, /first UI\/UX project/);
+  for (const p of projects.filter(p => p !== atlas)) assert.doesNotMatch(JSON.stringify(p), /first UI\/UX/i, p.slug);
+});
+
 test("Atlas has no phone app, so nothing shows it on a phone", () => {
   const atlas = projectBySlug("atlas-accountancy");
   assert.equal(atlas.phone, undefined);

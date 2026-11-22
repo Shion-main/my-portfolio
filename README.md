@@ -59,7 +59,7 @@ npm run check:browser         # Chromium checks at four sizes, transitions, no-J
 ## Content rules
 
 - FluxTrack is credited as “Designed and built it · team of three” (a three-person capstone).
-- Atlas Accountancy is an institutional MMCM project; Joshua was the UI/UX designer for its Accountancy module. Signed-in names in its screens are replaced with “Demo Requester”.
+- Atlas Accountancy is an institutional MMCM project; Joshua was the UI/UX designer for its Accountancy module, his first UI/UX work. Signed-in names in its screens are replaced with “Demo Requester”.
 - No personal location appears on the site.
 - Every screen's source, capture date and data note are in `public/media/work/<slug>/provenance.json`.
 

@@ -185,7 +185,7 @@ export const projects: readonly Project[] = [
     label: "Institutional project · Accountancy module, MMCM",
     list: { what: "Finance request workflow", part: "UI/UX · Accountancy module", status: "Institutional", dot: "#5b8def", hover: "#6f9cf0" },
     tokens: { ground: "#13161c", text: "#e8edf6", giant: "#4f86f0" },
-    line: "Reimbursements, vendor payments and cash advances — filed step by step, then tracked to a decision.",
+    line: "My first UI/UX project — reimbursements, vendor payments and cash advances, filed step by step and tracked to a decision.",
     facts: [
       { term: "Role", detail: "UI/UX designer, Accountancy module" },
       { term: "Size", detail: "100+ screens & states" },
@@ -194,7 +194,7 @@ export const projects: readonly Project[] = [
     caption: "New request · step 3 of 5",
     desktop: { ...atlas("step3-desktop", "Atlas reimbursement request at step 3, payment terms and schedule", "New request · step 3 of 5"), title: "Atlas — New request, step 3" },
     question: "How do you make a payment request easy to file and easy to follow?",
-    intro: "Atlas Accountancy is MMCM’s accountancy module, where requesters file reimbursements, vendor payments and cash advances. As its UI/UX designer, I designed how they file each request and how they track it to a decision.",
+    intro: "Atlas Accountancy was my first UI/UX project. It is MMCM’s accountancy module, where requesters file reimbursements, vendor payments and cash advances; as its UI/UX designer, I designed how they file each request and how they track it to a decision.",
     caseFacts: [
       { term: "Role", detail: "UI/UX designer, Accountancy module" },
       { term: "Requests", detail: "Reimbursement, vendor payment (trade and non-trade), cash advance" },
@@ -212,7 +212,7 @@ export const projects: readonly Project[] = [
       { title: "Steps you can see.", problem: "Long finance forms invite mistakes and abandoned requests.", choice: "A five-step stepper with mode-of-payment branching and a final review where any section can be edited.", result: "Requesters always know where they are and what is left." },
       { title: "Track it to a decision.", problem: "Once filed, a request disappeared into email and phone calls.", choice: "A view-form window with Form, Comments and Journey tabs, and cancelling with a confirmation.", result: "Every request shows who has it and what happens next." },
     ],
-    reflection: "Finance tools earn trust through plain structure. The stepper and the journey made a long process feel predictable.",
+    reflection: "As my first UI/UX project, Atlas taught me that finance tools earn trust through plain structure. The stepper and the journey made a long process feel predictable.",
     evidence: "Screens come from the Atlas design file. Signed-in names are replaced with a demo requester. Claims cover the Accountancy module’s design only.",
     wall: {
       desktop: ["step3-desktop", "journey-desktop", "list-desktop", "step1-desktop", "login-desktop"],
