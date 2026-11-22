@@ -7,6 +7,7 @@ export const easeInOut3 = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow
 export const easeIn3 = (t: number) => t * t * t;
 export const easeOut3 = (t: number) => 1 - Math.pow(1 - t, 3);
 export const easeOut4 = (t: number) => 1 - Math.pow(1 - t, 4);
+export const easeInOut4 = (t: number) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2);
 export const range = (v: number, start: number, end: number) => clamp((v - start) / (end - start));
 
 /** Font size that makes the giant word span 96% of the viewport, capped by height. `widthAt100` is its width at 100px. */
@@ -130,36 +131,64 @@ export function dolly(rect: { x: number; y: number; w: number; h: number }, vw: 
 /** Slow parallax while a project rests: the desk moves -drift × 26px, the phone -drift × 48px. */
 export const restDrift = (s: number, i: number) => clamp(s - restCenter(i), -1.2, 1.2);
 
-// ---- Case hand-off: the end of a case study carries on into the next project ----
-// Positions are screens of scroll from the moment the hand-off stage pins.
-export const HANDOFF = { FROM: -0.6, ARRIVE: 0.6, HOLD: 0.85, DIVE_FROM: 1.1, DIVE_TO: 2 } as const;
+// ---- Case hand-off: the end of a case study carries on into the next project, as a whip pan ----
+// Positions are screens of scroll from the moment the hand-off stage pins. The contact block rests, the camera whips
+// sideways to the next project, it holds, then a second whip carries on into the next case (the page change finishes it).
+export const HANDOFF = { IN_FROM: 0.35, IN_TO: 1.35, HOLD: 1.55, OUT_FROM: 1.75, OUT_TO: 2.6 } as const;
 
-/** Track height in viewport heights: the dive's end plus the pinned screen. */
-export const handoffTrackScreens = () => HANDOFF.DIVE_TO + 1;
+/** Track height in viewport heights: the second whip's end plus the pinned screen. */
+export const handoffTrackScreens = () => HANDOFF.OUT_TO + 1;
 
-export type HandoffPhase = { phase: "before" | "arrive" | "hold" | "dive" | "done"; t: number };
+export type HandoffPhase = { phase: "contact" | "in" | "hold" | "out" | "done"; t: number };
 
-/** Where the reader is in the hand-off: the next project arriving, holding, the camera diving, or done (open the next case). */
+/** Where the reader is in the hand-off: on the contact block, whipping in, holding on the next project,
+ *  whipping out, or done (open the next case). */
 export function handoffPhase(s: number): HandoffPhase {
-  if (s < 0) return { phase: "before", t: 0 };
-  if (s < HANDOFF.ARRIVE) return { phase: "arrive", t: s / HANDOFF.ARRIVE };
-  if (s < HANDOFF.DIVE_FROM) return { phase: "hold", t: 1 };
-  if (s < HANDOFF.DIVE_TO - 0.002) return { phase: "dive", t: (s - HANDOFF.DIVE_FROM) / (HANDOFF.DIVE_TO - HANDOFF.DIVE_FROM) };
+  if (s < HANDOFF.IN_FROM) return { phase: "contact", t: 0 };
+  if (s < HANDOFF.IN_TO) return { phase: "in", t: (s - HANDOFF.IN_FROM) / (HANDOFF.IN_TO - HANDOFF.IN_FROM) };
+  if (s < HANDOFF.OUT_FROM) return { phase: "hold", t: 1 };
+  if (s < HANDOFF.OUT_TO - 0.002) return { phase: "out", t: (s - HANDOFF.OUT_FROM) / (HANDOFF.OUT_TO - HANDOFF.OUT_FROM) };
   return { phase: "done", t: 1 };
 }
 
-/** Where to finish a hand-off move the reader stopped inside, the way they were heading: the arrival ends at the hold
- *  or back with the contact block in view; the dive completes (opening the next case) or returns to the hold. */
+/** Where to finish a whip the reader stopped inside, the way they were heading: the whip in ends at the hold or back
+ *  on the contact block; the whip out completes (opening the next case) or returns to the hold. */
 export function handoffSettle(s: number, dir: 1 | -1): number | null {
   const spans: [number, number, number, number][] = [
-    [HANDOFF.FROM, HANDOFF.ARRIVE, HANDOFF.ARRIVE, HANDOFF.FROM],
-    [HANDOFF.DIVE_FROM, HANDOFF.DIVE_TO, HANDOFF.DIVE_TO, HANDOFF.HOLD],
+    [HANDOFF.IN_FROM, HANDOFF.IN_TO, HANDOFF.HOLD, 0],
+    [HANDOFF.OUT_FROM, HANDOFF.OUT_TO, HANDOFF.OUT_TO, HANDOFF.HOLD],
   ];
   for (const [a, b, forward, back] of spans) {
     if (s <= a + 0.005 || s >= b - 0.005) continue;
     return dir > 0 ? forward : back;
   }
   return null;
+}
+
+/** The first whip, t 0 → 1: the contact block streaks off left as the next project races in from the right.
+ *  Shots travel in vw (infoX in px); skew in degrees; blur is a fraction of the blur cap; streaks an opacity; bars in vh.
+ *  Inside the incoming world its giant name runs ahead and its laptop lags behind, then both settle. */
+export function whipEnter(t: number, fit: number) {
+  const p = easeInOut4(range(t, 0.05, 0.85));
+  return {
+    contactX: z(-105 * p), worldX: z(105 * (1 - p)),
+    skew: z(-8 * tri(t, 0.05, 0.45, 0.85)), blur: tri(t, 0.1, 0.45, 0.8),
+    streaks: 0.9 * tri(t, 0.12, 0.45, 0.78), streakX: z(-60 * p), bars: 9 * tri(t, 0.05, 0.45, 0.9),
+    giantX: z(-40 * (1 - easeOut4(range(t, 0.15, 0.95)))), giantW: lerp(150, fit, easeOut3(range(t, 0.3, 1))),
+    deskX: z(26 * (1 - easeOut3(range(t, 0.25, 1)))),
+    infoO: range(t, 0.7, 1), infoX: z(-30 * (1 - easeOut3(range(t, 0.7, 1)))),
+  };
+}
+
+/** The second whip's first half, u 0 → 1: the next project accelerates off to the left (words, then the name, then the
+ *  laptop) while blur, streaks and bars build. It ends mid-move; the page transition finishes the whip. Units as whipEnter. */
+export function whipLeave(u: number) {
+  return {
+    infoO: 1 - range(u, 0, 0.3), infoX: z(-120 * easeIn3(range(u, 0, 0.7))),
+    giantX: z(-140 * easeIn3(range(u, 0, 0.85))), deskX: z(-125 * easeIn3(range(u, 0.1, 1))),
+    skew: z(-8 * range(u, 0.1, 1)), blur: range(u, 0.2, 1),
+    streaks: 0.9 * range(u, 0.15, 0.9), streakX: z(-60 * easeIn3(u)), bars: 9 * range(u, 0.1, 1),
+  };
 }
 
 export const WALL_PATTERN = ["d", "p", "d", "d", "p", "d", "p", "d", "d", "p", "d"] as const;

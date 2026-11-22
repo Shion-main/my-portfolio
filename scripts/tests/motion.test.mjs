@@ -4,7 +4,7 @@ import { loadTs } from "./load-ts.mjs";
 
 const { fitFontSize, WALL_PATTERN, wallColumn, wallSource, shadeEdge, range,
   trackScreens, restStart, restCenter, movesEnd, momentAt, activeChapter, settleTarget, glide, arrivalT, COVER_AT, wallDive,
-  pushOut, pushIn, landing, leaveWords, dolly, restDrift, DIVE_FROM, HANDOFF, handoffTrackScreens, handoffPhase, handoffSettle } = await loadTs("src/motion/scroll.ts");
+  pushOut, pushIn, landing, leaveWords, dolly, restDrift, DIVE_FROM, handoffTrackScreens, handoffPhase, handoffSettle, whipEnter, whipLeave } = await loadTs("src/motion/scroll.ts");
 
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} ≠ ${b}`);
 
@@ -113,17 +113,35 @@ test("range is clamped", () => {
 });
 
 test("case hand-off timeline", () => {
-  assert.equal(handoffPhase(-0.3).phase, "before");
-  assert.equal(handoffPhase(0.3).phase, "arrive"); near(handoffPhase(0.3).t, .5);
-  assert.deepEqual(handoffPhase(.85), { phase: "hold", t: 1 });
-  const d = handoffPhase(1.55); assert.equal(d.phase, "dive"); near(d.t, .5);
-  assert.equal(handoffPhase(1.999).phase, "done");
-  near(handoffTrackScreens(), 3);
-  near(HANDOFF.HOLD, .85);
+  assert.deepEqual(handoffPhase(-0.3), { phase: "contact", t: 0 });
+  assert.equal(handoffPhase(.2).phase, "contact");
+  const w = handoffPhase(.85); assert.equal(w.phase, "in"); near(w.t, .5);
+  assert.deepEqual(handoffPhase(1.55), { phase: "hold", t: 1 });
+  const o = handoffPhase(2.175); assert.equal(o.phase, "out"); near(o.t, .5);
+  assert.equal(handoffPhase(2.599).phase, "done");
+  near(handoffTrackScreens(), 3.6);
 });
 
 test("case hand-off finishing", () => {
-  near(handoffSettle(.2, 1), .6); near(handoffSettle(-.2, 1), .6); near(handoffSettle(.2, -1), -.6);
-  near(handoffSettle(1.3, 1), 2); near(handoffSettle(1.9, -1), .85);
-  assert.equal(handoffSettle(.85, 1), null); assert.equal(handoffSettle(-.8, 1), null); assert.equal(handoffSettle(1.997, 1), null);
+  near(handoffSettle(.8, 1), 1.55); near(handoffSettle(.8, -1), 0);
+  near(handoffSettle(2, 1), 2.6); near(handoffSettle(2.5, -1), 1.55);
+  for (const s of [-.5, .2, .35, 1.55, 1.75, 2.598]) assert.equal(handoffSettle(s, 1), null, String(s));
+});
+
+test("whip in: the contact block out, the next project in, fastest in the middle", () => {
+  const a = whipEnter(0, 122), m = whipEnter(.45, 122), b = whipEnter(1, 122);
+  near(a.contactX, 0); near(a.worldX, 105); near(a.bars, 0); near(a.blur, 0); near(a.streaks, 0); near(a.infoO, 0);
+  near(m.contactX, -52.5); near(m.worldX, 52.5); near(m.skew, -8); near(m.bars, 9); near(m.blur, 1); near(m.streaks, .9);
+  for (const k of ["worldX", "giantX", "deskX", "infoX", "skew", "bars", "blur", "streaks"]) near(b[k], 0);
+  near(b.contactX, -105); near(b.giantW, 122); near(b.infoO, 1);
+  const h = whipEnter(.5, 122);
+  assert.ok(h.giantX < 0 && h.deskX > 0, "the name runs ahead and the laptop lags behind");
+});
+
+test("whip out: the name leaves first, the laptop last, building to a blur", () => {
+  const a = whipLeave(0), m = whipLeave(.5), b = whipLeave(1);
+  for (const k of ["giantX", "deskX", "infoX", "skew", "blur", "streaks", "bars"]) near(a[k], 0);
+  near(a.infoO, 1);
+  assert.ok(m.giantX < m.deskX, "the name leads");
+  near(b.infoO, 0); near(b.giantX, -140); near(b.deskX, -125); near(b.skew, -8); near(b.blur, 1); near(b.bars, 9);
 });
