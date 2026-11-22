@@ -15,7 +15,7 @@ Current build: the dark “Index & Worlds” redesign (design: `docs/superpowers
 
 ## Results (2026-11-22, case hand-off, branch redesign/index-worlds)
 
-- `npm test`: 35 passed; `npm run typecheck`, `npm run lint`: clean; `node scripts/check-static.mjs`: passed; `npm run check:browser`: 57 of 57 passed (Chromium 153). Frames reviewed at s = −0.3, 0.2, 0.45, 0.85, 1.3, 1.7, 1.95 and the landing on Korte at 1440×900, 390×844 and 844×390, plus the reduced-motion ending.
+- `npm test`: 35 passed; `npm run typecheck`, `npm run lint`: clean; `node scripts/check-static.mjs`: passed; `npm run check:browser`: 63 of 63 passed (Chromium 153), including six added from the final review (rotation, phone toolbar, Back crossfade, sizing before the app runs, restore mid-arrival, End key). Frames reviewed at s = −0.3, 0.2, 0.45, 0.85, 1.3, 1.7, 1.95 and the landing on Korte at 1440×900, 390×844 and 844×390, plus the reduced-motion ending.
 
 ## Results (2026-11-22, push-through transitions, branch redesign/index-worlds)
 
