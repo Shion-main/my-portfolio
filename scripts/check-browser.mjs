@@ -742,6 +742,48 @@ check("chapters-frame-budget", async () => {
   assert.ok(onGpu.cold.over20 <= 14, `the cold first arrival dropped ${onGpu.cold.over20} frames (ceiling 14)`);
 });
 
+// The case hand-off's whip on the same footing: wheel like a reader from the contact block through the whole whip in
+// and into the whip out (blur on two full-screen layers is the cost to watch), once cold and once warm.
+async function handoffFramesWith(launched) {
+  const context = await launched.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  await page.goto(BASE + "/work/space-arabica/?checks", { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => window.__handoff, null, { timeout: 3000 });
+  await page.evaluate(() => window.__handoff.settle(false));
+  const run = async () => {
+    await handoffGoTo(page, .2);
+    await page.waitForTimeout(800);
+    await page.evaluate(() => { const run = (window.__run = (window.__run || 0) + 1); window.__frames = []; let last = performance.now(); const tick = now => { if (window.__run !== run) return; window.__frames.push(now - last); last = now; requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+    await page.mouse.move(700, 450);
+    for (let i = 0; i < 15; i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(90); }
+    await page.waitForTimeout(500);
+    return page.evaluate(() => {
+      const f = window.__frames.slice(2).sort((a, b) => a - b);
+      const at = q => f[Math.min(f.length - 1, Math.floor(f.length * q))];
+      return { frames: f.length, median: +at(.5).toFixed(1), p95: +at(.95).toFixed(1), max: +f[f.length - 1].toFixed(1), over20: f.filter(v => v > 20).length, over34: f.filter(v => v > 34).length };
+    });
+  };
+  const cold = await run();
+  const warm = await run();
+  const renderer = await page.evaluate(() => { const c = document.createElement("canvas").getContext("webgl"); const e = c && c.getExtension("WEBGL_debug_renderer_info"); return e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : "unknown"; });
+  await context.close();
+  return { cold, warm, renderer };
+}
+
+check("handoff-frame-budget", async () => {
+  const gpu = await chromium.launch({ headless: !process.env.HEADED, args: GPU_ARGS });
+  const onGpu = await handoffFramesWith(gpu);
+  await gpu.close();
+  const inSoftware = await handoffFramesWith(browser);
+  console.log(`     GPU (${onGpu.renderer.slice(0, 48)}) whip, cold 1× ${JSON.stringify(onGpu.cold)}`);
+  console.log(`     GPU whip, warm 1× ${JSON.stringify(onGpu.warm)}`);
+  console.log(`     software whip, warm 1× ${JSON.stringify(inSoftware.warm)}`);
+  assert.ok(!/SwiftShader/.test(onGpu.renderer), "no real GPU available, so the frame budget cannot be judged here");
+  assert.ok(onGpu.warm.p95 <= 17, `the whip stutters on the GPU: p95 ${onGpu.warm.p95} ms`);
+  assert.ok(onGpu.cold.over20 <= 14, `the cold whip dropped ${onGpu.cold.over20} frames (ceiling 14)`);
+});
+
 // ---- Review fixes for the push-through (2026-11-22) ----
 const visibleChapters = page => page.evaluate(() => [...document.querySelectorAll(".chapter")].filter(c => Number(getComputedStyle(c).opacity) > .99).map(c => c.dataset.chapter));
 

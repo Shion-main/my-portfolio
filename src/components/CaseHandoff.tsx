@@ -25,6 +25,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
     const contact = pick(".handoff__contact"), world = pick(".handoff__world"), scene = pick(".handoff__scene");
     const info = pick(".handoff__info"), desk = pick(".handoff__desk"), giant = pick(".handoff__giant");
     const streaksEl = pick(".handoff__streaks"), bars = [pick(".handoff__bar--top"), pick(".handoff__bar--bottom")];
+    const screen = pick<HTMLImageElement>(".handoff__frame img");
     const url = pick<HTMLAnchorElement>(".handoff__continue").href;
     const page = document.documentElement.style;
     const opts = { settle: true };
@@ -33,6 +34,7 @@ export default function CaseHandoff({ next }: { next: Project }) {
     let cur = Number.NaN;
     let target = 0;
     let headOn = false;
+    let primed = false;
     // Opening the next case needs a reader: some input since load (or since a restore), and only once per page view.
     let moved = false;
     let opened = false;
@@ -55,6 +57,9 @@ export default function CaseHandoff({ next }: { next: Project }) {
       last = now;
       target = position();
       cur = Number.isNaN(cur) ? target : glide(cur, target, dt, false);
+      // The next project's screenshot is lazy: load and decode it as the reader nears the hand-off, so it is never
+      // fetched and decoded in the middle of the whip.
+      if (!primed && cur > -1.5) { primed = true; screen.loading = "eager"; screen.decode?.().catch(() => {}); }
       const { phase, t } = handoffPhase(cur);
       const cap = innerWidth > 860 ? 10 : 6;
       const blurOf = (b: number) => (b * cap > 0.05 ? `blur(${(b * cap).toFixed(1)}px)` : "none");
